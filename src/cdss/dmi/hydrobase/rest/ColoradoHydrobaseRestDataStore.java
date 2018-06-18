@@ -5,31 +5,46 @@ import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+//import DWR.DMI.HydroBaseDMI.HydroBase_StationView;
+//import DWR.DMI.HydroBaseDMI.HydroBase_StructMeasTypeView;
+//import DWR.DMI.HydroBaseDMI.HydroBase_Util;
+//import DWR.DMI.HydroBaseDMI.HydroBase_WISFormat;
+//import DWR.DMI.HydroBaseDMI.HydroBase_WISSheetName;
+
 import riverside.datastore.AbstractWebServiceDataStore;
 
+import RTi.DMI.DMIUtil;
+import RTi.TS.DayTS;
+import RTi.TS.HourTS;
+import RTi.TS.IrregularTS;
+import RTi.TS.MinuteTS;
+import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSDataFlagMetadata;
 import RTi.TS.TSIdent;
 import RTi.TS.TSUtil;
+import RTi.TS.YearTS;
 import RTi.Util.GUI.InputFilter_JPanel;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
@@ -37,13 +52,22 @@ import RTi.Util.IO.ReaderInputStream;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
+import RTi.Util.Time.TimeInterval;
+import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
+import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
+import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
+import cdss.dmi.hydrobase.rest.dao.DiversionComment;
+import cdss.dmi.hydrobase.rest.dao.DiversionStageVolume;
+import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
+import cdss.dmi.hydrobase.rest.dao.Structure;
+import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
 
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
 This class provides a general interface to the web service, consistent with TSTool conventions.
 @author sam
 */
-public class ColoradoHydrobaseRestDataStore extends AbstractWebServiceDataStore
+public class ColoradoHydroBaseRestDataStore extends AbstractWebServiceDataStore
 {
 
 /**
@@ -62,7 +86,7 @@ Important, properties other than the default values passed as parameters may be 
 call to setProperties().  Consequently, initialization should occur from public called methods to ensure
 that information is available for initialization.
 */
-public ColoradoHydrobaseRestDataStore ( String name, String description, URI serviceRootURI )
+public ColoradoHydroBaseRestDataStore ( String name, String description, URI serviceRootURI )
 throws URISyntaxException, IOException
 {
     setName ( name );
@@ -78,7 +102,7 @@ throws URISyntaxException, IOException
 Factory method to construct a data store connection from a properties file.
 @param filename name of file containing property strings
 */
-public static ColoradoHydrobaseRestDataStore createFromFile ( String filename )
+public static ColoradoHydroBaseRestDataStore createFromFile ( String filename )
 throws IOException, Exception
 {
     // Read the properties from the file
@@ -91,13 +115,14 @@ throws IOException, Exception
     
     // Get the properties and create an instance
 
-    ColoradoHydrobaseRestDataStore ds = new ColoradoHydrobaseRestDataStore( name, description, new URI(serviceRootURI) );
+    ColoradoHydroBaseRestDataStore ds = new ColoradoHydroBaseRestDataStore( name, description, new URI(serviceRootURI) );
     ds.setProperties(props);
     return ds;
 }
 
 /**
 Determine the web service API version.
+Will have to edit how version is retrieved from parsing URL - @jurentie
 */
 private void determineAPIVersion()
 {   String routine = "ColoradoHydrobaseRestDataStore.determineAPIVersion";
@@ -496,6 +521,100 @@ throws IOException, MalformedURLException, URISyntaxException
 }
 */
 
+/* TODO: add all these cases to this method */
+public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
+
+	ObjectMapper mapper = new ObjectMapper();
+	
+	DiversionWaterClass waterClass = null;
+	
+	try {
+		JsonNode waterClasses = mapper.readTree(new URL(getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + wdid));
+		JsonNode resultList = waterClasses.path("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			String divrectype = resultList.get(i).get("divrectype").textValue();
+			if(divTotalReq){
+				if(("DivTotal").equalsIgnoreCase(divrectype)){
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}else if(relTotalReq){
+				if(("RelTotal").equalsIgnoreCase(divrectype)){
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}else{
+				if((waterClassReqString).equals(resultList.get(i).get("wcIdentifier").textValue())){ // Confirm with Steve - wcIdentifier
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}
+		}
+	} 
+	catch (JsonParseException e ) { e.printStackTrace(); }
+	catch (JsonMappingException e ) { e.printStackTrace(); }
+	catch (IOException e) { e.printStackTrace(); }
+	
+	return waterClass;
+}
+
+public static void setTimeSeriesProperties ( TS ts, Structure struct )
+{   // Use the same names as the database view columns, same order as view
+	ts.setProperty("wdid", (struct.getWdid() == null) ? null : new Integer(struct.getWdid()));
+	ts.setProperty("structure_name", (struct.getStructureName() == null) ? "" : struct.getStructureName());
+	ts.setProperty("associated_akas", (struct.getAssociatedAkas() == null) ? "" : struct.getAssociatedAkas());
+	ts.setProperty("ciu_code" , (struct.getCiuCode() == null) ? "" : struct.getCiuCode());
+	ts.setProperty("structure_type", (struct.getStructureType() == null) ? "" : struct.getStructureType());
+	ts.setProperty("water_source" , (struct.getWaterSource() == null) ? "" : struct.getWaterSource());
+	ts.setProperty("gnis_id", (struct.getGnisId() == null) ? "" : struct.getGnisId());
+	ts.setProperty("stream_mile", (new Double(struct.getStreamMile()) == null) ? "" : new Double(struct.getStreamMile()));
+	ts.setProperty("associated_case_numbers", (struct.getAssociatedCaseNumbers() == null) ? "" : struct.getAssociatedCaseNumbers());
+	ts.setProperty("associated_permits", (struct.getAssociatedPermits() == null) ? "" : struct.getAssociatedPermits());
+	ts.setProperty("assocaited_meters", (struct.getAssociatedMeters() == null) ? "" : struct.getAssociatedMeters());
+	ts.setProperty("associated_contacts", (struct.getAssociatedContacts() == null) ? "" : struct.getAssociatedContacts());
+	ts.setProperty("por_start", (struct.getPorStart() == null) ? "" : struct.getPorStart()); // Deal with date time stuff
+	ts.setProperty("por_end", (struct.getPorEnd() == null) ? "" : struct.getPorEnd()); // Deal with date time stuff
+	ts.setProperty("division", (new Integer(struct.getDivision()) == null) ? "" : new Integer(struct.getDivision()));
+	ts.setProperty("water_district", (new Integer(struct.getWaterDistrict()) == null) ? "" : new Integer(struct.getWaterDistrict()));
+	ts.setProperty("subdistrict", (struct.getSubdistrict() == null) ? "" : struct.getSubdistrict());
+	ts.setProperty("county", (struct.getCounty() == null) ? "" : struct.getCounty());
+	ts.setProperty("designated_basin_name", (struct.getDesignatedBasinName() ==null) ? "" : struct.getDesignatedBasinName());
+	ts.setProperty("management_district_name", (struct.getManagementDistrictName() == null) ? "" : struct.getManagementDistrictName());
+	ts.setProperty("pm", (struct.getPm() == null) ? "" : struct.getPm());
+	ts.setProperty("township", (struct.getTownship() == null) ? "" : struct.getTownship());
+	ts.setProperty("range", (struct.getRange() == null) ? "" : struct.getRange());
+	ts.setProperty("section", (struct.getSection() == null) ? "" : struct.getSection());
+	ts.setProperty("q10", (struct.getQ10() == null) ? "" : struct.getQ10());
+	ts.setProperty("q40", (struct.getQ40() == null) ? "" : struct.getQ40());
+	ts.setProperty("q160", (struct.getQ10() == null) ? "" : struct.getQ160());
+	ts.setProperty("coords_ew", (new Integer(struct.getCoordsew()) == null) ? "" : new Integer(struct.getCoordsew()));
+	ts.setProperty("coords_ew_dir", (struct.getCoordsewDir() == null) ? "" : struct.getCoordsew());
+	ts.setProperty("coords_ns", (new Integer(struct.getCoordsns()) == null) ? "" : new Integer(struct.getCoordsns()));
+	ts.setProperty("coords_ns_dir", (struct.getCoordsnsDir() == null) ? "" : struct.getCoordsnsDir());
+	ts.setProperty("utmX", (new Double(struct.getUtmX()) == null) ? "" : new Double(struct.getUtmX()));
+	ts.setProperty("utmY", (new Double(struct.getUtmY()) == null) ? "" : new Double(struct.getUtmY()));
+	ts.setProperty("latdecdeg", (new Double(struct.getLatdecdeg()) == null) ? "" : new Double(struct.getLatdecdeg()));
+	ts.setProperty("longdecdeg", (new Double(struct.getLongdecdeg()) == null) ? "" : new Double(struct.getLongdecdeg()));
+	ts.setProperty("location_accuracy", (struct.getLocationAccuracy() == null) ? "" : struct.getLocationAccuracy());
+	ts.setProperty("modified", (struct.getModified() == null) ? "" : struct.getModified());
+}
+
+public JsonNode getJsonNodeResultsFromURL(URL url){
+	
+	ObjectMapper mapper = new ObjectMapper();
+	JsonNode results = null;
+	
+	try{
+		JsonNode divrecRootNode = mapper.readTree(url);
+		/*String exampleJsonString = "{\"ResultList\":[{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":26,\"dataMeasDate\":\"2011-06\",\"dataValue\":33.4616,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":6,\"dataMeasDate\":\"2011-07\",\"dataValue\":3.2133,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":4,\"dataMeasDate\":\"2011-08\",\"dataValue\":2.7372,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":17,\"dataMeasDate\":\"2011-09\",\"dataValue\":59.1083,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":1,\"dataMeasDate\":\"2011-10\",\"dataValue\":0,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"}]}";
+		JsonNode divrecRootNode = mapper.readTree(exampleJsonString);*/
+		results = divrecRootNode.path("ResultList");
+		//JsonNode results = divrecRootNode;
+	}
+	catch (JsonParseException e ) { e.printStackTrace(); }
+	catch (JsonMappingException e ) { e.printStackTrace(); }
+	catch (IOException e) { e.printStackTrace(); }
+	
+	return results;
+}
+
 /**
 Read a time series.  Only one element type is read.
 @param tsidentString the time series identifier string as per TSTool conventions.  The location should be
@@ -509,22 +628,246 @@ not read the data
 */
 public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData )
 throws MalformedURLException, Exception
-{   // Make sure data store is initialized
+{   
+	System.out.println(this.getServiceRootURI());
+	
+	// Make sure data store is initialized
     initialize();
     TS ts = null;
     String routine = getClass().getName() + ".readTimeSeries";
+    
+    // 1. Parse the time series identifier (TSID) that was passed in
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
+	String locid = tsident.getLocation();
+    String data_source = tsident.getSource(); // TSID data source
+	String data_type = tsident.getType(); // TSID data type 
+	String sub_data_type = ""; // Sub-data type.
+	
+	if(data_type.indexOf("-") > 0){
+		// Contains the vax_field or SFUT...
+		sub_data_type = StringUtil.getToken ( data_type, "-", 0, 1);
+		data_type = StringUtil.getToken ( data_type, "-", 0, 0);
+	}
+	String interval = tsident.getInterval();
+
+	// 2. Create time series to receive the data.
+	ts = TSUtil.newTimeSeries(tsidentString, true);
+	int interval_base = ts.getDataIntervalBase();
+	
+	// 3. TS Configuration:
+	ts.setIdentifier(tsidentString);
+
+	// Create ObjectMapper for Jackson 
+	ObjectMapper mapper = new ObjectMapper();
+	
+	String wdid = locid;
+	
+	// Get Structure
+	URL structRequest = new URL(getServiceRootURI() + "/structures/?format=json&wdid=" + wdid);
+	JsonNode structRootNode = mapper.readTree(structRequest);
+	JsonNode structResults = structRootNode.get("ResultList").get(0);
+	
+	Structure struct = mapper.treeToValue(structResults, Structure.class);
+	
+	// Set structure name as TS Description
+	ts.setDescription(struct.getStructureName() + " " + data_type);
+	
+	if(data_type.equalsIgnoreCase("DivTotal") || data_type.equalsIgnoreCase("DivClass")){
+		// Diversion records - total through diversion
+		// locid is the WDID in this case
+		boolean divTotalReq = true;
+		boolean relTotalReq = false;
+		String waterClassReqString = "";
+		
+		// Retrieve water class num for given wdid
+		DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
+		int waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+		
+		URL divRecRequest = null;
+		
+		if(interval_base == TimeInterval.DAY){
+			// Create request URL for web services API
+			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+			System.out.println(getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+		}
+		if(interval_base == TimeInterval.MONTH){
+			// Create request URL for web services API
+			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+			System.out.println(getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+			
+		}
+		if(interval_base == TimeInterval.YEAR){
+			// Create request URL for web services API
+			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+			System.out.println(getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid);
+		}
+		
+		// Get JsonNode results give the request URL
+		JsonNode results = getJsonNodeResultsFromURL(divRecRequest);
+		
+		System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(results));
+		
+		/* Get first and last date */
+		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
+		DateTime firstDate = null;
+		if(interval_base == TimeInterval.DAY){ 
+			DiversionByDay divRecFirst = mapper.treeToValue(results.get(0), DiversionByDay.class);
+			firstDate = new DateTime(DateTime.PRECISION_DAY); 
+			firstDate.setYear(divRecFirst.getYear());
+			firstDate.setMonth(divRecFirst.getMonth());
+			firstDate.setDay(divRecFirst.getDay());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(divRecFirst.getMeasUnits());
+			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
+		}
+		if(interval_base == TimeInterval.MONTH){ 
+			DiversionByMonth divRecFirst = mapper.treeToValue(results.get(0), DiversionByMonth.class);
+			firstDate = new DateTime(DateTime.PRECISION_MONTH); 
+			firstDate.setYear(divRecFirst.getYear());
+			firstDate.setMonth(divRecFirst.getMonth());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(divRecFirst.getMeasUnits());
+			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
+		}
+		if(interval_base == TimeInterval.YEAR){ 
+			DiversionByYear divRecFirst = mapper.treeToValue(results.get(0), DiversionByYear.class);
+			firstDate = new DateTime(DateTime.PRECISION_YEAR); 
+			firstDate.setYear(divRecFirst.getYear());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(divRecFirst.getMeasUnits());
+			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
+		}
+		
+		// Last Date
+		DateTime lastDate = null;
+		if(interval_base == TimeInterval.DAY){ 
+			DiversionByDay divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByDay.class);
+			lastDate = new DateTime(DateTime.PRECISION_DAY); 
+			lastDate.setYear(divRecLast.getYear());
+			lastDate.setMonth(divRecLast.getMonth());
+			lastDate.setDay(divRecLast.getDay());
+			ts.setDate2Original(lastDate);
+		}
+		if(interval_base == TimeInterval.MONTH){ 
+			DiversionByMonth divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
+			lastDate = new DateTime(DateTime.PRECISION_MONTH); 
+			lastDate.setYear(divRecLast.getYear());
+			lastDate.setMonth(divRecLast.getMonth());
+			ts.setDate2Original(lastDate);
+		}
+		if(interval_base == TimeInterval.YEAR){ 
+			DiversionByYear divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByYear.class);
+			lastDate = new DateTime(DateTime.PRECISION_YEAR); 
+			lastDate.setYear(divRecLast.getYear());
+			ts.setDate2Original(lastDate);
+		}
+			
+		// Set start and end date
+		if(readStart == null){
+			ts.setDate1(ts.getDate1Original());
+		}else{
+			ts.setDate1(readStart);
+		}
+		if(readEnd == null){
+			ts.setDate2(ts.getDate2Original());
+		}else{
+			ts.setDate2(readEnd);
+		}
+		
+		System.out.println("Date1: " + ts.getDate1());
+		System.out.println("Date2: " + ts.getDate2());
+		
+		System.out.println("Units: " + ts.getDataUnitsOriginal());
+			
+		// Allocate data space
+		ts.allocateDataSpace();
+		
+		if(interval_base == TimeInterval.DAY){
+			ts.setInputName ( "HydroBase daily_amt.amt_*, daily_amt.obs_*");
+		}
+		if(interval_base == TimeInterval.MONTH){
+			ts.setInputName("HydroBase annual_amt.amt_*");
+		}
+		if(interval_base == TimeInterval.YEAR){
+			ts.setInputName ( "HydroBase annual_amt.ann_amt");
+		}
+		
+		ts.setMissing(Double.NaN); // don't need setMissingRange() for now
+		
+		// 4. Set Properties:
+		ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
+		setTimeSeriesProperties(ts, struct);
+		
+		// Work out comments:
+		
+		System.out.println("Genesis: " + ts.getGenesis());
+		System.out.println("Properties:\n" + ts.getProperties());
+		
+		// 5. Read Data: 
+		if(readData){
+			// Pass Data into TS Object
+			if(interval_base == TimeInterval.DAY){
+				for(int i = 0; i < results.size(); i++){
+					DiversionByDay divRecCurrDay = mapper.treeToValue(results.get(i), DiversionByDay.class);
+					
+					// Set Date
+					DateTime date = new DateTime(DateTime.PRECISION_DAY);
+					date.setYear(divRecCurrDay.getYear());
+					date.setMonth(divRecCurrDay.getMonth());
+					date.setDay(divRecCurrDay.getDay());
+					
+					// Get Data
+					double value = divRecCurrDay.getDataValue();
+					
+					ts.setDataValue(date, value);
+				}
+			}
+			if(interval_base == TimeInterval.MONTH){
+				for(int i = 0; i < results.size(); i++){
+					DiversionByMonth divRecCurrMonth = mapper.treeToValue(results.get(i), DiversionByMonth.class);
+					
+					// Set Date
+					DateTime date = new DateTime(DateTime.PRECISION_MONTH);
+					date.setYear(divRecCurrMonth.getYear());
+					date.setMonth(divRecCurrMonth.getMonth());
+					
+					// Get Data
+					double value = divRecCurrMonth.getDataValue();
+					
+					ts.setDataValue(date, value);
+				}
+			}
+			if(interval_base == TimeInterval.YEAR){
+				for(int i = 0; i < results.size(); i++){
+					DiversionByYear divRecCurrYear = mapper.treeToValue(results.get(i), DiversionByYear.class);
+					
+					// Set Date
+					DateTime date = new DateTime(DateTime.PRECISION_YEAR);
+					date.setYear(divRecCurrYear.getYear());
+					
+					// Get Data
+					double value = divRecCurrYear.getDataValue();
+					
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+	}
+	
     // Look up the metadata for the data name
-    /*TODO smalers comment
-    RccAcisVariableTableRecord variable = lookupVariable ( tsident.getType() );
+    //TODO smalers comment
+    //commented out proceeding line @jurentie
+    /*RccAcisVariableTableRecord variable = lookupVariable ( tsident.getType() );
     if ( variable == null ) {
         throw new IllegalArgumentException("Data type is not recognized:  " + tsident.getType() );
-    }
-    int apiVersion = getAPIVersion();
+    }*/
+    //int apiVersion = getAPIVersion();
+    
     // The station ID needs to specify the location type...
-    String stationIDAndStationType = readTimeSeries_FormHttpRequestStationID ( tsident.getLocationType(), tsident.getLocation() );
+    /* commentd out by @jurentie */
+    /*String stationIDAndStationType = readTimeSeries_FormHttpRequestStationID ( tsident.getLocationType(), tsident.getLocation() ); */
     // The start and end date are required.
-    String readStartString = "por";
+    /*String readStartString = "por";
     String readEndString = "por";
     if ( !readData ) {
         // Specify a minimal period to try a query and make sure that the time series is defined.
@@ -562,9 +905,10 @@ throws MalformedURLException, Exception
         //else {
         //    readEndString = readEnd.toString();
         //}
-    }
+    }*/
+   
     // Only one data type is requested as per readTimeSeries() conventions
-    String elems = "";
+    /*String elems = "";
     if ( apiVersion == 1 ) {
         // Version 1 uses var major number
         // Note this may cause an error if VarMajor is not known, but since the Version 1 API is obsolete
@@ -848,8 +1192,9 @@ throws MalformedURLException, Exception
             // Add a specific data flag type 
             ts.addDataFlagMetadata(new TSDataFlagMetadata("M", "Missing value."));
         }
-    }
-	*/
+    }*/
+	
+    System.out.println("return: " + ts);
     return ts;
 }
 
@@ -886,6 +1231,36 @@ private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType
         throw new InvalidParameterException ( "Station location \"" + tsidLocation +
         "\" is invalid (should be Type:ID)" );
     }
+}
+
+
+/**
+ * Inserting main method for testing purposes:
+ * @throws URISyntaxException 
+ */
+public static void main(String[] args) throws URISyntaxException{
+	
+	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+	
+	try {
+		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri);
+		
+		/* DateTime date1 = new DateTime(DateTime.PRECISION_MONTH);
+		date1.setYear(2011);
+		date1.setMonth(6);
+		
+		DateTime date2 = new DateTime(DateTime.PRECISION_MONTH);
+		date2.setYear(2016);
+		date2.setMonth(9); */
+		
+		chrds.readTimeSeries("0300503.DWR.DivTotal.Month~ColoradoHydroBaseRest", null, null, true);
+	} catch (MalformedURLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 }
 
 }
