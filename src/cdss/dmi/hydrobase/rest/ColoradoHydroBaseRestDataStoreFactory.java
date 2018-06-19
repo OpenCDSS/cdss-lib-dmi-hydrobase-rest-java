@@ -25,8 +25,9 @@ public DataStore create ( PropList props )
         description = "";
     }
     String serviceRootURI = props.getValue ( "ServiceRootURI" );
+    String apiKey = props.getValue("apiKey");
     try {
-        DataStore ds = new ColoradoHydroBaseRestDataStore ( name, description, new URI(serviceRootURI) );
+        DataStore ds = new ColoradoHydroBaseRestDataStore ( name, description, new URI(serviceRootURI), apiKey);
         ds.setProperties ( props );
         return ds;
     }
