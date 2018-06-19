@@ -1,6 +1,6 @@
 package cdss.dmi.hydrobase.rest.dao;
 
-public class ReferenceTablesDesigntatedBasin {
+public class ReferenceTablesDesignatedBasin {
 	
 	/**
 	 *  Variables declared in order as returned

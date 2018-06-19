@@ -1,6 +1,6 @@
 package cdss.dmi.hydrobase.rest.dao;
 
-public class TelemeteryRatingTable {
+public class TelemetryRatingTable {
 	
 	/**
 	 *  Variables declared in order as returned
