@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -65,6 +66,8 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 import cdss.dmi.hydrobase.rest.dao.Structure;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
+import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
+import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
@@ -270,9 +273,9 @@ public List<String> getDataTypeStrings ( boolean includeName, boolean includeInt
  * @return list of districts
  * @throws MalformedURLException
  */
-public List<ReferenceTablesWaterDistrict> getDistricts() throws MalformedURLException{
+public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedURLException{
 	if(districtList == null){
-		readDistricts();
+		readWaterDistricts();
 	}
 	return districtList;
 }
@@ -282,9 +285,9 @@ public List<ReferenceTablesWaterDistrict> getDistricts() throws MalformedURLExce
  * @return list of divisions
  * @throws MalformedURLException
  */
-public List<ReferenceTablesWaterDivision> getDivisions() throws MalformedURLException{
+public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedURLException{
 	if(divisionList == null){
-		readDivisions();
+		readWaterDivisions();
 	}
 	return divisionList;
 }
@@ -454,7 +457,7 @@ private void readCounties() throws MalformedURLException{
  * Read districts from web services
  * @throws MalformedURLException 
  */
-private void readDistricts() throws MalformedURLException{
+private void readWaterDistricts() throws MalformedURLException{
 	//String apiKey = getAPIKey();
 	ObjectMapper mapper = new ObjectMapper();
 	URL districtRequest = new URL(getServiceRootURI() + "/referencetables/waterdistrict/?format=json&apiKey=" + this.apiKey);
@@ -476,7 +479,7 @@ private void readDistricts() throws MalformedURLException{
  * Read divisions form web services
  * @throws MalformedURLException 
  */
-private void readDivisions() throws MalformedURLException{
+private void readWaterDivisions() throws MalformedURLException{
 	//String apiKey = getAPIKey();
 	ObjectMapper mapper = new ObjectMapper();
 	URL divisionRequest = new URL(getServiceRootURI() + "/referencetables/waterdivision/?format=json&apiKey=" + this.apiKey);
@@ -500,8 +503,8 @@ private void readDivisions() throws MalformedURLException{
  */
 private void readGlobalData() throws MalformedURLException{
 	readCounties();
-	readDistricts();
-	readDivisions();
+	readWaterDistricts();
+	readWaterDivisions();
 }
 
 
@@ -918,9 +921,9 @@ throws MalformedURLException, Exception
 		
 		// 4. Set Properties:
 		ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
-		setTimeSeriesProperties(ts, struct);
+		setTimeSeriesPropertiesStructure(ts, struct);
 		
-		setComments(ts, struct);
+		setCommentsStructure(ts, struct);
 		
 		// Work out comments:
 		
@@ -982,11 +985,149 @@ throws MalformedURLException, Exception
 		String abbrev = locid;
 		
 		// Get Telemetry
-		URL telemetryRequest = new URL(getServiceRootURI() + "/telemetrystation/?format=json&abbrev=" + abbrev);
+		URL telemetryRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrystation/?format=json&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+		System.out.println(telemetryRequest);
 		JsonNode telemetryRootNode = mapper.readTree(telemetryRequest);
-		JsonNode telemetryResults = telemetryRootNode.get("ResultList");
+		JsonNode telemetryResults = telemetryRootNode.get("ResultList").get(0);
+		
+		TelemetryStation telStation = mapper.treeToValue(telemetryResults, TelemetryStation.class);
 		
 		// Set Description
+		ts.setDescription(telStation.getStationName());
+		
+		URL telRequest = null;
+		
+		// Retrieve Telemetry based on date interval
+		if(interval_base == DateTime.PRECISION_MINUTE){
+			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+		}
+		if(interval_base == DateTime.PRECISION_HOUR){
+			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+		}
+		if(interval_base == DateTime.PRECISION_DAY){
+			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+		}else{ // get raw for both minute and irregular
+			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + "&apiKey=" + this.apiKey);
+		}
+		
+		JsonNode results = mapper.readTree(telRequest).get("ResultList");
+		
+		System.out.println(results);
+		
+		/* Get first and last date */
+		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
+		DateTime firstDate = null;
+		if(interval_base == TimeInterval.MINUTE){
+			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
+			firstDate = new DateTime(DateTime.PRECISION_MINUTE);
+			firstDate.setYear(telTSMinute.getYear());
+			firstDate.setMonth(telTSMinute.getMonth());
+			firstDate.setDay(telTSMinute.getDay());
+			firstDate.setHour(telTSMinute.getHour());
+			firstDate.setMinute(telTSMinute.getMinute());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(telStation.getUnits());
+			ts.setDataUnitsOriginal(telStation.getUnits());
+		}
+		if(interval_base == TimeInterval.HOUR){
+			TelemetryTimeSeries telTSHour = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
+			firstDate = new DateTime(DateTime.PRECISION_HOUR);
+			firstDate.setYear(telTSHour.getYear());
+			firstDate.setMonth(telTSHour.getMonth());
+			firstDate.setDay(telTSHour.getDay());
+			firstDate.setHour(telTSHour.getHour());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(telStation.getUnits());
+			ts.setDataUnitsOriginal(telStation.getUnits());
+		}
+		if(interval_base == TimeInterval.DAY){ 
+			TelemetryTimeSeries telTSDay = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
+			firstDate = new DateTime(DateTime.PRECISION_DAY);
+			System.out.println(telTSDay);
+			firstDate.setYear(telTSDay.getYear());
+			firstDate.setMonth(telTSDay.getMonth());
+			firstDate.setDay(telTSDay.getDay());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(telStation.getUnits());
+			ts.setDataUnitsOriginal(telStation.getUnits());
+		}else{
+			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
+			firstDate = new DateTime(DateTime.PRECISION_MINUTE);
+			firstDate.setYear(telTSMinute.getYear());
+			firstDate.setMonth(telTSMinute.getMonth());
+			firstDate.setDay(telTSMinute.getDay());
+			firstDate.setHour(telTSMinute.getHour());
+			firstDate.setMinute(telTSMinute.getMinute());
+			ts.setDate1Original(firstDate);
+			ts.setDataUnits(telStation.getUnits());
+			ts.setDataUnitsOriginal(telStation.getUnits());
+		}
+		
+		// Last Date
+		DateTime lastDate = null;
+		if(interval_base == TimeInterval.MINUTE){
+			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			lastDate = new DateTime(DateTime.PRECISION_MINUTE);
+			lastDate.setYear(telTSMinute.getYear());
+			lastDate.setMonth(telTSMinute.getMonth());
+			lastDate.setDay(telTSMinute.getDay());
+			lastDate.setHour(telTSMinute.getHour());
+			lastDate.setMinute(telTSMinute.getMinute());
+			ts.setDate2Original(lastDate);
+		}
+		if(interval_base == TimeInterval.HOUR){
+			TelemetryTimeSeries telTSHour = mapper.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			lastDate = new DateTime(DateTime.PRECISION_HOUR);
+			lastDate.setYear(telTSHour.getYear());
+			lastDate.setMonth(telTSHour.getMonth());
+			lastDate.setDay(telTSHour.getDay());
+			lastDate.setHour(telTSHour.getHour());
+			ts.setDate2Original(lastDate);
+		}
+		if(interval_base == TimeInterval.DAY){ 
+			TelemetryTimeSeries telTSDay = mapper.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			lastDate = new DateTime(DateTime.PRECISION_DAY);
+			lastDate.setYear(telTSDay.getYear());
+			lastDate.setMonth(telTSDay.getMonth());
+			lastDate.setDay(telTSDay.getDay());
+			ts.setDate2Original(lastDate);
+		}else{
+			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			lastDate = new DateTime(DateTime.PRECISION_MINUTE);
+			lastDate.setYear(telTSMinute.getYear());
+			lastDate.setMonth(telTSMinute.getMonth());
+			lastDate.setDay(telTSMinute.getDay());
+			lastDate.setHour(telTSMinute.getHour());
+			lastDate.setMinute(telTSMinute.getMinute());
+			ts.setDate2Original(lastDate);
+		}
+			
+		// Set start and end date
+		if(readStart == null){
+			ts.setDate1(ts.getDate1Original());
+		}else{
+			ts.setDate1(readStart);
+		}
+		if(readEnd == null){
+			ts.setDate2(ts.getDate2Original());
+		}else{
+			ts.setDate2(readEnd);
+		}
+		
+		System.out.println("Date1: " + ts.getDate1());
+		System.out.println("Date1OG: " + ts.getDate1Original());
+		
+		/*System.out.println("Date1: " + ts.getDate1());
+		System.out.println("Date2: " + ts.getDate2());
+		
+		System.out.println("Units: " + ts.getDataUnitsOriginal());*/
+			
+		// Allocate data space
+		ts.allocateDataSpace();
 		
 	}
 	
@@ -1373,7 +1514,7 @@ private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType
     }
 }
 
-public static void setTimeSeriesProperties ( TS ts, Structure struct )
+public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.setProperty("wdid", (struct.getWdid() == null) ? null : new Integer(struct.getWdid()));
 	ts.setProperty("structure_name", (struct.getStructureName() == null) ? "" : struct.getStructureName());
@@ -1414,7 +1555,7 @@ public static void setTimeSeriesProperties ( TS ts, Structure struct )
 	ts.setProperty("modified", (struct.getModified() == null) ? "" : struct.getModified());
 }
 
-public static void setComments ( TS ts, Structure struct )
+public static void setCommentsStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
 	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
@@ -1478,17 +1619,21 @@ public static void main(String[] args) throws URISyntaxException{
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-		/*DateTime date1 = new DateTime(DateTime.PRECISION_DAY);
-		date1.setYear(1995);
-		date1.setMonth(1);
-		date1.setDay(1);
+		DateTime date1 = new DateTime(DateTime.PRECISION_MINUTE);
+		date1.setYear(2018);
+		date1.setMonth(5);
+		date1.setDay(20);
+		date1.setHour(0);
+		date1.setMinute(0);
 		
 		DateTime date2 = new DateTime(DateTime.PRECISION_DAY);
-		date2.setYear(1995);
-		date2.setMonth(12);
-		date2.setDay(21);
+		date2.setYear(2018);
+		date2.setMonth(6);
+		date2.setDay(19);
+		date2.setHour(16);
+		date2.setMinute(0);
 		
-		chrds.readTimeSeries("0300909.DWR.RelTotal.Day~ColoradoHydroBaseRest", date1, date2, true);*/
+		chrds.readTimeSeries("abbrev:TRMDITCO.DWR.DISCHRG.15Min~ColoradoHydroBaseRest", date1, date2, true);
 	} catch (MalformedURLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
