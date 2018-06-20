@@ -119,30 +119,10 @@ Determine the web service API version.
 Will have to edit how version is retrieved from parsing URL - @jurentie
 */
 private void determineAPIVersion()
-{   String routine = "ColoradoHydrobaseRestDataStore.determineAPIVersion";
-    __apiVersion = 2; // Default is most current
-    String urlString = "" + getServiceRootURI() + "/version";
-    try {
-        String resultString = IOUtil.readFromURL(urlString);
-        // Format of result is JSON like:  "2.0.0-beta.1"
-        // Therefore check the 2nd character
-        if ( resultString.length() >= 2 ) {
-            if ( resultString.charAt(1) == '1' ) {
-                __apiVersion = 1;
-            }
-            else if ( resultString.charAt(1) != '2' ) {
-                String message = "ACIS API version is not supported:  " + resultString;
-                Message.printWarning ( 2, routine, message );
-                throw new RuntimeException ( message );
-            }
-        }
-    }
-    catch ( Exception e ) {
-        // Might be disconnected from the internet - usually safe to default to latest version
-        Message.printWarning ( 2, routine,
-            "Error reading version for web service API using \"" + urlString +
-            "\" - possibly due to not being connected to internet.  Assuming version is " + __apiVersion );
-    }
+{   
+	String uriString = getServiceRootURI().toString();
+	int indexOf = uriString.lastIndexOf("/");
+	__apiVersion = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
 }
 
 private String getAPIKey(){
@@ -277,18 +257,18 @@ public List<Structure> getStructures(HashMap<String, String> filters) throws Mal
 }
 
 //TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
-	// but go with Structure for now.
-	/**
-	 * Return the list of structure time series, suitable for display in TSTool browse area.
-	 * @param dataType
-	 * @param interval
-	 * @param filterPanel
-	 * @return
-	 */
-	public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
-		List<Structure> structureList = new ArrayList<Structure>();
-		return structureList;
-	}
+// but go with Structure for now.
+/**
+ * Return the list of structure time series, suitable for display in TSTool browse area.
+ * @param dataType
+ * @param interval
+ * @param filterPanel
+ * @return
+ */
+public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
+	List<Structure> structureList = new ArrayList<Structure>();
+	return structureList;
+}
 
 /**
  * Returns a list of data types that can be displayed in TSTool
@@ -747,6 +727,7 @@ throws MalformedURLException, Exception
 	
 	// Make sure data store is initialized
     initialize();
+    determineAPIVersion();
     TS ts = null;
     
     // 1. Parse the time series identifier (TSID) that was passed in
@@ -1126,6 +1107,12 @@ throws MalformedURLException, Exception
 			
 		// Allocate data space
 		ts.allocateDataSpace();
+		
+		// FIXME @jurentie 06/20/2018 change name of telemetryRequest/telRequest
+		// Set Properties
+		ts.addToGenesis("read data from web services " + telemetryRequest + " and " + telRequest + ".");
+		setTimeSeriesPropertiesTelemetry(ts, telStation);
+		setCommentsTelemetry(ts, telStation);
 		
 	}
 	
@@ -1553,12 +1540,44 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 	ts.setProperty("modified", (struct.getModified() == null) ? "" : struct.getModified());
 }
 
+public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel)
+{
+	ts.setProperty("div", (new Integer(tel.getDiv()) == null) ? null : new Integer(tel.getDiv()));
+	ts.setProperty("wd", (new Integer(tel.getWd()) == null) ? null : new Integer(tel.getWd()));
+	ts.setProperty("county", (tel.getCounty() == null) ? null : tel.getCounty());
+	ts.setProperty("station_name", (tel.getStationName() == null) ? null : tel.getStationName());
+	ts.setProperty("data_source", (tel.getDataSource() == null) ? null : tel.getDataSource());
+	ts.setProperty("abbrev", (tel.getAbbrev() == null) ? null : tel.getAbbrev());
+	ts.setProperty("usgs_station_id", (tel.getUsgsStationId() == null) ? null : tel.getUsgsStationId());
+	ts.setProperty("station_status", (tel.getStationStatus() == null) ? null : tel.getStationStatus());
+	ts.setProperty("station_type", (tel.getStationType() == null) ? null : tel.getStationType());
+	ts.setProperty("structure_type", (tel.getStructureType() == null) ? null : tel.getStructureType());
+	ts.setProperty("measDateTime", (tel.getMeasDateTime() == null) ? null : tel.getMeasDateTime());
+	ts.setProperty("parameter", (tel.getParameter() == null) ? null : tel.getParameter());
+	ts.setProperty("stage", (new Double(tel.getStage()) == null) ? null : tel.getStage());
+	ts.setProperty("meas_value", (new Double(tel.getMeasValue()) == null) ? null : new Double(tel.getMeasValue()));
+	ts.setProperty("units", (tel.getUnits() == null) ? null : tel.getUnits());
+	ts.setProperty("flagA", (tel.getFlagA() == null) ? null : tel.getFlagA());
+	ts.setProperty("flagB", (tel.getFlagB() == null) ? null : tel.getFlagB());
+	ts.setProperty("contr_area", (new Double(tel.getContrArea()) == null) ? null : new Double(tel.getContrArea()));
+	ts.setProperty("drain_area", (new Double(tel.getDrainArea()) == null) ? null : new Double(tel.getDrainArea()));
+	ts.setProperty("huc10", (tel.getHuc10() == null) ? null : tel.getHuc10());
+	ts.setProperty("utmX", (new Double(tel.getUtmX()) == null) ? null : new Double(tel.getUtmX()));
+	ts.setProperty("utmY", (new Double(tel.getUtmY()) == null) ? null : new Double(tel.getUtmY()));
+	ts.setProperty("latitude", (new Double(tel.getLatitude()) == null) ? null : new Double(tel.getLatitude()));
+	ts.setProperty("longitude", (new Double(tel.getLongitude()) == null) ? null : new Double(tel.getLongitude()));
+	ts.setProperty("location_accuracy", (tel.getLocationAccuracy() == null) ? null : tel.getLocationAccuracy());
+	ts.setProperty("wdid", (tel.getWdid() == null) ? null : tel.getWdid());
+	ts.setProperty("modified", (tel.getModified() == null) ? null : tel.getModified());
+	ts.setProperty("moreInformation", (tel.getMoreInformation() == null) ? null : tel.getMoreInformation());
+}
+
 public static void setCommentsStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
 	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
 	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR Rest");
+	ts.addToComments("Data Source                     = DWR REST");
 	ts.addToComments("Data Type                       = " + ts.getDataType());
 	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
 	ts.addToComments("Data Units                      = " + ts.getDataUnits());
@@ -1569,6 +1588,21 @@ public static void setCommentsStructure ( TS ts, Structure struct )
 	ts.addToComments("Latitude, Longitude             = " + struct.getLatdecdeg() + ", " + struct.getLongdecdeg());
 } 
 
+public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
+{
+	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
+	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
+	ts.addToComments("Description                     = " + ts.getDescription());
+	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Type                       = " + ts.getDataType());
+	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
+	ts.addToComments("Data Units                      = " + ts.getDataUnits());
+	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
+	ts.addToComments("HydroBase availabe period       = " + ts.getDate1Original() + " to " + ts.getDate2Original());
+	ts.addToComments("Located in water div            = " + tel.getDiv());
+	ts.addToComments("Located in county               = " + tel.getCounty());
+	ts.addToComments("Latitude, Longitude             = " + tel.getLatitude() + ", " + tel.getLongitude());
+}
 /* TODO: add all these cases to this method */
 public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
 
@@ -1617,14 +1651,16 @@ public static void main(String[] args) throws URISyntaxException{
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-		HashMap<String, String> filters = new HashMap<>();
+		System.out.println(chrds.getAPIVersion());
+		
+		/*HashMap<String, String> filters = new HashMap<>();
 		
 		filters.put("county", "mesa");
 		filters.put("wdid", "0900123");
 		
-		chrds.getStructures(filters);
+		chrds.getStructures(filters);*/
 		
-		/*DateTime date1 = new DateTime(DateTime.PRECISION_MINUTE);
+		DateTime date1 = new DateTime(DateTime.PRECISION_MINUTE);
 		date1.setYear(2018);
 		date1.setMonth(5);
 		date1.setDay(20);
@@ -1638,7 +1674,7 @@ public static void main(String[] args) throws URISyntaxException{
 		date2.setHour(16);
 		date2.setMinute(0);
 		
-		chrds.readTimeSeries("abbrev:TRMDITCO.DWR.DISCHRG.15Min~ColoradoHydroBaseRest", date1, date2, true);*/
+		chrds.readTimeSeries("abbrev:TRMDITCO.DWR.DISCHRG.15Min~ColoradoHydroBaseRest", date1, date2, true);
 	} catch (MalformedURLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
