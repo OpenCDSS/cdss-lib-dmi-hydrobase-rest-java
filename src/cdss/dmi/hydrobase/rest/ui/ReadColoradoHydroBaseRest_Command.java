@@ -1,4 +1,4 @@
-package cdss.dmi.hydrobase.rest.dao.ui;
+package cdss.dmi.hydrobase.rest.ui;
 
 import java.util.ArrayList;
 import java.util.List;

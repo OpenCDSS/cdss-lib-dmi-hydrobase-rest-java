@@ -1,20 +1,21 @@
-package cdss.dmi.hydrobase.rest.dao.ui;
+package cdss.dmi.hydrobase.rest.ui;
 
 import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
 
 /**
-This class is used to render cells for TSTool_HydroBase_StructureGeolocStructMeasType_TableModel data.
+This class is used to render cells for TSTool_HydroBase_GroundWaterWellsView_TableModel data.
 */
-public class ColoradoHydroBaseRest_Structure_CellRenderer
+@SuppressWarnings("serial")
+public class ColoradoHydroBaseRest_Well_CellRenderer
 extends JWorksheet_DefaultTableCellRenderer {
 
-ColoradoHydroBaseRest_Structure_TableModel __table_model = null;	// Table model to render
+ColoradoHydroBaseRest_Well_TableModel __table_model = null;	// Table model to render
 
 /**
 Constructor.
 @param table_model The TSTool_HydroBase_TableModel to render.
 */
-public ColoradoHydroBaseRest_Structure_CellRenderer ( ColoradoHydroBaseRest_Structure_TableModel table_model )
+public ColoradoHydroBaseRest_Well_CellRenderer ( ColoradoHydroBaseRest_Well_TableModel table_model )
 {	__table_model = table_model;
 }
 

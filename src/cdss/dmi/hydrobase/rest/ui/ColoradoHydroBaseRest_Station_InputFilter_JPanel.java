@@ -1,4 +1,4 @@
-package cdss.dmi.hydrobase.rest.dao.ui;
+package cdss.dmi.hydrobase.rest.ui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -16,7 +16,7 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 
 @SuppressWarnings("serial")
-public class ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel
+public class ColoradoHydroBaseRest_Station_InputFilter_JPanel
 extends InputFilter_JPanel
 implements MouseListener
 {
@@ -27,29 +27,28 @@ Datastore for this panel
 private ColoradoHydroBaseRestDataStore datastore = null;
 
 /**
-Create an InputFilter_JPanel for ColoradoHydroBaseRest web services telemetry (real-time) station queries.
+Create an InputFilter_JPanel for ColoradoHydroBaseRest web services historical station queries.
 This is used by TSTool.
 Default filter panel properties are used (e.g., 3 filter groups).
-@return a JPanel containing InputFilter instances for telemetry station queries.
+@return a JPanel containing InputFilter instances for historical station queries.
 @param dataStore ColoradoHydroBaseRestDataStore instance.
 @exception Exception if there is an error.
 */
-public ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel (
-		ColoradoHydroBaseRestDataStore dataStore )
+public ColoradoHydroBaseRest_Station_InputFilter_JPanel ( ColoradoHydroBaseRestDataStore dataStore )
 throws Exception
 {	this ( dataStore, -1, -1 );
 }
 
 /**
-Create an InputFilter_JPanel for ColoradoHydroBaseRest web services telemetry (real-time) station queries.
+Create an InputFilter_JPanel for ColoradoHydroBaseRest web services historical station queries.
 This is used by TSTool.
-@return a JPanel containing InputFilter instances for telemetry station queries.
+@return a JPanel containing InputFilter instances for historical station queries.
 @param dataStore ColoradoHydroBaseRestDataStore instance.
 @param numFilterGroups the number of filter groups to display
 @param numWhereChoicesToDisplay the number of where choices to display in each filter
 @exception Exception if there is an error.
 */
-public ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel (
+public ColoradoHydroBaseRest_Station_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
 throws Exception
 {	this.datastore = datastore;

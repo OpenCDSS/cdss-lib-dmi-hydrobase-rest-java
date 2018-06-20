@@ -1,4 +1,4 @@
-package cdss.dmi.hydrobase.rest.dao.ui;
+package cdss.dmi.hydrobase.rest.ui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
