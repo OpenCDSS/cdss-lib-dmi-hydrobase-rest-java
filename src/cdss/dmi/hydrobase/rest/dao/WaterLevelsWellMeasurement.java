@@ -2,7 +2,7 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import java.time.LocalDateTime;
 
-public class WaterLevelsWellMeasurements {
+public class WaterLevelsWellMeasurement {
 	
 	/**
 	 * Variables declared in order as returned
