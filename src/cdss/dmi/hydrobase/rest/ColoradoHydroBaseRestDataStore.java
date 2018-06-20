@@ -1,71 +1,39 @@
 package cdss.dmi.hydrobase.rest;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.security.InvalidParameterException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-//import DWR.DMI.HydroBaseDMI.HydroBase_StationView;
-//import DWR.DMI.HydroBaseDMI.HydroBase_StructMeasTypeView;
-//import DWR.DMI.HydroBaseDMI.HydroBase_Util;
-//import DWR.DMI.HydroBaseDMI.HydroBase_WISFormat;
-//import DWR.DMI.HydroBaseDMI.HydroBase_WISSheetName;
-
 import riverside.datastore.AbstractWebServiceDataStore;
 
-import RTi.DMI.DMIUtil;
-import RTi.TS.DayTS;
-import RTi.TS.HourTS;
-import RTi.TS.IrregularTS;
-import RTi.TS.MinuteTS;
-import RTi.TS.MonthTS;
 import RTi.TS.TS;
-import RTi.TS.TSDataFlagMetadata;
 import RTi.TS.TSIdent;
 import RTi.TS.TSUtil;
-import RTi.TS.YearTS;
-import RTi.Util.GUI.InputFilter_JPanel;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
-import RTi.Util.IO.ReaderInputStream;
 import RTi.Util.Message.Message;
-import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
+import cdss.dmi.hydrobase.rest.dao.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
-import cdss.dmi.hydrobase.rest.dao.DiversionComment;
-import cdss.dmi.hydrobase.rest.dao.DiversionStageVolume;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 import cdss.dmi.hydrobase.rest.dao.Structure;
-import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
 import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 
@@ -228,7 +196,7 @@ on this.
 @param includeName whether to include the name
 @param includeInterval whether to include the interval as (daily), etc.
 */
-public List<String> getDataTypeStrings ( boolean includeName, boolean includeInterval )
+/*public List<String> getDataTypeStrings ( boolean includeName, boolean includeInterval )
 {   try {
         initialize();
     }
@@ -264,9 +232,9 @@ public List<String> getDataTypeStrings ( boolean includeName, boolean includeInt
         }
         recPrev = rec;
     }
-    */
+    
     return typeList;
-}
+}*/
 
 /**
  * Get list of districts from global variable
@@ -291,6 +259,36 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 	}
 	return divisionList;
 }
+
+public List<Structure> getStructures(HashMap<String, String> filters) throws MalformedURLException{
+	String structRequestString = getServiceRootURI() + "structures/?format=json";
+	if(filters.get("county") != null){
+		String county = filters.get("county");
+		structRequestString += "&county=" + county;
+	}
+	if(filters.get("division") != null){
+		
+	}
+	if(apiKey != null){
+		structRequestString += "&apiKey=" + apiKey;
+	}
+	System.out.println(structRequestString);
+	return null;
+}
+
+//TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
+	// but go with Structure for now.
+	/**
+	 * Return the list of structure time series, suitable for display in TSTool browse area.
+	 * @param dataType
+	 * @param interval
+	 * @param filterPanel
+	 * @return
+	 */
+	public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
+		List<Structure> structureList = new ArrayList<Structure>();
+		return structureList;
+	}
 
 /**
  * Returns a list of data types that can be displayed in TSTool
@@ -1016,7 +1014,7 @@ throws MalformedURLException, Exception
 		
 		JsonNode results = mapper.readTree(telRequest).get("ResultList");
 		
-		System.out.println(results);
+		//System.out.println(results);
 		
 		/* Get first and last date */
 		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
@@ -1485,7 +1483,7 @@ where ID is the station.
 @param tsidLocationType the location type part of a time series identifier (station ID network abbreviation).
 @param tsidLocation the location part of a time series identifier (station ID).
 */
-private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType, String tsidLocation )
+/*private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType, String tsidLocation )
 {
     if ( tsidLocationType.length() == 0 ) {
         throw new InvalidParameterException ( "Station location type abbreviation is not specified." );
@@ -1505,14 +1503,14 @@ private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType
             // Station ID followed by the station type code
             return tsidLocation.trim() + " " + stationType.getCode();
         }
-        */
+        
     	return "";
     }
     catch ( NumberFormatException e ) {
         throw new InvalidParameterException ( "Station location \"" + tsidLocation +
         "\" is invalid (should be Type:ID)" );
     }
-}
+}*/
 
 public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
@@ -1619,7 +1617,14 @@ public static void main(String[] args) throws URISyntaxException{
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-		DateTime date1 = new DateTime(DateTime.PRECISION_MINUTE);
+		HashMap<String, String> filters = new HashMap<>();
+		
+		filters.put("county", "mesa");
+		filters.put("wdid", "0900123");
+		
+		chrds.getStructures(filters);
+		
+		/*DateTime date1 = new DateTime(DateTime.PRECISION_MINUTE);
 		date1.setYear(2018);
 		date1.setMonth(5);
 		date1.setDay(20);
@@ -1633,7 +1638,7 @@ public static void main(String[] args) throws URISyntaxException{
 		date2.setHour(16);
 		date2.setMinute(0);
 		
-		chrds.readTimeSeries("abbrev:TRMDITCO.DWR.DISCHRG.15Min~ColoradoHydroBaseRest", date1, date2, true);
+		chrds.readTimeSeries("abbrev:TRMDITCO.DWR.DISCHRG.15Min~ColoradoHydroBaseRest", date1, date2, true);*/
 	} catch (MalformedURLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
