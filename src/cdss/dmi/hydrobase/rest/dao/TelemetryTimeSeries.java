@@ -24,7 +24,7 @@ public class TelemetryTimeSeries {
 	private String parameter;
 	
 	/* Measurement Date Time - for hour/day */
-	private String measDate;
+	private LocalDateTime measDate;
 	
 	/* Measurement Date Time - for raw */
 	private LocalDateTime measDateTime;
@@ -60,12 +60,12 @@ public class TelemetryTimeSeries {
 		this.parameter = parameter;
 	}
 	
-	public String getMeasDate() {
+	public LocalDateTime getMeasDate() {
 		return measDate;
 	}
 
 	public void setMeasDate(String measDate) {
-		this.measDate = measDate;
+		this.measDate = LocalDateTime.parse(measDate);
 	}
 
 	public LocalDateTime getMeasDateTime() {
@@ -113,7 +113,55 @@ public class TelemetryTimeSeries {
 	}
 
 	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
+		if(modified == "N/A" || modified == null){
+			this.modified = null;
+		}else{
+			int indexOf = modified.lastIndexOf("-");
+			modified = modified.substring(0, indexOf);
+			this.modified = LocalDateTime.parse(modified);
+		}
+	}
+	
+	public int getMinute(){
+		if(measDateTime != null){
+			return measDateTime.getMinute();
+		}else{
+			return measDate.getMinute();
+		}
+	}
+	
+	public int getHour(){
+		if(measDateTime != null){
+			return measDateTime.getHour();
+		}else{
+			return measDate.getHour();
+		}
+	}
+	
+	public int getDay(){
+		if(measDateTime != null){
+			return measDateTime.getDayOfMonth();
+		}else{
+			return measDate.getDayOfMonth();
+		}
+	}
+	
+	public int getMonth(){
+		if(measDateTime != null){
+			return measDateTime.getMonthValue();
+		}else{
+			return measDate.getMonthValue();
+		}
+		
+	}
+	
+	public int getYear(){
+		if(measDateTime != null){
+			return measDateTime.getYear();
+		}else{
+			return measDate.getYear();
+		}
+		
 	}
 	
 	@Override
