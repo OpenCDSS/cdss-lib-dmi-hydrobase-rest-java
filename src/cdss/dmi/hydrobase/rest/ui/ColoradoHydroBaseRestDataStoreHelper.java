@@ -3,6 +3,8 @@ package cdss.dmi.hydrobase.rest.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import RTi.Util.Message.Message;
+import cdss.dmi.hydrobase.rest.dao.Station;
 import cdss.dmi.hydrobase.rest.dao.Structure;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
@@ -20,7 +22,8 @@ public class ColoradoHydroBaseRestDataStoreHelper {
 		
 	}
 	
-	// TODO smalers 2018-06-19 enable when station web services are available
+	// TODO smalers 2018-06-19 the following should return something like StationTimeSeriesCatalog
+	// but go with Station for now.
 	/**
 	 * Return the list of station time series, suitable for display in TSTool browse area.
 	 * @param dataType
@@ -28,10 +31,10 @@ public class ColoradoHydroBaseRestDataStoreHelper {
 	 * @param filterPanel
 	 * @return
 	 */
-	/*public List<Station> getStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Station_InputFilter_JPanel filterPanel ) {
+	public List<Station> getStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Station_InputFilter_JPanel filterPanel ) {
 		List<Station> stationList = new ArrayList<Station>();
 		return stationList;
-	}*/
+	}
 	
 	// TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
 	// but go with Structure for now.
@@ -44,9 +47,12 @@ public class ColoradoHydroBaseRestDataStoreHelper {
 	 */
 	public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
 		List<Structure> structureList = new ArrayList<Structure>();
+		Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
 		return structureList;
 	}
-	
+
+	// TODO smalers 2018-06-19 the following should return something like TelemetryStationTimeSeriesCatalog
+	// but go with Station for now.
 	/**
 	 * Return the list of telemetry station time series, suitable for display in TSTool browse area.
 	 * @param dataType
@@ -56,9 +62,12 @@ public class ColoradoHydroBaseRestDataStoreHelper {
 	 */
 	public List<TelemetryStation> getTelemetryStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel filterPanel ) {
 		List<TelemetryStation> telemetryStationList = new ArrayList<TelemetryStation>();
+		Message.printStatus(1, "", "Getting ColoradoHydroBaseRest telemetry station time series list");
 		return telemetryStationList;
 	}
-	
+
+	// TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
+	// but go with Station for now.
 	/**
 	 * Return the list of well time series, suitable for display in TSTool browse area.
 	 * @param dataType
@@ -68,6 +77,7 @@ public class ColoradoHydroBaseRestDataStoreHelper {
 	 */
 	public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
 		List<WaterLevelsWell> wellList = new ArrayList<WaterLevelsWell>();
+		Message.printStatus(1, "", "Getting ColoradoHydroBaseRest well time series list");
 		return wellList;
 	}
 

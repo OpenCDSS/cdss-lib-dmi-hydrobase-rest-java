@@ -410,6 +410,63 @@ throws URISyntaxException, IOException
 }
 
 /**
+ * Indicate whether a time series data type corresponds to a station.
+ * @param dataType
+ * @return true if data type is for a station, false otherwise
+ */
+public boolean isStationTimeSeriesDataType ( String dataType ) {
+	// TODO smalers 2018-06-20 for now always return false since API is not implemented
+	return false;
+}
+
+/**
+ * Indicate whether a time series data type corresponds to a structure.
+ * @param dataType
+ * @return true if data type is for a structure, false otherwise
+ */
+public boolean isStructureTimeSeriesDataType ( String dataType ) {
+	String [] dataTypes = { "DIVTOTAL", "RELTOTAL", "WATERCLASS" };
+	// Compare the first part of the data type, because water classes data type will be followed by the class string
+	for ( int i = 0; i < dataTypes.length; i++ ) {
+		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether a time series data type corresponds to a telemetry station.
+ * @param dataType
+ * @return true if data type is for a telemetry station, false otherwise
+ */
+public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
+	String [] dataTypes = { "DISCHRG" };
+	for ( int i = 0; i < dataTypes.length; i++ ) {
+		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether a time series data type corresponds to a well.
+ * @param dataType
+ * @return true if data type is for a well, false otherwise
+ */
+public boolean isWellTimeSeriesDataType ( String dataType ) {
+	String [] dataTypes = { "WaterLevelDepth", "WaterLevelElev" };
+	// TODO smalers 2018-06-20 will need to compare only the first part of the data type for classes
+	for ( int i = 0; i < dataTypes.length; i++ ) {
+		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Read counties from web services
  * @throws MalformedURLException //TODO Throws
  */
