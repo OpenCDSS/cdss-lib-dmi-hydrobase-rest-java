@@ -60,7 +60,9 @@ throws Exception
 	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter
 
 	InputFilter filter;
-    // Fill in the county for input filters...
+	// TODO smalers 2018-06-20 Don't show any filters until station web service is actually available
+	/*
+    // County
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
 	List<String> countyList = new ArrayList<String> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
@@ -70,7 +72,8 @@ throws Exception
 		StringUtil.TYPE_STRING, countyList, countyList, false );
 	filter.setTokenInfo(",",0);
 	input_filters.add ( filter );
-	
+
+	// Water district
 	List<ReferenceTablesWaterDistrict> districtDataList = datastore.getWaterDistricts();
 	List<String> districtList = new ArrayList<String> ( districtDataList.size() );
 	List<String> districtInternalList = new ArrayList<String>(districtDataList.size());
@@ -83,6 +86,7 @@ throws Exception
 	filter.setTokenInfo("-",0);
 	input_filters.add ( filter );
 
+	// Water division
 	List<ReferenceTablesWaterDivision> divisionDataList = datastore.getWaterDivisions();
 	List<String> divisionList = new ArrayList<String> ( 7 );
 	List<String> divisionInternalList = new ArrayList<String> ( 7 );
@@ -94,87 +98,18 @@ throws Exception
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
 	filter.setTokenInfo("-",0);
 	input_filters.add ( filter );
-	
-	/*
-	input_filters.add ( new InputFilter ( "Elevation", "geoloc.elev", "elev",
-		StringUtil.TYPE_DOUBLE, null, null, true ) );
-		*/
-	
-	/*
-	input_filters.add ( new InputFilter ( "HUC", "geoloc.huc", "huc",
-		StringUtil.TYPE_STRING, null, null, true ) );
-		*/
-
-	/*
-	input_filters.add ( new InputFilter ( "Latitude", "geoloc.latdecdeg", "latdecdeg",
-		StringUtil.TYPE_DOUBLE, null, null, true ) );
-		
-	input_filters.add ( new InputFilter ( "Longitude", "geoloc.longdecdeg", "longdecdeg",
-		StringUtil.TYPE_DOUBLE, null, null, true ) );
-		*/
-
-	/*
-	// create the input filter for the PLSS Location
-	filter = new InputFilter(
-		HydroBase_GUI_Util._PLSS_LOCATION_LABEL,
-		HydroBase_GUI_Util._PLSS_LOCATION, 
-		HydroBase_GUI_Util._PLSS_LOCATION, StringUtil.TYPE_STRING,
-		null, null, false);
-	// all constraints other than EQUALS are removed because PLSS Locations
-	// are compared in a special way
-	filter.removeConstraint(InputFilter.INPUT_ONE_OF);
-	filter.removeConstraint(InputFilter.INPUT_STARTS_WITH);
-	filter.removeConstraint(InputFilter.INPUT_ENDS_WITH);
-	filter.removeConstraint(InputFilter.INPUT_CONTAINS);
-	// the PLSS Location text field is not editable because users must go
-	// through the PLSS Location JDialog to build a location
-	filter.setInputJTextFieldEditable(false);
-	// this listener must be set up so that the location builder dialog
-	// can be opened when the PLSS Location text field is clicked on.
-	filter.addInputComponentMouseListener(this);
-	filter.setInputComponentToolTipText("Click in this field to build a PLSS Location to use as a query constraint.");
-	filter.setInputJTextFieldWidth(20);
-	input_filters.add(filter);
 	*/
-
-	/*
-	input_filters.add(new InputFilter("Stream Mile", "str_mile", "str_mile", 
-		StringUtil.TYPE_DOUBLE, null, null, true));
-		*/
-/*
-	input_filters.add ( new InputFilter ( "Structure ID", "id", "id",
-		StringUtil.TYPE_INTEGER, null, null, true ) );
-		
-	input_filters.add ( new InputFilter ( "Structure Name", "str_name", "str_name",
-		StringUtil.TYPE_STRING, null, null, true ) );
-		*/
 	
-	/*
-    input_filters.add ( new InputFilter ( "Structure WDID", "wdid", "wdid",
-        StringUtil.TYPE_INTEGER, null, null, true ) );
-        */
-
-	/* Not enabled yet
-	if ( include_SFUT ) {
-		input_filters.add ( new InputFilter ("SFUT", "struct_meas_type.identifier", "identifier",
-			StringUtil.TYPE_STRING, null, null, true ) );
-	}
-	*/
-
-	/*
-	input_filters.add ( new InputFilter ( "UTM X", "utm_x", "utm_x",
-		StringUtil.TYPE_DOUBLE, null, null, true ) );		
-
-	input_filters.add ( new InputFilter ( "UTM Y", "utm_y", "utm_y",
-		StringUtil.TYPE_DOUBLE, null, null, true ) );
-		*/
+	// Include this filter to help developers see when the station panel is mistakenly being shown
+    input_filters.add ( new InputFilter ( "Stations are not enabled", "stationId", "stationId",
+            StringUtil.TYPE_STRING, null, null, true ) );
 
 	if ( numFilterGroups < 0 ) {
-		// TODO SAM 2010-07-21 need larger default?
-		numFilterGroups = 3;
+		// Set number of filter groups to 4 so that latitude, longitude, radius, and units can be specified
+		numFilterGroups = 4;
 		numWhereChoicesToDisplay = input_filters.size();
 	}
-	setToolTipText ( "<html>ColoradoHydroBaseRest telemetry station queries can be filtered based on station data.</html>" );
+	setToolTipText ( "<html>ColoradoHydroBaseRest station queries can be filtered based on station data.</html>" );
 	setInputFilters ( input_filters, numFilterGroups, numWhereChoicesToDisplay );
 }
 
