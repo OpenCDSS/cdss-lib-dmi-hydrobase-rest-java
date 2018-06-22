@@ -83,10 +83,10 @@ public class DiversionWaterClass {
 	private String wcDescr;
 	
 	/* Year of First Measurement */
-	private int porStart;
+	private LocalDateTime porStart;
 	
 	/* Year of Last Measurement */
-	private int porEnd;
+	private LocalDateTime porEnd;
 	
 	/* Date Last Modified */
 	private LocalDateTime porLastModified;
@@ -102,6 +102,9 @@ public class DiversionWaterClass {
 	
 	/* Modified date/time */
 	private LocalDateTime modified;
+	
+	/* Available Timesteps */
+	private String availableTimesteps;
 
 	public String getDivrectype() {
 		return divrectype;
@@ -295,20 +298,28 @@ public class DiversionWaterClass {
 		this.wcDescr = wcDescr;
 	}
 
-	public int getPorStart() {
+	public LocalDateTime getPorStart() {
 		return porStart;
 	}
 
-	public void setPorStart(int porStart) {
-		this.porStart = porStart;
+	public void setPorStart(String porStart) {
+		this.porStart = LocalDateTime.parse(porStart);
 	}
 
-	public int getPorEnd() {
+	public String getAvailableTimesteps() {
+		return availableTimesteps;
+	}
+
+	public void setAvailableTimesteps(String availableTimesteps) {
+		this.availableTimesteps = availableTimesteps;
+	}
+
+	public LocalDateTime getPorEnd() {
 		return porEnd;
 	}
 
-	public void setPorEnd(int porEnd) {
-		this.porEnd = porEnd;
+	public void setPorEnd(String porEnd) {
+		this.porEnd = LocalDateTime.parse(porEnd);
 	}
 
 	public LocalDateTime getPorLastModified() {
@@ -346,9 +357,9 @@ public class DiversionWaterClass {
 	public LocalDateTime getModified() {
 		return modified;
 	}
-
+	
 	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
 	}
 	
 	@Override 

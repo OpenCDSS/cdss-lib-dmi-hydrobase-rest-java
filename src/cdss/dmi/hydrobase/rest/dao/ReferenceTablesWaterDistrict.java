@@ -9,41 +9,41 @@ public class ReferenceTablesWaterDistrict {
 	 */
 	
 	/* Water Division */
-	private int div;
+	private int division;
 	
 	/* Water District */
-	private int wd;
+	private int waterDistrict;
 	
 	/* Water District Name */
-	private String wdName;
+	private String waterDistrictName;
 
-	public int getDiv() {
-		return div;
+	public int getDivision() {
+		return division;
 	}
 
-	public void setDiv(int div) {
-		this.div = div;
+	public void setDivision(int div) {
+		this.division = div;
 	}
 
-	public int getWd() {
-		return wd;
+	public int getWaterDistrict() {
+		return waterDistrict;
 	}
 
-	public void setWd(int wd) {
-		this.wd = wd;
+	public void setWaterDistrict(int wd) {
+		this.waterDistrict = wd;
 	}
 
-	public String getWdName() {
-		return wdName;
+	public String getWaterDistrictName() {
+		return waterDistrictName;
 	}
 
-	public void setWdName(String wdName) {
-		this.wdName = wdName;
+	public void setWaterDistrictName(String wdName) {
+		this.waterDistrictName = wdName;
 	}
 	
 	@Override
 	public String toString(){
-		return "ReferenceTablesWaterDistrict [ div: " + div + ", wd: " + wd + ", wdName: " + wdName + " ]";
+		return "ReferenceTablesWaterDistrict [ div: " + division + ", wd: " + waterDistrict + ", wdName: " + waterDistrictName + " ]";
 	}
 
 }

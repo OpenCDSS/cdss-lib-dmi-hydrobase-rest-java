@@ -9,30 +9,30 @@ public class ReferenceTablesWaterDivision {
 	 */
 	
 	/* Water Division */
-	private int div;
+	private int division;
 	
 	/* Water Division Name */
-	private String divName;
+	private String divisionName;
 
-	public int getDiv() {
-		return div;
+	public int getDivision() {
+		return division;
 	}
 
-	public void setDiv(int div) {
-		this.div = div;
+	public void setDivision(int div) {
+		this.division = div;
 	}
 
-	public String getDivName() {
-		return divName;
+	public String getDivisionName() {
+		return divisionName;
 	}
 
-	public void setDivName(String divName) {
-		this.divName = divName;
+	public void setDivisionName(String divName) {
+		this.divisionName = divName;
 	}
 	
 	@Override
 	public String toString(){
-		return "ReferenceTablesWaterDivision [ div: " + div + ", divName: " + divName + " ]"; 
+		return "ReferenceTablesWaterDivision [ div: " + division + ", divName: " + divisionName + " ]"; 
 	}
 
 }

@@ -11,10 +11,10 @@ public class TelemetryStation {
 	 */
 	
 	/* DWR Water Division */
-	private int div;
+	private int division;
 	
 	/* DWR Water District */
-	private int wd;
+	private int waterDistrict;
 	
 	/* County */
 	private String county;
@@ -23,7 +23,19 @@ public class TelemetryStation {
 	private String stationName;
 	
 	/* Data Source */
+	private String dataSourceAbbrev;
+	
+	/* Full data source description */
 	private String dataSource;
+	
+	/* Water Source */
+	private String waterSource;
+	
+	/* GNIS ID */
+	private String gnisId;
+	
+	/* Stream Mile */
+	private double streamMile;
 	
 	/* Abbreviation */
 	private String abbrev;
@@ -94,20 +106,20 @@ public class TelemetryStation {
 	/* Hyperlink to additional details */
 	private String moreInformation;
 
-	public int getDiv() {
-		return div;
+	public int getDivision() {
+		return division;
 	}
 
-	public void setDiv(int div) {
-		this.div = div;
+	public void setDivision(int div) {
+		this.division = div;
 	}
 
-	public int getWd() {
-		return wd;
+	public int getWaterDistrict() {
+		return waterDistrict;
 	}
 
-	public void setWd(int wd) {
-		this.wd = wd;
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
 	}
 
 	public String getCounty() {
@@ -125,6 +137,14 @@ public class TelemetryStation {
 	public void setStationName(String stationName) {
 		this.stationName = stationName;
 	}
+	
+	public String getDataSourceAbbrev() {
+		return dataSourceAbbrev;
+	}
+
+	public void setDataSourceAbbrev(String dataSourceAbbrev) {
+		this.dataSourceAbbrev = dataSourceAbbrev;
+	}
 
 	public String getDataSource() {
 		return dataSource;
@@ -132,6 +152,30 @@ public class TelemetryStation {
 
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
+	}
+	
+	public String getWaterSource() {
+		return waterSource;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
+	}
+
+	public String getGnisId() {
+		return gnisId;
+	}
+
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+
+	public double getStreamMile() {
+		return streamMile;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
 	}
 
 	public String getAbbrev() {
@@ -324,7 +368,7 @@ public class TelemetryStation {
 	
 	@Override
 	public String toString(){
-		return "TelemetryStation: [ div: " + div + ", wd: " + wd + ", county: " + county + ", stationName: " +
+		return "TelemetryStation: [ div: " + division + ", wd: " + waterDistrict + ", county: " + county + ", stationName: " +
 				stationName + ", dataSource: " + dataSource + ", abbrev: " + abbrev + ", usgsStationId: " +
 				usgsStationId + ", stationStatus: " + stationStatus + ", stationType: " + stationType + 
 				", strcutureType: " + structureType + ", measDateTime: " + measDateTime + ", parameter: " + 
@@ -334,5 +378,6 @@ public class TelemetryStation {
 				", longitude: " + longitude + ", locationAccuracy: " + locationAccuracy + ", wdid: " + wdid + 
 				", modified: " + modified + ", moreInformation: " + moreInformation + " ]";
 	}
+
 
 }

@@ -114,6 +114,8 @@ public class WaterLevelsWellMeasurement {
 		return measurementDate;
 	}
 	public void setMeasurementDate(String measurementDate) {
+		int indexOf = measurementDate.lastIndexOf("-");
+		measurementDate = measurementDate.substring(0, indexOf);
 		this.measurementDate = LocalDateTime.parse(measurementDate);
 	}
 	public double getDepthToWater() {
@@ -162,7 +164,21 @@ public class WaterLevelsWellMeasurement {
 		return modified;
 	}
 	public void setModified(String modified) {
+		int indexOf = modified.lastIndexOf("-");
+		modified = modified.substring(0, indexOf);
 		this.modified = LocalDateTime.parse(modified);
+	}
+	
+	public int getYear(){
+		return measurementDate.getYear();
+	}
+	
+	public int getMonth(){
+		return measurementDate.getMonthValue();
+	}
+	
+	public int getDay(){
+		return measurementDate.getDayOfMonth();
 	}
 	
 	@Override

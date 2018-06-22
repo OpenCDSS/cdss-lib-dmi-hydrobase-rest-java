@@ -10,6 +10,8 @@ import RTi.DMI.DMIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.String.StringUtil;
+import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
+import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 
 /**
 This class is a table model for time series header information for HydroBase station time series.
@@ -222,7 +224,7 @@ public int getRowCount() {
 }
 
 
-// FIXME @jurentie 06/20/2018 imports/irrelevant code
+//FIXME @jurentie 06/20/2018 imports/irrelevant code
 /**
 From AbstractTableModel.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
@@ -231,120 +233,51 @@ From AbstractTableModel.  Returns the data that should be placed in the JTable a
 */
 public Object getValueAt(int row, int col)
 {	
-	return null;
+	
 	// If sorted, get the position in the data from the displayed row.
-	/*if (_sortOrder != null) {
+	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
 
 	int i; // Use for integer data.
 	double d; // Use for double data
-
-	HydroBase_StationGeolocMeasType mt = (HydroBase_StationGeolocMeasType)_data.get(row);
+	
+	TelemetryStationDataTypes tsds = (TelemetryStationDataTypes)_data.get(row);
+	
 	switch (col) {
 		// case 0 handled above.
-		case COL_ID: return mt.getStation_id();
-		case COL_ABBREV: return mt.getAbbrev();
-		case COL_NAME: return mt.getStation_name();
-		case COL_DATA_SOURCE:
-		    // Station also has source but want the meas_type source.
-			return mt.getData_source();
-		case COL_DATA_TYPE:
-		    // TSTool translates to values from the TSTool interface...
-			return mt.getMeas_type();
-		case COL_TIME_STEP:
-		    // TSTool translates HydroBase values to nicer values...
-			return mt.getTime_step();
-		case COL_UNITS:
-		    // The units are not in HydroBase.meas_type but are set by TSTool...
-			//return mt.getData_units();
-		    String units = HydroBase_Util.getTimeSeriesDataUnits(null, mt.getMeas_type(), mt.getTime_step());
-		    if ( units == null ) {
-		        units = "";
-		    }
-		    return units;
-		case COL_START:
-		    //return new Integer(mt.getStart_year() );
-			i = mt.getStart_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_END:
-		    //return new Integer (mt.getEnd_year() );
-			i = mt.getEnd_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_MEAS_COUNT:
-            i = mt.getMeas_count();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIV:
-		    //return new Integer ( mt.getDiv() );
-			i = mt.getDiv();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIST:
-		    //return new Integer ( mt.getWD() );
-			i = mt.getWD();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_COUNTY: return mt.getCounty();
-		case COL_STATE: return mt.getST();
-		case COL_HUC: return mt.getHUC();
-        case COL_LONG:
-            d = mt.getLongdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_LAT:
-            d = mt.getLatdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_UTM_X:
-            d = mt.getUtm_x();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
-        case COL_UTM_Y:
-            d = mt.getUtm_y();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
+		case COL_ID: return tsds.getWdid();
+		case COL_NAME: return tsds.getStationName();
+		case COL_DATA_SOURCE: return "DWR";
+		case COL_DATA_TYPE: return tsds.getParameter();
+	/*case COL_TIME_STEP:
+	    // TSTool translates HydroBase values to nicer values...
+		return mt.getTime_step();
+		case COL_UNITS: return ;*/
+		//case COL_START: return divWC.getPorStart().getYear();
+		//case COL_END: return divWC.getPorEnd().getYear();
+	/*case COL_MEAS_COUNT:
+	    i = mt.getMeas_count();
+		if ( DMIUtil.isMissing(i) ) {
+			return "";
+		}
+		else {
+		    return "" + i;
+		}*/
+		case COL_DIV: return tsds.getDivision();
+		case COL_DIST: return tsds.getWaterDistrict();
+		case COL_COUNTY: return tsds.getCounty();
+		//case COL_STATE: return divWC.getSta;
+		case COL_HUC: return tsds.getHuc10();
+		case COL_LONG: return tsds.getLongdecdeg();
+		case COL_LAT: return tsds.getLatdecdeg();
+		case COL_UTM_X: return tsds.getUtmX();
+		case COL_UTM_Y: return tsds.getUtmY();
+		//case COL_STR_TYPE: return tsds.getStructureType();
+		//case COL_STRTYPE: return tsds.getStructureType();
 		case COL_INPUT_TYPE: return __inputType;
 		default: return "";
-	}*/
+	}
 }
 
 /**

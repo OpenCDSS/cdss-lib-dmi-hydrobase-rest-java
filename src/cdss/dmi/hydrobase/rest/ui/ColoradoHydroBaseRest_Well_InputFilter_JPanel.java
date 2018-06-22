@@ -109,8 +109,8 @@ throws Exception
 	List<String> districtList = new ArrayList<String> ( districtDataList.size() );
 	List<String> districtInternalList = new ArrayList<String>(districtDataList.size());
 	for ( ReferenceTablesWaterDistrict wd : districtDataList ) {
-		districtList.add ("" + wd.getWd() + " - " + wd.getWdName());
-		districtInternalList.add ("" + wd.getWd() );
+		districtList.add ("" + wd.getWaterDistrict() + " - " + wd.getWaterDistrictName());
+		districtInternalList.add ("" + wd.getWaterDistrict() );
 	}
 	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict",
 		StringUtil.TYPE_STRING, districtList, districtInternalList, false );
@@ -122,8 +122,8 @@ throws Exception
 	List<String> divisionList = new ArrayList<String> ( 7 );
 	List<String> divisionInternalList = new ArrayList<String> ( 7 );
 	for ( ReferenceTablesWaterDivision div: divisionDataList ) {
-		divisionList.add ("" + div.getDiv() + " - " + div.getDivName());
-		divisionInternalList.add ("" + div.getDiv() );
+		divisionList.add ("" + div.getDivision() + " - " + div.getDivisionName());
+		divisionInternalList.add ("" + div.getDivision() );
 	}
 	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision",
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
