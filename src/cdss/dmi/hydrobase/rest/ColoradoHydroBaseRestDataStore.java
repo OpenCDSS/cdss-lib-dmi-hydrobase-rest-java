@@ -6,12 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +19,6 @@ import RTi.TS.TS;
 import RTi.TS.TSIdent;
 import RTi.TS.TSUtil;
 import RTi.Util.GUI.InputFilter;
-import RTi.Util.IO.DataType;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
@@ -33,7 +29,6 @@ import RTi.Util.Time.TimeInterval;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Station_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel;
-import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_WaterClass_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Well_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
@@ -49,7 +44,6 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
-import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
@@ -134,11 +128,18 @@ Will have to edit how version is retrieved from parsing URL - @jurentie
 */
 private void determineAPIVersion()
 {   
+	String routine = "ColoradoHydroBaseRestDataStore.determineAPIVersion";
 	String uriString = getServiceRootURI().toString();
 	int indexOf = uriString.lastIndexOf("/");
-	__apiVersion = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
+	int version = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
+	Message.printStatus(1, routine, "DWR REST services API version: " + version);
+	__apiVersion = version;
 }
 
+/**
+ * Initialize APIKey from properties list 
+ * @return apiKey
+ */
 private String getAPIKey(){
 	Prop apiKeyProp = this.getProperties().getProp("apiKey");
 	String apiKey = apiKeyProp.getValue();
@@ -180,6 +181,31 @@ public List<String> getDataIntervalStringsForDataType ( String dataType )
     //    dataIntervalStrings.add(interval);
     //}
     return dataIntervalStrings;
+}
+
+/**
+ * Returns a JsonNode using the ObjectMapper from the Jackson package given a URL
+ * request from the DWR REST API.
+ * @param url request to be parsed by ObjectMapper
+ * @return ResultList JsonNode from DWR REST API request
+ */
+public JsonNode getJsonNodeResultsFromURLString(String url){
+	
+	ObjectMapper mapper = new ObjectMapper();
+	JsonNode results = null;
+	
+	try{
+		URL request = new URL(url);
+		JsonNode divrecRootNode = mapper.readTree(request);
+		results = divrecRootNode.path("ResultList");
+	}
+	//TODO @jurentie 06/22/2018 work out what these catch cases should return
+	//catch (URL e) { e.printStackTrace(); }
+	catch (JsonParseException e ) { e.printStackTrace(); }
+	catch (JsonMappingException e ) { e.printStackTrace(); }
+	catch (IOException e) { e.printStackTrace(); }
+	
+	return results;
 }
 
 /**
@@ -601,45 +627,6 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 }
 
 /**
- * Get list of districts from global variable
- * @return list of districts
- * @throws MalformedURLException
- */
-public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedURLException{
-	if(districtList == null){
-		readWaterDistricts();
-	}
-	return districtList;
-}
-
-/**
- * Get list of divisions from global variable
- * @return list of divisions
- * @throws MalformedURLException
- */
-public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedURLException{
-	if(divisionList == null){
-		readWaterDivisions();
-	}
-	return divisionList;
-}
-
-// TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
-// but go with Station for now.
-/**
- * Return the list of well time series, suitable for display in TSTool browse area.
- * @param dataType
- * @param interval
- * @param filterPanel
- * @return
- */
-public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
-	List<WaterLevelsWell> wellList = new ArrayList<WaterLevelsWell>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest well time series list");
-	return wellList;
-}
-
-/**
  * Returns a list of data types that can be displayed in TSTool
  */
 public List<String> getTimeSeriesDataTypes(boolean group){
@@ -702,24 +689,46 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	return timeSteps;
 }
 
-public JsonNode getJsonNodeResultsFromURL(URL url){
-	
-	ObjectMapper mapper = new ObjectMapper();
-	JsonNode results = null;
-	
-	try{
-		JsonNode divrecRootNode = mapper.readTree(url);
-		/*String exampleJsonString = "{\"ResultList\":[{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":26,\"dataMeasDate\":\"2011-06\",\"dataValue\":33.4616,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":6,\"dataMeasDate\":\"2011-07\",\"dataValue\":3.2133,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":4,\"dataMeasDate\":\"2011-08\",\"dataValue\":2.7372,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":17,\"dataMeasDate\":\"2011-09\",\"dataValue\":59.1083,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"},{\"wdid\":\"0300503\",\"waterClassNum\":10300503,\"wcIdentifier\":\"0300503 Total (Diversion)\",\"measInterval\":\"Daily\",\"measCount\":1,\"dataMeasDate\":\"2011-10\",\"dataValue\":0,\"measUnits\":\"AF\",\"obsCode\":\"*         \",\"approvalStatus\":\"Approved\",\"modified\":\"2012-05-22T11:11:00\"}]}";
-		JsonNode divrecRootNode = mapper.readTree(exampleJsonString);*/
-		results = divrecRootNode.path("ResultList");
-		//JsonNode results = divrecRootNode;
+
+/**
+ * Get list of districts from global variable
+ * @return list of districts
+ * @throws MalformedURLException
+ */
+public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedURLException{
+	if(districtList == null){
+		readWaterDistricts();
 	}
-	catch (JsonParseException e ) { e.printStackTrace(); }
-	catch (JsonMappingException e ) { e.printStackTrace(); }
-	catch (IOException e) { e.printStackTrace(); }
-	
-	return results;
+	return districtList;
 }
+
+/**
+ * Get list of divisions from global variable
+ * @return list of divisions
+ * @throws MalformedURLException
+ */
+public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedURLException{
+	if(divisionList == null){
+		readWaterDivisions();
+	}
+	return divisionList;
+}
+
+// TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
+// but go with Station for now.
+/**
+ * Return the list of well time series, suitable for display in TSTool browse area.
+ * @param dataType
+ * @param interval
+ * @param filterPanel
+ * @return
+ */
+public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
+	List<WaterLevelsWell> wellList = new ArrayList<WaterLevelsWell>();
+	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest well time series list");
+	return wellList;
+}
+
 
 /**
 Initialize internal data store data.
@@ -1219,11 +1228,10 @@ throws MalformedURLException, Exception
 		String wdid = locid;
 		
 		// Get Structure
-		URL structRequest = new URL(getServiceRootURI() + "/structures/?format=json&wdid=" + wdid + apiKeyString);
-		JsonNode structRootNode = mapper.readTree(structRequest);
-		JsonNode structResults = structRootNode.get("ResultList").get(0);
-		
-		Structure struct = mapper.treeToValue(structResults, Structure.class);
+		String structRequest = getServiceRootURI() + "/structures/?format=json&wdid=" + wdid + apiKeyString;
+		JsonNode structResult = getJsonNodeResultsFromURLString(structRequest).get(0);
+		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
+		Structure struct = mapper.treeToValue(structResult, Structure.class);
 		
 		// Set structure name as TS Description
 		ts.setDescription(struct.getStructureName());
@@ -1240,7 +1248,6 @@ throws MalformedURLException, Exception
 			// Retrieve water class num for given wdid
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
-			
 		}
 		if(data_type.equalsIgnoreCase("RelTotal")){
 			// Release records - total through release
@@ -1256,27 +1263,27 @@ throws MalformedURLException, Exception
 		
 		//System.out.println(waterClassNumForWdid);
 		
-		URL divRecRequest = null;
+		String divRecRequest = null;
 			
 		if(interval_base == TimeInterval.DAY){
 			// Create request URL for web services API
-			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
+			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
 			System.out.println(getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
 		}
 		if(interval_base == TimeInterval.MONTH){
 			// Create request URL for web services API
-			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
+			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
 			System.out.println(getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
 			
 		}
 		if(interval_base == TimeInterval.YEAR){
 			// Create request URL for web services API
-			divRecRequest = new URL(getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
+			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
 			System.out.println(getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
 		}
 		
 		// Get JsonNode results give the request URL
-		JsonNode results = getJsonNodeResultsFromURL(divRecRequest);
+		JsonNode results = getJsonNodeResultsFromURLString(divRecRequest);
 		
 		//System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(results));
 		
@@ -1431,18 +1438,18 @@ throws MalformedURLException, Exception
 		String abbrev = locid;
 		
 		// Get Telemetry
-		URL telemetryRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrystation/?format=json&abbrev=" + abbrev + apiKeyString);
-		System.out.println(telemetryRequest);
-		JsonNode telemetryRootNode = mapper.readTree(telemetryRequest);
-		JsonNode telemetryResults = telemetryRootNode.get("ResultList").get(0);
+		String telemetryRequest = getServiceRootURI() + "/telemetrystations/telemetrystation/?format=json&abbrev=" + abbrev + apiKeyString;
+		JsonNode telemetryResult = getJsonNodeResultsFromURLString(telemetryRequest).get(0);
 		
-		TelemetryStation telStation = mapper.treeToValue(telemetryResults, TelemetryStation.class);
+		TelemetryStation telStation = mapper.treeToValue(telemetryResult, TelemetryStation.class);
 		
 		// Set Description
 		ts.setDescription(telStation.getStationName());
 		
 		URL telRequest = null;
 		
+		// Code commented in else statements below are for potential irregular intervals
+
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
 			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
@@ -1656,24 +1663,15 @@ throws MalformedURLException, Exception
 		JsonNode results = wellMeasurementRootNode.get("ResultList");
 		
 		/* Get first and last date */
-		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
-		/*DateTime firstDate = null;
-		WaterLevelsWellMeasurement firstWell = mapper.treeToValue(results.get(0), WaterLevelsWellMeasurement.class);
-		firstDate = new DateTime(DateTime.PRECISION_DAY);
-		firstDate.setYear(firstWell.getYear());
-		firstDate.setMonth(firstWell.getMonth());
-		firstDate.setDay(firstWell.getDay());
-		ts.setDate1Original(firstDate);*/
-		/*ts.setDataUnits(telStation.getUnits()); 
-		ts.setDataUnitsOriginal(telStation.getUnits());*/ //TODO @jurentie 06/21/2018 no units in request results
-		
+		//TODO @jurentie 06/21/2018 no units in request results
+		// First Date = PorStart
 		DateTime firstDate = new DateTime(DateTime.PRECISION_DAY);
 		firstDate.setYear(well.getPorStart().getYear());
 		firstDate.setMonth(well.getPorStart().getMonthValue());
 		firstDate.setDay(well.getPorStart().getDayOfMonth());
 		ts.setDate1Original(firstDate);
 		
-		// Last Date
+		// Last Date = PorEnd
 		DateTime lastDate = new DateTime(DateTime.PRECISION_DAY);
 		lastDate.setYear(well.getPorEnd().getYear());
 		lastDate.setMonth(well.getPorEnd().getMonthValue());
@@ -1712,346 +1710,6 @@ throws MalformedURLException, Exception
 	
 	// Return Time Series Object
     return ts;
-	
-    // Look up the metadata for the data name
-    //TODO smalers comment
-    //commented out proceeding line @jurentie
-    /*RccAcisVariableTableRecord variable = lookupVariable ( tsident.getType() );
-    if ( variable == null ) {
-        throw new IllegalArgumentException("Data type is not recognized:  " + tsident.getType() );
-    }*/
-    //int apiVersion = getAPIVersion();
-    
-    // The station ID needs to specify the location type...
-    /* commentd out by @jurentie */
-    /*String stationIDAndStationType = readTimeSeries_FormHttpRequestStationID ( tsident.getLocationType(), tsident.getLocation() ); */
-    // The start and end date are required.
-    /*String readStartString = "por";
-    String readEndString = "por";
-    if ( !readData ) {
-        // Specify a minimal period to try a query and make sure that the time series is defined.
-        // If this period is not valid for the time series, a missing value will come back.
-        // TODO SAM 2012-06-28 Evaluate whether this impacts the number of stations returned since not all
-        // will be active on the requested day
-        readStart = DateTime.parse("2011-01-01");
-        readEnd = DateTime.parse("2011-01-01");
-    }
-    // TODO SAM 2011-01-21 ACIS always seems to want precision to day on request
-    if ( readStart != null ) {
-        //if ( intervalBase == TimeInterval.DAY ) {
-            readStartString = readStart.toString(DateTime.FORMAT_YYYY_MM_DD);
-        //}
-        //else if ( intervalBase == TimeInterval.MONTH ) {
-        //    readStartString = readStart.toString(DateTime.FORMAT_YYYY_MM);
-        //}
-        //else if ( intervalBase == TimeInterval.HOUR ) {
-        //    readStartString = readStart.toString(DateTime.FORMAT_YYYY_MM_DD_HH);
-        //} 
-        //else {
-        //    readStartString = readStart.toString();
-        //}
-    }
-    if ( readEnd != null ) {
-        //if ( intervalBase == TimeInterval.DAY ) {
-            readEndString = readEnd.toString(DateTime.FORMAT_YYYY_MM_DD);
-        //}
-        //else if ( intervalBase == TimeInterval.MONTH ) {
-        //    readEndString = readEnd.toString(DateTime.FORMAT_YYYY_MM);
-        //}
-        //else if ( intervalBase == TimeInterval.HOUR ) {
-        //    readEndString = readEnd.toString(DateTime.FORMAT_YYYY_MM_DD_HH);
-        //}
-        //else {
-        //    readEndString = readEnd.toString();
-        //}
-    }*/
-   
-    // Only one data type is requested as per readTimeSeries() conventions
-    /*String elems = "";
-    if ( apiVersion == 1 ) {
-        // Version 1 uses var major number
-        // Note this may cause an error if VarMajor is not known, but since the Version 1 API is obsolete
-        // this hopefully should not be an issue.
-        elems = "" + variable.getMajor();
-    }
-    else {
-        // Version 2 uses element name or var major (but use element name because some data types don't
-        // seem to have documented var major)
-        elems = "" + variable.getElem();
-    }
-    // Form the URL - no need to ask for metadata?
-    // Always specify the station id type to avoid ambiguity
-    boolean requestJSON = true; // JSON more work to parse, CSV is verified to work
-    if ( apiVersion == 1 ) {
-        // Version 1 worked with CSV so leave it as is
-        // For version 2 can focus on new features in JSON
-        requestJSON = false;
-    }
-    StringBuffer urlString = new StringBuffer("" + getServiceRootURI() + "/StnData" );
-    if ( requestJSON ) {
-        urlString.append("?output=json");
-    }
-    else {
-        // Request CSV
-        urlString.append("?output=csv");
-    }
-    // Only JSON format allows metadata to be requested
-    // Version 1 requires sId... whereas version 2 is case-independent
-    if ( requestJSON ) {
-        urlString.append( "&meta=sIds,uid,name,state,county,basin,climdiv,cwa,ll,elev,valid_daterange" );
-    }
-    urlString.append( "&sId=" +
-         URLEncoder.encode(stationIDAndStationType,"UTF-8") +
-         "&elems=" + elems + "&sDate=" + readStartString + "&eDate=" + readEndString );
-    String urlStringEncoded = urlString.toString(); //URLEncoder.encode(urlString.toString(),"UTF-8");
-    Message.printStatus(2, routine, "Performing the following request:  " + urlStringEncoded );
-    String resultString = IOUtil.readFromURL(urlStringEncoded);
-    //Message.printStatus(2,routine,"Returned string="+resultString);
-    if ( Message.isDebugOn ) {
-        Message.printDebug(1,routine,"Returned string="+resultString);
-    }
-    if ( resultString.indexOf("error") >= 0 ) {
-        throw new IOException ( "Error retrieving data for URL \"" + urlStringEncoded +
-            "\":  " + resultString );
-    }
-    else {
-        RccAcisStationTimeSeriesMetaAndData metaAndData = null;
-        if ( requestJSON ) {
-            // Parse the JSON for time series ("meta" and "data)
-            Gson gson = new Gson();
-            metaAndData = gson.fromJson(resultString, RccAcisStationTimeSeriesMetaAndData.class);
-            // Should only be one record since a specific time series is requested
-            if ( metaAndData == null ) {
-                throw new IOException ( "Expecting metadata for 1 time series, no metadata returned." );
-            }
-            else {
-                metaAndData.getMeta().setVariable(variable);
-                metaAndData.getMeta().setDataStore ( this );
-            }
-        }
-        else {
-            // No metadata for CSV.  Get the station name from the first line of data
-        }
-        // Create the time series.
-        ts = TSUtil.newTimeSeries(tsidentString, true);
-        ts.setIdentifier(tsidentString);
-        ts.setMissing(Double.NaN);// Use this instead of legacy default -999
-        // Parse the data into short strings
-        String [] dataStringsArray = new String[0];
-        DateTime dataStart = null; // Determined from data records
-        DateTime dataEnd = null;
-        DateTime validDataStart = null; // Determined from valid_daterange metadata (only if JSON)
-        DateTime validDataEnd = null;
-        String stationName = "";
-        int mCount = 0;
-        int tCount = 0;
-        int commaPos = 0; // Position of comma
-        // Set the time series properties from returned data
-        String [][] data = null;
-        int nData = 0; // Number of records to process
-        int iFirstData = 0; // Index of first data record to process
-        if ( requestJSON ) {
-            // Set time series properties from the metadata
-            stationName = metaAndData.getMeta().getName();
-            data = metaAndData.getData();
-            nData = data.length; // Number of rows in 2D array
-            iFirstData = 0;
-            Message.printStatus(2, routine, "Have " + nData + " data records." );
-            if ( nData > 0 ) {
-                dataStart = DateTime.parse(data[iFirstData][0]);
-                dataEnd = DateTime.parse(data[nData - 1][0]);
-            }
-            // Also get the valid data start and end from the metadata
-            validDataStart = DateTime.parse(metaAndData.getMeta().getValid_daterange()[0][0]);
-            validDataEnd = DateTime.parse(metaAndData.getMeta().getValid_daterange()[0][1]);
-        }
-        else {
-            // Used by default with version 1 API...
-            // CSV, each newline delimited row has YYYY-MM-DD,valueFlag
-            // (Flag character is optional) with the first line being the station name
-            dataStringsArray = resultString.split("\n");
-            Message.printStatus(2, routine, "Have " + dataStringsArray.length + " data records (first is station name)." );
-            nData = dataStringsArray.length;
-            iFirstData = 1; // Station name is record 1
-            if ( nData > 1 ) {
-                stationName = dataStringsArray[0];
-                commaPos = dataStringsArray[1].indexOf(",");
-                dataStart = DateTime.parse(dataStringsArray[1].substring(0,commaPos));
-                commaPos = dataStringsArray[dataStringsArray.length - 1].indexOf(",");
-                dataEnd = DateTime.parse(dataStringsArray[dataStringsArray.length - 1].substring(0,commaPos));
-                // Since CSV does not have metadata and not doing a round-trip would be a hit, use the same dates
-                validDataStart = new DateTime(dataStart);
-                validDataEnd = new DateTime(dataEnd);
-            }
-        }
-        ts.setDataUnits(variable.getUnits());
-        ts.setDataUnitsOriginal(variable.getUnits());
-        ts.setDescription(stationName);
-        boolean setPropertiesFromMetadata = true;
-        if ( setPropertiesFromMetadata ) {
-            // Set time series properties from the station metadata
-            if ( metaAndData != null ) {
-                // Get metadata from the object and set as properties, using the JSON property names
-                RccAcisStationTimeSeriesMetadata meta = metaAndData.getMeta();
-                ts.setProperty("uid", (meta.getUid() == null) ? "" : meta.getUid() );
-                ts.setProperty("name", (meta.getName() == null) ? "" : meta.getName() );
-                ts.setProperty("county", (meta.getCounty() == null) ? "" : meta.getCounty() );
-                ts.setProperty("basin", (meta.getBasin() == null) ? "" : meta.getBasin() );
-                ts.setProperty("climdiv", (meta.getClimdiv() == null) ? "" : meta.getClimdiv() );
-                ts.setProperty("cwa", (meta.getCwa() == null) ? "" : meta.getCwa() );
-                ts.setProperty("state", (meta.getState() == null) ? "" : meta.getState() );
-                ts.setProperty("elev", new Double(meta.getElev()) );
-                double [] ll = meta.getLl();
-                if ( (ll != null) && (ll.length == 2) ) {
-                    ts.setProperty("longitude", new Double(ll[0]) );
-                    ts.setProperty("latitude", new Double(ll[1]) );
-                }
-                String [] sids = meta.getSids();
-                if ( sids != null ) {
-                    // Set each identifier for the different station types
-                    for ( int i = 0; i < sids.length; i++ ) {
-                        // Each string is "ID type"
-                        String [] parts = sids[i].split(" ");
-                        if ( (parts != null) && (parts.length == 2) ) {
-                            // Set a property "ID-type"
-                            RccAcisStationType stype = lookupStationTypeFromCode(Integer.parseInt(parts[1]));
-                            if ( stype != null ) {
-                                ts.setProperty("ID-" + stype.getType(), parts[0] );
-                            }
-                        }
-                    }
-                }
-                // Also set the preferred identifier with location type so it can be used to read the time series
-                ts.setProperty("IDWithLocType", meta.getIDPreferred(true));
-                // Valid dates will only have two dates since one element was requested
-                String [][] validDates = meta.getValid_daterange();
-                if ( validDates.length > 0 ) {
-                    if ( validDates[0].length == 2 ) {
-                        ts.setProperty("valid_daterange1", validDates[0][0] );
-                        ts.setProperty("valid_daterange2", validDates[0][1] );
-                    }
-                }
-            }
-        }
-        // Since there is no way currently to retrieve the separate periods, set both to what was retrieved.
-        ts.setDate1(dataStart);
-        ts.setDate2(dataEnd);
-        ts.setDate1Original(validDataStart);
-        ts.setDate2Original(validDataEnd);
-        DateTime date = null;
-        String [] dataStringParts = null;
-        String dateString = ""; // string containing the date
-        String valueString = ""; // string containing value and optionally flag part of data
-        String flagString; // string containing flag part of data (split out of "valueString")
-        int valueStringLength;
-        // Nolan Doesken and Bill Noon indicate that 0 is what people use for trace
-        double traceValue = 0.0;
-        double missing = ts.getMissing(); // Will be Double.NaN, based on initialization
-        if ( readData ) {
-            ts.allocateDataSpace();
-            // Process each data string.  Trace values result in setting the data flag.
-            for ( int i = iFirstData; i < nData; i++ ) {
-                try {
-                    if ( requestJSON ) {
-                        dateString = data[i][0];
-                        valueString = data[i][1];
-                    }
-                    else {
-                        // CSV
-                        dataStringParts = dataStringsArray[i].split(",");
-                        dateString = dataStringParts[0];
-                        valueString = dataStringParts[1];
-                    }
-                    //Message.printStatus(2,routine,"Date="+dateString+", value="+valueString);
-                    date = DateTime.parse(dateString);
-                    valueStringLength = valueString.length();
-                    if ( valueString.equals("M") ) {
-                        // No value and missing flag.  Do set a flag since ACIS specific sets a flag
-                        ts.setDataValue(date, missing, "M", 0 );
-                        ++mCount;
-                    }
-                    else if ( valueString.equals("T") ) {
-                        // No value and trace flag.  Do set a flag since ACIS specific sets a flag
-                        ts.setDataValue(date, traceValue, "T", 0 );
-                        ++tCount;
-                    }
-                    // Check for data string form ##F or ##F1 (two one-character flags may occur, with
-                    // the second flag possibly being a character or digit)
-                    else if ( (valueString.length() > 0) &&
-                        Character.isLetter(valueString.charAt(valueStringLength - 1)) ) {
-                        flagString = valueString.substring(valueStringLength - 1);
-                        valueString = valueString.substring(0,valueStringLength - 1);
-                        if ( valueString.length() > 0 ) {
-                            ts.setDataValue(date, Double.parseDouble(valueString), flagString, 0 );
-                        }
-                        else {
-                            // Only flag was available
-                            ts.setDataValue(date, missing, flagString, 0 );
-                        }
-                    }
-                    else if ( (valueString.length() > 1) &&
-                        Character.isLetter(valueString.charAt(valueStringLength - 2)) ) {
-                        flagString = valueString.substring(valueStringLength - 2);
-                        valueString = valueString.substring(0,valueStringLength - 2);
-                        ts.setDataValue(date, Double.parseDouble(valueString), flagString, 0 );
-                        if ( valueString.length() > 0 ) {
-                            ts.setDataValue(date, Double.parseDouble(valueString), flagString, 0 );
-                        }
-                        else {
-                            // Only flag was available
-                            ts.setDataValue(date, missing, flagString, 0 );
-                        }
-                    }
-                    else {
-                        // Just the data value
-                        ts.setDataValue(date,Double.parseDouble(valueString));
-                    }
-                }
-                catch ( NumberFormatException e ) {
-                    Message.printWarning(3,routine,"Error parsing data point date=" + dateString + " valueString=\"" +
-                        valueString + "\" (" + e + ") - treating as flagged data.");
-                    // TODO SAM 2011-04-04 Have seen data values like "S", "0.20A".  Should these be
-                    // considered valid data points or treated as missing because they failed some test?
-                    // Submitted an email request to the ACIS contact page to see if I can get an answer.
-                    // For now, strip the characters off the end and treat as the flag and use the numerical
-                    // part (if present) for the value.
-                    int lastDigitPos = -1;
-                    for ( int iChar = valueString.length() - 1; iChar >= 0; iChar-- ) {
-                        if ( Character.isDigit(valueString.charAt(iChar)) ) {
-                            lastDigitPos = iChar;
-                            break;
-                        }
-                    }
-                    if ( lastDigitPos >= 0 ) {
-                        String number = valueString.substring(0,lastDigitPos);
-                        if ( StringUtil.isDouble(number) ) {
-                            ts.setDataValue(date,Double.parseDouble(number),
-                                valueString.substring(lastDigitPos + 1),0);
-                        }
-                        else {
-                            // Set the entire string as the flag
-                            ts.setDataValue(date,ts.getMissing(),valueString,0);
-                        }
-                    }
-                    else {
-                        ts.setDataValue(date,ts.getMissing(),valueString,0);
-                    }
-                }
-                catch ( Exception e ) {
-                    Message.printWarning(3,routine,"Error parsing data point date=" + dateString + ", valueString=\"" +
-                        valueString + "\" (" + e + ").");
-                }
-            }
-        }
-        if ( tCount > 0 ) {
-            // Add a specific data flag type 
-            ts.addDataFlagMetadata(new TSDataFlagMetadata("T", "Trace - value of " + traceValue + " is used."));
-        }
-        if ( mCount > 0 ) {
-            // Add a specific data flag type 
-            ts.addDataFlagMetadata(new TSDataFlagMetadata("M", "Missing value."));
-        }
-    }*/
 }
 
 /**
@@ -2088,6 +1746,74 @@ where ID is the station.
         "\" is invalid (should be Type:ID)" );
     }
 }*/
+
+/* TODO: add all these cases to this method */
+public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
+
+	ObjectMapper mapper = new ObjectMapper();
+	
+	DiversionWaterClass waterClass = null;
+	
+	String apiKey = getAPIKey();
+	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	try {
+		JsonNode waterClasses = mapper.readTree(new URL(getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + wdid + apiKeyString));
+		JsonNode resultList = waterClasses.path("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			String divrectype = resultList.get(i).get("divrectype").textValue();
+			if(divTotalReq){
+				if(("DivTotal").equalsIgnoreCase(divrectype)){
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}else if(relTotalReq){
+				if(("RelTotal").equalsIgnoreCase(divrectype)){
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}else{
+				if((waterClassReqString).equals(resultList.get(i).get("wcIdentifier").textValue())){ // TODO @jurentie Confirm with Steve - wcIdentifier
+					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				}
+			}
+		}
+	} 
+	catch (JsonParseException e ) { e.printStackTrace(); }
+	catch (JsonMappingException e ) { e.printStackTrace(); }
+	catch (IOException e) { e.printStackTrace(); }
+	
+	return waterClass;
+}
+
+public static void setCommentsStructure ( TS ts, Structure struct )
+{   // Use the same names as the database view columns, same order as view
+	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
+	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
+	ts.addToComments("Description                     = " + ts.getDescription());
+	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Type                       = " + ts.getDataType());
+	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
+	ts.addToComments("Data Units                      = " + ts.getDataUnits());
+	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
+	ts.addToComments("HydroBase available period      = " + ts.getDate1Original().getYear() + " to " + ts.getDate2Original().getYear());
+	ts.addToComments("Located in water div, district  = " + struct.getDivision() + ", " + struct.getWaterDistrict());
+	ts.addToComments("Located in county               = " + struct.getCounty());
+	ts.addToComments("Latitude, Longitude             = " + struct.getLatdecdeg() + ", " + struct.getLongdecdeg());
+} 
+
+public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
+{
+	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
+	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
+	ts.addToComments("Description                     = " + ts.getDescription());
+	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Type                       = " + ts.getDataType());
+	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
+	ts.addToComments("Data Units                      = " + ts.getDataUnits());
+	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
+	ts.addToComments("HydroBase availabe period       = " + ts.getDate1Original() + " to " + ts.getDate2Original());
+	ts.addToComments("Located in water div            = " + tel.getDivision());
+	ts.addToComments("Located in county               = " + tel.getCounty());
+	ts.addToComments("Latitude, Longitude             = " + tel.getLatitude() + ", " + tel.getLongitude());
+}
 
 public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
@@ -2182,74 +1908,6 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 	ts.setProperty("base_of_grout", (new Integer(well.getBaseOfGrout()) == null) ? null : new Integer(well.getBaseOfGrout()));
 	
 }
-
-public static void setCommentsStructure ( TS ts, Structure struct )
-{   // Use the same names as the database view columns, same order as view
-	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
-	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
-	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR REST");
-	ts.addToComments("Data Type                       = " + ts.getDataType());
-	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
-	ts.addToComments("Data Units                      = " + ts.getDataUnits());
-	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
-	ts.addToComments("HydroBase available period      = " + ts.getDate1Original().getYear() + " to " + ts.getDate2Original().getYear());
-	ts.addToComments("Located in water div, district  = " + struct.getDivision() + ", " + struct.getWaterDistrict());
-	ts.addToComments("Located in county               = " + struct.getCounty());
-	ts.addToComments("Latitude, Longitude             = " + struct.getLatdecdeg() + ", " + struct.getLongdecdeg());
-} 
-
-public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
-{
-	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
-	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
-	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR REST");
-	ts.addToComments("Data Type                       = " + ts.getDataType());
-	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
-	ts.addToComments("Data Units                      = " + ts.getDataUnits());
-	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
-	ts.addToComments("HydroBase availabe period       = " + ts.getDate1Original() + " to " + ts.getDate2Original());
-	ts.addToComments("Located in water div            = " + tel.getDivision());
-	ts.addToComments("Located in county               = " + tel.getCounty());
-	ts.addToComments("Latitude, Longitude             = " + tel.getLatitude() + ", " + tel.getLongitude());
-}
-/* TODO: add all these cases to this method */
-public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
-
-	ObjectMapper mapper = new ObjectMapper();
-	
-	DiversionWaterClass waterClass = null;
-	
-	String apiKey = getAPIKey();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
-	try {
-		JsonNode waterClasses = mapper.readTree(new URL(getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + wdid + apiKeyString));
-		JsonNode resultList = waterClasses.path("ResultList");
-		for(int i = 0; i < resultList.size(); i++){
-			String divrectype = resultList.get(i).get("divrectype").textValue();
-			if(divTotalReq){
-				if(("DivTotal").equalsIgnoreCase(divrectype)){
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}else if(relTotalReq){
-				if(("RelTotal").equalsIgnoreCase(divrectype)){
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}else{
-				if((waterClassReqString).equals(resultList.get(i).get("wcIdentifier").textValue())){ // TODO @jurentie Confirm with Steve - wcIdentifier
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}
-		}
-	} 
-	catch (JsonParseException e ) { e.printStackTrace(); }
-	catch (JsonMappingException e ) { e.printStackTrace(); }
-	catch (IOException e) { e.printStackTrace(); }
-	
-	return waterClass;
-}
-
 
 /**
  * Inserting main method for testing purposes:

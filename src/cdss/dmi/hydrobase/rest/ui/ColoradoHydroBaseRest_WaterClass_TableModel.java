@@ -2,16 +2,12 @@ package cdss.dmi.hydrobase.rest.ui;
 
 import java.util.List;
 
-// FIXME @jurentie 06/20/2018 imports/irrelevant code
-//import DWR.DMI.HydroBaseDMI.HydroBase_StructureGeolocStructMeasType;
-//import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
-
-import RTi.DMI.DMIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 
+
+// FIXME @jurentie why is this complaining? 06/22/2018
 /**
 This class is a table model for time series header information for HydroBase waterclass time series.
 By default the sheet will contain row and column numbers.
@@ -237,7 +233,6 @@ public int getRowCount() {
 	return _rows;
 }
 
-// FIXME @jurentie 06/20/2018 imports/irrelevant code
 /**
 From AbstractTableModel.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
@@ -248,182 +243,42 @@ public Object getValueAt(int row, int col)
 {	
 	
 	// If sorted, get the position in the data from the displayed row.
+	// TODO @jurentie 06/22/2018 ask steve if you can get rid of this
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
-
-	int i; // Use for integer data.
-	double d; // Use for double data
 	
+	// Cast _data row to DiversionWaterClass
 	DiversionWaterClass divWC = (DiversionWaterClass)_data.get(row);
 	
+	// TODO @jurentie 06/22/2018 join structure with waterclass to finish populating table
+	// Populate table with data values
 	switch (col) {
 		// case 0 handled above.
 		case COL_ID: return divWC.getWdid();
 		case COL_NAME: return divWC.getStructureName();
 		case COL_DATA_SOURCE: return "DWR";
 		case COL_DATA_TYPE: return divWC.getDivrectype();
-	/*case COL_TIME_STEP:
-	    // TSTool translates HydroBase values to nicer values...
-		return mt.getTime_step();
-		case COL_UNITS: return ;*/
+		//case COL_TIME_STEP: return
+		//case COL_UNITS: return 
 		case COL_START: return divWC.getPorStart().getYear();
 		case COL_END: return divWC.getPorEnd().getYear();
-	/*case COL_MEAS_COUNT:
-	    i = mt.getMeas_count();
-		if ( DMIUtil.isMissing(i) ) {
-			return "";
-		}
-		else {
-		    return "" + i;
-		}*/
+		//case COL_MEAS_COUNT: return
 		case COL_DIV: return divWC.getDivision();
 		case COL_DIST: return divWC.getWaterDistrict();
 		case COL_COUNTY: return divWC.getCounty();
-		//case COL_STATE: return divWC.getSta;
-		//case COL_HUC: return divWC.get;
-		/*case COL_LONG:
-        d = mt.getLongdecdeg();
-        if ( DMIUtil.isMissing(d) ) {
-            return "";
-        }
-        else {
-            return "" + StringUtil.formatString(d,"%.6f");
-        }
-    case COL_LAT:
-        d = mt.getLatdecdeg();
-        if ( DMIUtil.isMissing(d) ) {
-            return "";
-        }
-        else {
-            return "" + StringUtil.formatString(d,"%.6f");
-        }*/
-		/*case COL_UTM_X: return divWC.getU
-    case COL_UTM_Y:
-        d = mt.getUtm_y();
-        if ( DMIUtil.isMissing(d) ) {
-            return "";
-        }
-        else {
-            return "" + StringUtil.formatString(d,"%.3f");
-        }*/
-		//case COL_STR_TYPE: return divWC.getSTr;
-		//case COL_STRTYPE: return mt.getSTRTYPE();
+		//case COL_STATE: return
+		//case COL_HUC: return
+		//case COL_LONG: return
+		//case COL_LAT: return
+		//case COL_UTM_X: return
+    	//case COL_UTM_Y: return
+		//case COL_STR_TYPE: return
+		//case COL_STRTYPE: return
 		case COL_WDID: return divWC.getWdid();
 		case COL_INPUT_TYPE: return __inputType;
 		default: return "";
 	}
-
-	/*HydroBase_StructureGeolocStructMeasType mt = (HydroBase_StructureGeolocStructMeasType)_data.get(row);
-	switch (col) {
-		// case 0 handled above.
-		case COL_ID:
-            if ( mt.getCommon_id().length() > 0 ) {
-				// Well with a different identifier to display.
-				return
-				mt.getCommon_id();
-			}
-			else {
-			    // A waterclass other than wells...
-				return
-				HydroBase_WaterDistrict.formWDID (__wdid_length, mt.getWD(), mt.getID() );
-			}
-		case COL_NAME: return mt.getStr_name();
-		case COL_DATA_SOURCE: return mt.getData_source();
-		case COL_DATA_TYPE:
-		    // TSTool translates to values from the TSTool interface...
-			return mt.getMeas_type();
-		case COL_TIME_STEP:
-		    // TSTool translates HydroBase values to nicer values...
-			return mt.getTime_step();
-		case COL_UNITS:
-		    // The units are not in HydroBase.meas_type but are set by TSTool...
-			return mt.getData_units();
-		case COL_START:
-		    //return new Integer(mt.getStart_year() );
-			i = mt.getStart_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_END:
-		    //return new Integer ( mt.getEnd_year() );
-			i = mt.getEnd_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_MEAS_COUNT:
-		    i = mt.getMeas_count();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIV:
-		    //return new Integer ( mt.getDiv() );
-			i = mt.getDiv();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIST:
-		    //return new Integer ( mt.getWD() );
-			i = mt.getWD();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_COUNTY: return mt.getCounty();
-		case COL_STATE: return mt.getST();
-		case COL_HUC: return mt.getHUC();
-        case COL_LONG:
-            d = mt.getLongdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_LAT:
-            d = mt.getLatdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_UTM_X:
-            d = mt.getUtm_x();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
-        case COL_UTM_Y:
-            d = mt.getUtm_y();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
-        case COL_STR_TYPE: return mt.getStr_type();
-        case COL_STRTYPE: return mt.getSTRTYPE();
-        case COL_WDID: return mt.getWDID();
-		case COL_INPUT_TYPE: return __inputType;
-		default: return "";
-	}*/
 }
 
 /**

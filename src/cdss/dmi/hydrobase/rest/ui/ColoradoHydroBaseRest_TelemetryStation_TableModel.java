@@ -2,15 +2,8 @@ package cdss.dmi.hydrobase.rest.ui;
 
 import java.util.List;
 
-// FIXME @jurentie 06/20/2018 imprts/irrelevant code
-//import DWR.DMI.HydroBaseDMI.HydroBase_StationGeolocMeasType;
-//import DWR.DMI.HydroBaseDMI.HydroBase_Util;
-
-import RTi.DMI.DMIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
-import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 
 /**
@@ -235,46 +228,34 @@ public Object getValueAt(int row, int col)
 {	
 	
 	// If sorted, get the position in the data from the displayed row.
+	// TODO @jurentie 06/22/2018 ask steve if you can remove this
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
 
-	int i; // Use for integer data.
-	double d; // Use for double data
-	
 	TelemetryStationDataTypes tsds = (TelemetryStationDataTypes)_data.get(row);
 	
 	switch (col) {
 		// case 0 handled above.
 		case COL_ID: return tsds.getWdid();
+		case COL_ABBREV: return tsds.getAbbrev();
 		case COL_NAME: return tsds.getStationName();
 		case COL_DATA_SOURCE: return "DWR";
 		case COL_DATA_TYPE: return tsds.getParameter();
-	/*case COL_TIME_STEP:
-	    // TSTool translates HydroBase values to nicer values...
-		return mt.getTime_step();
-		case COL_UNITS: return ;*/
-		//case COL_START: return divWC.getPorStart().getYear();
-		//case COL_END: return divWC.getPorEnd().getYear();
-	/*case COL_MEAS_COUNT:
-	    i = mt.getMeas_count();
-		if ( DMIUtil.isMissing(i) ) {
-			return "";
-		}
-		else {
-		    return "" + i;
-		}*/
+		//case COL_TIME_STEP: return
+		//case COL_UNITS: return
+		//case COL_START:
+		//case COL_END:
+		//case COL_MEAS_COUNT: return
 		case COL_DIV: return tsds.getDivision();
 		case COL_DIST: return tsds.getWaterDistrict();
 		case COL_COUNTY: return tsds.getCounty();
-		//case COL_STATE: return divWC.getSta;
+		//case COL_STATE: return 
 		case COL_HUC: return tsds.getHuc10();
 		case COL_LONG: return tsds.getLongdecdeg();
 		case COL_LAT: return tsds.getLatdecdeg();
 		case COL_UTM_X: return tsds.getUtmX();
 		case COL_UTM_Y: return tsds.getUtmY();
-		//case COL_STR_TYPE: return tsds.getStructureType();
-		//case COL_STRTYPE: return tsds.getStructureType();
 		case COL_INPUT_TYPE: return __inputType;
 		default: return "";
 	}
