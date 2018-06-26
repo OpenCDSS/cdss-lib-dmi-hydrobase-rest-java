@@ -6,9 +6,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +46,7 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
+import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
@@ -132,7 +135,7 @@ private void determineAPIVersion()
 	String uriString = getServiceRootURI().toString();
 	int indexOf = uriString.lastIndexOf("/");
 	int version = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
-	Message.printStatus(1, routine, "DWR REST services API version: " + version);
+	Message.printStatus(2, routine, "DWR REST services API version = " + version);
 	__apiVersion = version;
 }
 
@@ -501,6 +504,24 @@ private String getRequestStringHelperMatches(String operator, String value){
 	return ret;
 }
 
+private String[] getTelemetryDataTypesFromWebServices(){	
+	ObjectMapper mapper = new ObjectMapper();
+	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams";
+	JsonNode telemetryDataTypes = getJsonNodeResultsFromURLString(telParametersRequest);
+
+	String[] dataTypes = new String[telemetryDataTypes.size()];
+	
+	for(int i = 0; i < telemetryDataTypes.size(); i++){
+		try {
+			dataTypes[i] = mapper.treeToValue(telemetryDataTypes.get(i), ReferenceTablesTelemetryParams.class).getParameter();
+		} catch (JsonProcessingException e) {
+			// TODO @jurentie 06/26/2018 - Deal with catch
+			e.printStackTrace();
+		}
+	}
+	return dataTypes;
+}
+
 public String getTelemetryParamsRequestString(String dataType, String interval, List<String []> listOfTriplets){
 	// All telemetry data is assumed to be 15 minute, not searching by interval
 	String tpRequestString = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes/?format=json&parameter=" + dataType;
@@ -632,56 +653,47 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 public List<String> getTimeSeriesDataTypes(boolean group){
 	List<String> dataTypes = new ArrayList<String>();
 	ObjectMapper mapper = new ObjectMapper();
-	// Get Telemetry Data Types
-	URL telParametersRequest;
-	try {
-		telParametersRequest = new URL(getServiceRootURI() + "/referencetables/telemetryparams");
-		JsonNode telParamsRootNode = mapper.readTree(telParametersRequest);
-		JsonNode telParamsResults = telParamsRootNode.get("ResultList");
-		if(group){
-			dataTypes.add("Structure - DivTotal");
-			dataTypes.add("Structure - RelTotal");
-			dataTypes.add("Structure - WaterClass");
-			for(int i = 0; i < telParamsResults.size(); i++){
-				ReferenceTablesTelemetryParams telParams = mapper.treeToValue(telParamsResults.get(i), ReferenceTablesTelemetryParams.class);
-				dataTypes.add("Telemetry Station - " + telParams.getParameter());
-			}
-			dataTypes.add("Well - WaterLevelDepth");
-			dataTypes.add("Well - WaterLevelElev");
-		}else{
-			dataTypes.add("DivTotal");
-			dataTypes.add("RelTotal");
-			dataTypes.add("WaterClass");
-			for(int i = 0; i < telParamsResults.size(); i++){
-				ReferenceTablesTelemetryParams telParams = mapper.treeToValue(telParamsResults.get(i), ReferenceTablesTelemetryParams.class);
-				dataTypes.add("Telemetry Station - " + telParams.getParameter());
-			}
-			dataTypes.add("WaterLevelDepth");
-			dataTypes.add("WaterLevelElev");
+	if(group){
+		dataTypes.add("Structure - DivTotal");
+		dataTypes.add("Structure - RelTotal");
+		dataTypes.add("Structure - WaterClass");
+		// Get list of telemetry data types
+		String[] telDataTypes = getTelemetryDataTypesFromWebServices();
+		for(int i = 0; i < telDataTypes.length; i++){
+			dataTypes.add("Telemetry Station - " + telDataTypes[i]);
 		}
-	 } catch (JsonParseException e) {
-        e.printStackTrace();
-     } catch (JsonMappingException e) {
-        e.printStackTrace();
-     } catch (IOException e) {
-           e.printStackTrace();
-     }
+		dataTypes.add("Well - WaterLevelDepth");
+		dataTypes.add("Well - WaterLevelElev");
+	}else{
+		dataTypes.add("DivTotal");
+		dataTypes.add("RelTotal");
+		dataTypes.add("WaterClass");
+		// Get list of telemetry data types
+		String[] telDataTypes = getTelemetryDataTypesFromWebServices();
+		for(int i = 0; i < telDataTypes.length; i++){
+			dataTypes.add(telDataTypes[i]);
+		}
+		dataTypes.add("WaterLevelDepth");
+		dataTypes.add("WaterLevelElev");
+	}
 	return dataTypes;
 }
 
 public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	List<String> timeSteps = new ArrayList<String>();
-	if(selectedDataType.equalsIgnoreCase("Structure - DivTotal") || selectedDataType.equalsIgnoreCase("DivTotal") ||
-			selectedDataType.equalsIgnoreCase("Structure - RelTotal") || selectedDataType.equalsIgnoreCase("RelTotal") ||
-			selectedDataType.equalsIgnoreCase("Structure - WaterClass") || selectedDataType.equalsIgnoreCase("WaterClass")){
+	if(selectedDataType.equalsIgnoreCase("DivTotal") || 
+			selectedDataType.equalsIgnoreCase("RelTotal") || 
+			selectedDataType.equalsIgnoreCase("WaterClass")){
 		timeSteps.add("Day");
 		timeSteps.add("Month");
 		timeSteps.add("Year");
 	}
-	if(selectedDataType.equalsIgnoreCase("Well - WaterLevelDepth") || selectedDataType.equalsIgnoreCase("WaterLevelDepth") ||
-			selectedDataType.equalsIgnoreCase("Well - WaterLevelElev") || selectedDataType.equalsIgnoreCase("WaterLevelElev")){
+	else if(selectedDataType.equalsIgnoreCase("WaterLevelDepth") ||
+			selectedDataType.equalsIgnoreCase("WaterLevelElev")){
 		timeSteps.add("Day");
-	}else{ // FIXME @jurentie 06/22/2018 might need a more clever solution for telemetry stations
+	}
+	// Will be Telemetry
+	else{ // FIXME @jurentie 06/22/2018 might need a more clever solution for telemetry stations
 		timeSteps.add("15Min");
 		timeSteps.add("Hour");
 		timeSteps.add("Day");
@@ -837,29 +849,12 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
-	ObjectMapper mapper = new ObjectMapper();
-	URL telParametersRequest;
-	try {
-		telParametersRequest = new URL(getServiceRootURI() + "/referencetables/telemetryparams");
-		JsonNode telParamsRootNode = mapper.readTree(telParametersRequest);
-		JsonNode telParamsResults = telParamsRootNode.get("ResultList");
-		String [] dataTypes = new String[telParamsResults.size()];
-		for(int i = 0; i < telParamsResults.size(); i++){
-			ReferenceTablesTelemetryParams telParams = mapper.treeToValue(telParamsResults.get(i), ReferenceTablesTelemetryParams.class);
-			dataTypes[i] = telParams.getParameter();
+	String[] dataTypes = getTelemetryDataTypesFromWebServices();
+	for ( int i = 0; i < dataTypes.length; i++ ) {
+		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
+			return true;
 		}
-		for ( int i = 0; i < dataTypes.length; i++ ) {
-			if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
-				return true;
-			}
-		}
-	} catch (JsonParseException e) {
-        e.printStackTrace();
-     } catch (JsonMappingException e) {
-        e.printStackTrace();
-     } catch (IOException e) {
-           e.printStackTrace();
-     }
+	}
 	return false;
 }
 
@@ -1197,7 +1192,7 @@ not read the data
 public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData )
 throws MalformedURLException, Exception
 {   
-	//System.out.println(this.getServiceRootURI());
+	String routine = "ColoradoHydroBaseRestDataStore.readTimeSeries";
 	
 	// Make sure data store is initialized
     initialize();
@@ -1207,7 +1202,7 @@ throws MalformedURLException, Exception
     // 1. Parse the time series identifier (TSID) that was passed in
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
 	String locid = tsident.getLocation();
-	String data_type = tsident.getType(); // TSID data type 
+	String data_type = tsident.getType(); // TSID data type
 	
 	String apiKeyString = (this.apiKey == null) ? "" : "&apiKey=" + this.apiKey;
 	
@@ -1230,6 +1225,9 @@ throws MalformedURLException, Exception
 		// Get Structure
 		String structRequest = getServiceRootURI() + "/structures/?format=json&wdid=" + wdid + apiKeyString;
 		JsonNode structResult = getJsonNodeResultsFromURLString(structRequest).get(0);
+		// Log structure request for debugging properties
+		System.out.println(structRequest);
+		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
 		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
 		Structure struct = mapper.treeToValue(structResult, Structure.class);
 		
@@ -1260,85 +1258,52 @@ throws MalformedURLException, Exception
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 		}
-		
-		//System.out.println(waterClassNumForWdid);
-		
-		String divRecRequest = null;
-			
-		if(interval_base == TimeInterval.DAY){
-			// Create request URL for web services API
-			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-			System.out.println(getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
-		}
-		if(interval_base == TimeInterval.MONTH){
-			// Create request URL for web services API
-			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-			System.out.println(getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
-			
-		}
-		if(interval_base == TimeInterval.YEAR){
-			// Create request URL for web services API
-			divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-			System.out.println(getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString);
-		}
-		
-		// Get JsonNode results give the request URL
-		JsonNode results = getJsonNodeResultsFromURLString(divRecRequest);
-		
-		//System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(results));
+		// TODO @jurentie 06/26/2018 - Add case "WaterClass"
 		
 		/* Get first and last date */
 		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
 		DateTime firstDate = null;
 		if(interval_base == TimeInterval.DAY){ 
-			DiversionByDay divRecFirst = mapper.treeToValue(results.get(0), DiversionByDay.class);
 			firstDate = new DateTime(DateTime.PRECISION_DAY); 
-			firstDate.setYear(divRecFirst.getYear());
-			firstDate.setMonth(divRecFirst.getMonth());
-			firstDate.setDay(divRecFirst.getDay());
+			firstDate.setYear(struct.getPorStart().getYear());
+			firstDate.setMonth(struct.getPorStart().getMonthValue());
+			firstDate.setDay(struct.getPorStart().getDayOfMonth());
 			ts.setDate1Original(firstDate);
-			ts.setDataUnits(divRecFirst.getMeasUnits());
-			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
+			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
+			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
 		}
 		if(interval_base == TimeInterval.MONTH){ 
-			DiversionByMonth divRecFirst = mapper.treeToValue(results.get(0), DiversionByMonth.class);
 			firstDate = new DateTime(DateTime.PRECISION_MONTH); 
-			firstDate.setYear(divRecFirst.getYear());
-			firstDate.setMonth(divRecFirst.getMonth());
+			firstDate.setYear(struct.getPorStart().getYear());
+			firstDate.setMonth(struct.getPorStart().getMonthValue());
 			ts.setDate1Original(firstDate);
-			ts.setDataUnits(divRecFirst.getMeasUnits());
-			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
 		}
 		if(interval_base == TimeInterval.YEAR){ 
-			DiversionByYear divRecFirst = mapper.treeToValue(results.get(0), DiversionByYear.class);
 			firstDate = new DateTime(DateTime.PRECISION_YEAR); 
-			firstDate.setYear(divRecFirst.getYear());
+			firstDate.setYear(struct.getPorStart().getYear());
 			ts.setDate1Original(firstDate);
-			ts.setDataUnits(divRecFirst.getMeasUnits());
-			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());
 		}
 		
 		// Last Date
 		DateTime lastDate = null;
 		if(interval_base == TimeInterval.DAY){ 
-			DiversionByDay divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByDay.class);
 			lastDate = new DateTime(DateTime.PRECISION_DAY); 
-			lastDate.setYear(divRecLast.getYear());
-			lastDate.setMonth(divRecLast.getMonth());
-			lastDate.setDay(divRecLast.getDay());
+			lastDate.setYear(struct.getPorEnd().getYear());
+			lastDate.setMonth(struct.getPorEnd().getMonthValue());
+			lastDate.setDay(struct.getPorEnd().getDayOfMonth());
 			ts.setDate2Original(lastDate);
+			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
+			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
 		}
 		if(interval_base == TimeInterval.MONTH){ 
-			DiversionByMonth divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
 			lastDate = new DateTime(DateTime.PRECISION_MONTH); 
-			lastDate.setYear(divRecLast.getYear());
-			lastDate.setMonth(divRecLast.getMonth());
+			lastDate.setYear(struct.getPorEnd().getYear());
+			lastDate.setMonth(struct.getPorEnd().getMonthValue());
 			ts.setDate2Original(lastDate);
 		}
 		if(interval_base == TimeInterval.YEAR){ 
-			DiversionByYear divRecLast = mapper.treeToValue(results.get(results.size() - 1), DiversionByYear.class);
 			lastDate = new DateTime(DateTime.PRECISION_YEAR); 
-			lastDate.setYear(divRecLast.getYear());
+			lastDate.setYear(struct.getPorEnd().getYear());
 			ts.setDate2Original(lastDate);
 		}
 			
@@ -1353,11 +1318,6 @@ throws MalformedURLException, Exception
 		}else{
 			ts.setDate2(readEnd);
 		}
-		
-		/*System.out.println("Date1: " + ts.getDate1());
-		System.out.println("Date2: " + ts.getDate2());
-		
-		System.out.println("Units: " + ts.getDataUnitsOriginal());*/
 			
 		// Allocate data space
 		ts.allocateDataSpace();
@@ -1373,22 +1333,42 @@ throws MalformedURLException, Exception
 		}
 		
 		// 4. Set Properties:
-		ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
+		//FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
+		//ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
 		setTimeSeriesPropertiesStructure(ts, struct);
 		
 		setCommentsStructure(ts, struct);
-		
-		// Work out comments:
-		
-		//System.out.println("Genesis: " + ts.getGenesis());
-		//System.out.println("Properties:\n" + ts.getProperties());
-		
-		// Am I getting all the data regardless of time span? @jurentie
+
+		// FIXME @jurentie 06/26/2018 Do not read all data if not within the bounds of the specified dates
 		// 5. Read Data: 
 		if(readData){
+			// Get the data from web services
+			String divRecRequest = null;
+			if(interval_base == TimeInterval.DAY){
+				// Create request URL for web services API
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
+				System.out.println(divRecRequest);
+				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
+			}
+			if(interval_base == TimeInterval.MONTH){
+				// Create request URL for web services API
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
+				System.out.println(divRecRequest);
+				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
+			}
+			if(interval_base == TimeInterval.YEAR){
+				// Create request URL for web services API
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
+				System.out.println(divRecRequest);
+				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
+			}
+			// Get JsonNode results give the request URL
+			JsonNode results = getJsonNodeResultsFromURLString(divRecRequest);
+			
 			// Pass Data into TS Object
 			if(interval_base == TimeInterval.DAY){
 				for(int i = 0; i < results.size(); i++){
+					
 					DiversionByDay divRecCurrDay = mapper.treeToValue(results.get(i), DiversionByDay.class);
 					
 					// Set Date
@@ -1433,8 +1413,7 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	
-	if(data_type.equalsIgnoreCase("DISCHRG")){
+	else if(isTelemetryStationTimeSeriesDataType(data_type)){
 		String abbrev = locid;
 		
 		// Get Telemetry
@@ -1442,32 +1421,33 @@ throws MalformedURLException, Exception
 		JsonNode telemetryResult = getJsonNodeResultsFromURLString(telemetryRequest).get(0);
 		
 		TelemetryStation telStation = mapper.treeToValue(telemetryResult, TelemetryStation.class);
+		Message.printStatus(2, routine, "Retrieve telemetry stations from DWR REST API request url: " + telemetryRequest);
 		
 		// Set Description
 		ts.setDescription(telStation.getStationName());
 		
-		URL telRequest = null;
+		// FIXME @jurentie 06/26/2018 - Try to more efficiently get the first and last dates so I can move the following code inside readData() 
 		
-		// Code commented in else statements below are for potential irregular intervals
+		String telRequest = null;
 
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
-			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			System.out.println(telRequest);
+			Message.printStatus(2, routine, "Retrieve telemetry time series 15 min intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_HOUR){
-			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			System.out.println(telRequest);
+			Message.printStatus(2, routine, "Retrieve telemetry time series hourly intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_DAY){
-			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-		}/*else{ // get raw for both minute and irregular
-			telRequest = new URL(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-			System.out.println(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString);
-		}*/
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			System.out.println(telRequest);
+			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
+		}
 		
-		JsonNode results = mapper.readTree(telRequest).get("ResultList");
+		JsonNode results = getJsonNodeResultsFromURLString(telRequest);
 		
 		//System.out.println(results);
 		
@@ -1507,18 +1487,7 @@ throws MalformedURLException, Exception
 			ts.setDate1Original(firstDate);
 			ts.setDataUnits(telStation.getUnits());
 			ts.setDataUnitsOriginal(telStation.getUnits());
-		}/*else{
-			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
-			firstDate = new DateTime(DateTime.PRECISION_MINUTE);
-			firstDate.setYear(telTSMinute.getYear());
-			firstDate.setMonth(telTSMinute.getMonth());
-			firstDate.setDay(telTSMinute.getDay());
-			firstDate.setHour(telTSMinute.getHour());
-			firstDate.setMinute(telTSMinute.getMinute());
-			ts.setDate1Original(firstDate);
-			ts.setDataUnits(telStation.getUnits());
-			ts.setDataUnitsOriginal(telStation.getUnits());
-		}*/
+		}
 		
 		// Last Date
 		DateTime lastDate = null;
@@ -1548,16 +1517,7 @@ throws MalformedURLException, Exception
 			lastDate.setMonth(telTSDay.getMonth());
 			lastDate.setDay(telTSDay.getDay());
 			ts.setDate2Original(lastDate);
-		}/*else{
-			TelemetryTimeSeries telTSMinute = mapper.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
-			lastDate = new DateTime(DateTime.PRECISION_MINUTE);
-			lastDate.setYear(telTSMinute.getYear());
-			lastDate.setMonth(telTSMinute.getMonth());
-			lastDate.setDay(telTSMinute.getDay());
-			lastDate.setHour(telTSMinute.getHour());
-			lastDate.setMinute(telTSMinute.getMinute());
-			ts.setDate2Original(lastDate);
-		}*/
+		}
 			
 		// Set start and end date
 		if(readStart == null){
@@ -1570,14 +1530,6 @@ throws MalformedURLException, Exception
 		}else{
 			ts.setDate2(readEnd);
 		}
-		
-		System.out.println("Date1: " + ts.getDate1());
-		System.out.println("Date1OG: " + ts.getDate1Original());
-		
-		/*System.out.println("Date1: " + ts.getDate1());
-		System.out.println("Date2: " + ts.getDate2());
-		
-		System.out.println("Units: " + ts.getDataUnitsOriginal());*/
 			
 		// Allocate data space
 		ts.allocateDataSpace();
@@ -1642,25 +1594,20 @@ throws MalformedURLException, Exception
 		}
 		
 	}
-	
-	if(data_type.equalsIgnoreCase("WaterLevelDepth") || data_type.equalsIgnoreCase("WaterLevelElev")){
+	else if(data_type.equalsIgnoreCase("WaterLevelDepth") || data_type.equalsIgnoreCase("WaterLevelElev")){
 		String wellid = locid;
 		
 		// Get Well 
-		URL wellRequest = new URL(getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid +  apiKeyString);
+		String wellRequest = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid +  apiKeyString;
+		JsonNode wellResults = getJsonNodeResultsFromURLString(wellRequest).get(0);
+		
 		System.out.println(wellRequest);
-		JsonNode wellRootNode = mapper.readTree(wellRequest);
-		JsonNode wellResults = wellRootNode.get("ResultList").get(0);
+		Message.printStatus(2, routine, "Get wells from DWR REST API request url: " + wellRequest);
 		
 		WaterLevelsWell well = mapper.treeToValue(wellResults, WaterLevelsWell.class);
 		
 		// Set Description
 		ts.setDescription(well.getWellName());
-		
-		URL wellMeasurementRequest = new URL(getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + apiKeyString);
-		System.out.println(wellMeasurementRequest);
-		JsonNode wellMeasurementRootNode = mapper.readTree(wellMeasurementRequest);
-		JsonNode results = wellMeasurementRootNode.get("ResultList");
 		
 		/* Get first and last date */
 		//TODO @jurentie 06/21/2018 no units in request results
@@ -1689,22 +1636,43 @@ throws MalformedURLException, Exception
 		}else{
 			ts.setDate2(readEnd);
 		}
-		
-		System.out.println("Date1: " + ts.getDate1());
-		System.out.println("Date1OG: " + ts.getDate1Original());
-		
-		System.out.println("Date2: " + ts.getDate2());
-		System.out.println("Date2OG: " + ts.getDate2Original());
-		
-		/*System.out.println("Units: " + ts.getDataUnitsOriginal());*/
 			
 		// Allocate data space
 		ts.allocateDataSpace();
 		
 		// Set Properties
-		ts.addToGenesis("read data from web services " + wellRequest + " and " + wellMeasurementRequest + ".");
-		/*setTimeSeriesPropertiesTelemetry(ts, telStation);
-		setCommentsTelemetry(ts, telStation);*/
+		// FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
+		//ts.addToGenesis("read data from web services " + wellRequest + " and " + wellMeasurementRequest + ".");
+		setTimeSeriesPropertiesWell(ts, well);
+		setCommentsWell(ts, well);
+		
+		// Read Data
+		if(readData){
+			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + apiKeyString;
+			JsonNode results = getJsonNodeResultsFromURLString(wellMeasurementRequest);
+			System.out.println(wellMeasurementRequest);
+			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
+			for(int i = 0; i < results.size(); i++){
+				WaterLevelsWellMeasurement wellMeas = mapper.treeToValue(results.get(i), WaterLevelsWellMeasurement.class);
+				
+				// Set Date
+				DateTime date = new DateTime(DateTime.PRECISION_DAY);
+				date.setYear(wellMeas.getMeasurementDate().getYear());
+				date.setMonth(wellMeas.getMeasurementDate().getMonthValue());
+				date.setDay(wellMeas.getMeasurementDate().getDayOfMonth());
+
+				// Get Data
+				// TODO @jurentie 06/26/2018 - depthToWater or depthWaterBelowLandSurface
+				double value;
+				if(data_type.equalsIgnoreCase("WaterLevelDepth")){
+					value = wellMeas.getDepthToWater();
+				}else{
+					value = wellMeas.getElevationOfWater();
+				}
+				
+				ts.setDataValue(date, value);
+			}
+		}
 		
 	}
 	
@@ -1815,6 +1783,22 @@ public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
 	ts.addToComments("Latitude, Longitude             = " + tel.getLatitude() + ", " + tel.getLongitude());
 }
 
+public static void setCommentsWell (TS ts, WaterLevelsWell well)
+{
+	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
+	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
+	ts.addToComments("Description                     = " + ts.getDescription());
+	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Type                       = " + ts.getDataType());
+	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
+	ts.addToComments("Data Units                      = " + ts.getDataUnits());
+	ts.addToComments("HydroBase query period          = " + ts.getDate1() + " to " + ts.getDate2());
+	ts.addToComments("HydroBase availabe period       = " + ts.getDate1Original() + " to " + ts.getDate2Original());
+	ts.addToComments("Located in water div            = " + well.getDivision());
+	ts.addToComments("Located in county               = " + well.getCounty());
+	ts.addToComments("Latitude, Longitude             = " + well.getLatitude() + ", " + well.getLongitude());
+}
+
 public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.setProperty("wdid", (struct.getWdid() == null) ? null : new Integer(struct.getWdid()));
@@ -1906,7 +1890,34 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 	ts.setProperty("top_perforated_casing", (new Integer(well.getTopPerforatedCasing()) == null) ? null : new Integer(well.getTopPerforatedCasing()));
 	ts.setProperty("bottom_perforated_casing", (new Integer(well.getBottomPerforatedCasing()) == null) ? null : new Integer(well.getBottomPerforatedCasing()));
 	ts.setProperty("base_of_grout", (new Integer(well.getBaseOfGrout()) == null) ? null : new Integer(well.getBaseOfGrout()));
-	
+	ts.setProperty("wdid", (well.getWdid() == null) ? null : well.getWdid());
+	ts.setProperty("location_number", (well.getLocationNumber() == null) ? null : well.getLocationNumber());
+	ts.setProperty("usgs_site_id", (well.getUsgsSiteId() == null) ? null : well.getUsgsSiteId());
+	ts.setProperty("contact", (well.getContact() == null) ? null : well.getContact());
+	ts.setProperty("division", (new Integer(well.getDivision()) == null) ? null : well.getDivision());
+	ts.setProperty("water_district", (new Integer(well.getWaterDistrict()) == null) ? null : well.getWaterDistrict());
+	ts.setProperty("county", (well.getCounty()== null) ? null : well.getCounty());
+	ts.setProperty("designated_basin", (well.getDesignatedBasin() == null) ? null : well.getDesignatedBasin());
+	ts.setProperty("management_district", (well.getManagementDistrict() == null) ? null : well.getManagementDistrict());
+	ts.setProperty("q10", (well.getQ10() == null) ? null : well.getQ10());
+	ts.setProperty("q40", (well.getQ40() == null) ? null : well.getQ40());
+	ts.setProperty("q160", (well.getQ160() == null) ? null : well.getQ160());
+	ts.setProperty("section", (well.getSection() == null) ? null : well.getSection());
+	ts.setProperty("township", (well.getTownship() == null) ? null : well.getTownship());
+	ts.setProperty("range", (well.getRange() == null) ? null : well.getRange());
+	ts.setProperty("pm", (well.getPm() == null) ? null : well.getPm());
+	ts.setProperty("coordiantes_ew", (new Integer(well.getCoordinatesEw()) == null) ? null : well.getCoordinatesEw());
+	ts.setProperty("coordiantes_ew_dir", (well.getCoordinatesEwDir() == null) ? null : well.getCoordinatesEwDir());
+	ts.setProperty("coordinates_ns", (new Integer(well.getCoordinatesNs()) == null) ? null : new Integer(well.getCoordinatesNs()));
+	ts.setProperty("coordinates_ns_dir", (well.getCoordinatesNsDir() == null) ? null : well.getCoordinatesNsDir());
+	ts.setProperty("utmX", (new Double(well.getUtmX()) == null) ? null : new Double(well.getUtmX()));
+	ts.setProperty("utmY", (new Double(well.getUtmY()) == null) ? null : new Double(well.getUtmY()));
+	ts.setProperty("latitude", (new Double(well.getLatitude()) == null) ? null : new Double(well.getLatitude()));
+	ts.setProperty("longitude", (new Double(well.getLongitude()) == null) ? null : new Double(well.getLongitude()));
+	ts.setProperty("location_accuracy", (well.getLocationAccuracy() == null) ? null : well.getLocationAccuracy());
+	ts.setProperty("data_source", (well.getDataSource() == null) ? null : well.getDataSource());
+	ts.setProperty("modified", (well.getModified() == null) ? null : well.getModified());
+	ts.setProperty("more_information", (well.getMoreInformation() == null) ? null : well.getMoreInformation());
 }
 
 /**

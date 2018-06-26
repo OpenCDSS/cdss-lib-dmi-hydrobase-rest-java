@@ -164,9 +164,13 @@ public class WaterLevelsWellMeasurement {
 		return modified;
 	}
 	public void setModified(String modified) {
-		int indexOf = modified.lastIndexOf("-");
-		modified = modified.substring(0, indexOf);
-		this.modified = LocalDateTime.parse(modified);
+		if(modified != null){
+			int indexOf = modified.lastIndexOf("-");
+			modified = modified.substring(0, indexOf);
+			this.modified = LocalDateTime.parse(modified);
+		}else{
+			this.modified = null;
+		}
 	}
 	
 	public int getYear(){
