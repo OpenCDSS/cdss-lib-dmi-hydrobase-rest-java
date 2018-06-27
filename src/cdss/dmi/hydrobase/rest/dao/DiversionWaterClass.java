@@ -303,7 +303,7 @@ public class DiversionWaterClass {
 	}
 
 	public void setPorStart(String porStart) {
-		this.porStart = LocalDateTime.parse(porStart);
+		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
 	}
 
 	public String getAvailableTimesteps() {
@@ -319,7 +319,7 @@ public class DiversionWaterClass {
 	}
 
 	public void setPorEnd(String porEnd) {
-		this.porEnd = LocalDateTime.parse(porEnd);
+		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
 	}
 
 	public LocalDateTime getPorLastModified() {
@@ -327,7 +327,7 @@ public class DiversionWaterClass {
 	}
 
 	public void setPorLastModified(String porLastModified) {
-		this.porLastModified = LocalDateTime.parse(porLastModified);
+		this.porLastModified = (porLastModified == null) ? null : LocalDateTime.parse(porLastModified);
 	}
 
 	public int getDivision() {

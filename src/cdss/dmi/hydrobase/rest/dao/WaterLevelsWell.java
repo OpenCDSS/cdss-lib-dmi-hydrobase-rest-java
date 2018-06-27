@@ -426,7 +426,7 @@ public class WaterLevelsWell {
 		return modified;
 	}
 	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
 	}
 	public String getMoreInformation() {
 		return moreInformation;
