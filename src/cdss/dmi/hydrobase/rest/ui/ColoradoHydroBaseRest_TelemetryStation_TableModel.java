@@ -240,7 +240,7 @@ public Object getValueAt(int row, int col)
 		case COL_ID: return tsds.getWdid();
 		case COL_ABBREV: return tsds.getAbbrev();
 		case COL_NAME: return tsds.getStationName();
-		case COL_DATA_SOURCE: return "DWR";
+		case COL_DATA_SOURCE: return tsds.getDataSource();
 		case COL_DATA_TYPE: return tsds.getParameter();
 		//case COL_TIME_STEP: return
 		//case COL_UNITS: return

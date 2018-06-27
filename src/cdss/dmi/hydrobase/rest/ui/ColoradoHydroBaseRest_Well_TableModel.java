@@ -10,6 +10,8 @@ import RTi.DMI.DMIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.String.StringUtil;
+import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
+import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 
 /**
 This class is a table model for time series header information for HydroBase well time series that are not stored
@@ -232,122 +234,38 @@ From AbstractTableModel.  Returns the data that should be placed in the JTable a
 */
 public Object getValueAt(int row, int col)
 {	
-	return null;
 	// If sorted, get the position in the data from the displayed row.
-	/*if (_sortOrder != null) {
+	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
 
-	int i; // Use for integer data.
-	double d; // Use for double data
+	WaterLevelsWell well = (WaterLevelsWell) _data.get(row);
 
-	HydroBase_GroundWaterWellsView wv = (HydroBase_GroundWaterWellsView) _data.get(row);
-
-	switch (col) {
+	switch(col){
 		// case 0 handled above.
-		case COL_ID:		
-			if ( wv.getIdentifier().length() > 0 ) {
-				// Well with a different identifier to display.
-				return
-				wv.getIdentifier();
-			}
-			else {
-			    // A structure other than wells...
-				return HydroBase_WaterDistrict.formWDID (__wdid_length, wv.getWD(), wv.getID() );
-			}
-		case COL_NAME: return wv.getWell_name();
-		case COL_DATA_SOURCE: return wv.getData_source();
-		case COL_DATA_TYPE:
-		    // TSTool translates to values from the TSTool interface...
-			return "WellLevel";
-		case COL_TIME_STEP:
-		    // TSTool translates HydroBase values to nicer values...
-			return wv.getTime_step();
-		case COL_UNITS:
-		    // The units are not in HydroBase.meas_type but are set by TSTool...
-			return wv.getData_units();
-		case COL_START:
-		    //return new Integer(wv.getStart_year() );
-			i = wv.getStart_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_END:
-		    //return new Integer (wv.getEnd_year() );
-			i = wv.getEnd_year();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_MEAS_COUNT:
-		    i = wv.getMeas_count();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIV:
-		    //return new Integer ( wv.getDiv() );
-			i = wv.getDiv();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_DIST:
-		    //return new Integer ( wv.getWD() );
-			i = wv.getWD();
-			if ( DMIUtil.isMissing(i) ) {
-				return "";
-			}
-			else {
-			    return "" + i;
-			}
-		case COL_COUNTY: return wv.getCounty();
-		case COL_STATE: return wv.getST();
-		case COL_HUC: return wv.getHUC();
-        case COL_LONG:
-            d = wv.getLongdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_LAT:
-            d = wv.getLatdecdeg();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.6f");
-            }
-        case COL_UTM_X:
-            d = wv.getUtm_x();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
-        case COL_UTM_Y:
-            d = wv.getUtm_y();
-            if ( DMIUtil.isMissing(d) ) {
-                return "";
-            }
-            else {
-                return "" + StringUtil.formatString(d,"%.3f");
-            }
+		case COL_ID: return well.getWellId();
+		case COL_NAME: return well.getWellName();
+		case COL_DATA_SOURCE: return well.getDataSource();
+		//case COL_DATA_TYPE: return
+		//case COL_TIME_STEP: return
+		//case COL_UNITS: return 
+		case COL_START: return well.getPorStart().getYear();
+		case COL_END: return well.getPorEnd().getYear();
+		//case COL_MEAS_COUNT: return
+		case COL_DIV: return well.getDivision();
+		case COL_DIST: return well.getWaterDistrict();
+		case COL_COUNTY: return well.getCounty();
+		//case COL_STATE: return
+		//case COL_HUC: return
+		case COL_LONG: return well.getLongitude();
+		case COL_LAT: return well.getLatitude();
+		case COL_UTM_X: return well.getUtmX();
+    	case COL_UTM_Y: return well.getUtmY();
+		//case COL_STR_TYPE: return
+		//case COL_STRTYPE: return
 		case COL_INPUT_TYPE: return __inputType;
 		default: return "";
-	}*/
+	}
 }
 
 /**

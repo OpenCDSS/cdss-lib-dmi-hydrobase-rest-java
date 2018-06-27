@@ -257,7 +257,7 @@ public Object getValueAt(int row, int col)
 		// case 0 handled above.
 		case COL_ID: return divWC.getWdid();
 		case COL_NAME: return divWC.getStructureName();
-		case COL_DATA_SOURCE: return "DWR";
+		case COL_DATA_SOURCE: return divWC.getSourceDescr();
 		case COL_DATA_TYPE: return divWC.getDivrectype();
 		//case COL_TIME_STEP: return
 		//case COL_UNITS: return 
