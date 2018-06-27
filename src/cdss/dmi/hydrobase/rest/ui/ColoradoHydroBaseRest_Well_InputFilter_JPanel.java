@@ -114,7 +114,7 @@ throws Exception
 	}
 	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict",
 		StringUtil.TYPE_STRING, districtList, districtInternalList, false );
-	filter.setTokenInfo("-",0);
+	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
 
 	// Water division
@@ -127,7 +127,7 @@ throws Exception
 	}
 	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision",
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
-	filter.setTokenInfo("-",0);
+	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
 	
     input_filters.add ( new InputFilter ( "Well ID", "wellId", "wellId",

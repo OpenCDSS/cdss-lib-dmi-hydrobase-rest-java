@@ -76,7 +76,7 @@ throws Exception
 	input_filters.add ( filter );
 	
 	// Latitude
-	input_filters.add ( new InputFilter ( "Latitude", "latitude", "latitude",
+	/*input_filters.add ( new InputFilter ( "Latitude", "latitude", "latitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Longitude
@@ -93,7 +93,7 @@ throws Exception
 	radiusUnitsChoices.add("feet");
 	radiusUnitsChoices.add("miles");
 	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units",
-		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
+		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );*/
 
 	// Water district
 	List<ReferenceTablesWaterDistrict> districtDataList = datastore.getWaterDistricts();
