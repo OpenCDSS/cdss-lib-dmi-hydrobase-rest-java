@@ -726,6 +726,98 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 	return divisionList;
 }
 
+public List<WaterLevelsWell> getWells(List<String[]> listOfTriplets){
+	ObjectMapper mapper = new ObjectMapper();
+	List<WaterLevelsWell> waterclasses = new ArrayList<>();
+	// Create request string
+	JsonNode wellsNode = getJsonNodeResultsFromURLString(getWellRequestString(listOfTriplets));
+	
+	try{
+		for(int i = 0; i < wellsNode.size(); i++){
+			WaterLevelsWell well = mapper.treeToValue(wellsNode.get(i), WaterLevelsWell.class);
+			waterclasses.add(well);
+		}
+	} catch (JsonProcessingException e) {
+		// TODO @jurentie 06/26/2018 - Deal with catch
+		e.printStackTrace();
+	}
+	
+	return waterclasses;
+}
+
+public String getWellRequestString(List<String[]> listOfTriplets){
+	String wellRequestString = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json";
+	// Step through all Triplets
+	for(int i = 0; i < listOfTriplets.size(); i++){
+		// Assign variables based off triplet
+		String[] triplet = listOfTriplets.get(i);
+		String argumentKey = triplet[0];
+		String operator = triplet[1];
+		String value = triplet[2];
+		System.out.println("argkey: " + argumentKey.toUpperCase() + ", op: " + operator + ", val: " + value);
+		// Determine what to append to request string for specifiers
+		switch (argumentKey.toUpperCase()){
+			case "COUNTY":  
+						wellRequestString += "&county=" + getRequestStringHelperMatches(operator, value);
+						break;
+			case "DESIGNATEDBASIN":
+						wellRequestString += "&designatedBasin=" + getRequestStringHelperMatches(operator, value);
+						break;
+			case "LATITUDE":
+						wellRequestString += "&latitude=" + value;
+						break;
+			case "LONGITUDE":
+						wellRequestString += "&longitude=" + value;
+						break;
+			case "LATLONGRADIUS":
+						wellRequestString += "&radius=" + value;
+						break;
+			case "LATLONGRADIUSUNITS":
+						wellRequestString += "&units=" + value;
+						break;
+			case "MANAGEMENTDISTRICT":
+						wellRequestString += "&managementDistrict=" + getRequestStringHelperMatches(operator, value);
+						break;
+			case "PUBLICATION NAME":
+						wellRequestString += "&publicationName=" + getRequestStringHelperMatches(operator, value);
+						break;
+			case "WATERDISTRICT":
+						switch (operator.toUpperCase()){
+							case "ET":
+								wellRequestString += "&waterDistrict=" + value;
+								break;
+							case "LT":
+								wellRequestString += "&max-waterDistrict=" + value;
+								break;
+							case "GT":
+								wellRequestString += "&min-waterDistrict=" + value;
+								break;
+						}
+						break;
+			case "WATERDIVISION":
+						switch (operator.toUpperCase()){
+							case "ET":
+								wellRequestString += "&division=" + value;
+								break;
+							case "LT": 
+								wellRequestString += "&max-division" + value;
+								break;
+							case "GT":
+								wellRequestString += "&min-division" + value;
+								break;
+						}
+						break;
+			case "WELLID":
+						wellRequestString += "&wellId=" + value;
+						break;
+		}
+	}
+	if(apiKey != null){
+		wellRequestString += "&apiKey=" + apiKey;
+	}
+	return wellRequestString;
+}
+
 // TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
 // but go with Station for now.
 /**
@@ -736,9 +828,27 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
  * @return
  */
 public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
-	List<WaterLevelsWell> wellList = new ArrayList<WaterLevelsWell>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest well time series list");
-	return wellList;
+	List<WaterLevelsWell> wellsList = new ArrayList<>();
+	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
+	InputFilter filter = null;
+	int nfg = filterPanel.getNumFilterGroups();
+	List<String[]> listOfTriplets = new ArrayList<String[]>();
+	try{
+		for(int ifg = 0; ifg < nfg; ifg++){
+			filter = filterPanel.getInputFilter(ifg);
+			String op = filterPanel.getOperator(ifg);
+			String[] triplet = getSPFlexParametersTriplet(filter, op);
+			if(triplet != null){
+				listOfTriplets.add(triplet);
+			}
+		}
+	}
+	catch (Exception e) {
+		// TODO @jurentie 06/26/2018 - Fix catch
+		e.printStackTrace();
+	}
+	wellsList = getWells(listOfTriplets);
+	return wellsList;
 }
 
 
