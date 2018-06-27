@@ -1,12 +1,13 @@
 package cdss.dmi.hydrobase.rest;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -126,9 +127,13 @@ throws IOException, Exception
 }
 
 /**
-Determine the web service API version.
-Will have to edit how version is retrieved from parsing URL - @jurentie
-*/
+ * Determine the web service API version. This will set 
+ * __apiVersion to be the integer of the API service version number 
+ * found at the end of the service request URI. 
+ * For example: 
+ * https://dnrweb.state.co.us/DWR/DwrApiService/api/v2 
+ * will return 2.
+ */
 private void determineAPIVersion()
 {   
 	String routine = "ColoradoHydroBaseRestDataStore.determineAPIVersion";
@@ -193,7 +198,7 @@ public List<String> getDataIntervalStringsForDataType ( String dataType )
  * @return ResultList JsonNode from DWR REST API request
  */
 public JsonNode getJsonNodeResultsFromURLString(String url){
-	
+	String routine = "ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString";
 	ObjectMapper mapper = new ObjectMapper();
 	JsonNode results = null;
 	
@@ -202,13 +207,44 @@ public JsonNode getJsonNodeResultsFromURLString(String url){
 		JsonNode divrecRootNode = mapper.readTree(request);
 		results = divrecRootNode.path("ResultList");
 	}
-	//TODO @jurentie 06/22/2018 work out what these catch cases should return
-	//catch (URL e) { e.printStackTrace(); }
-	catch (JsonParseException e ) { e.printStackTrace(); }
-	catch (JsonMappingException e ) { e.printStackTrace(); }
-	catch (IOException e) { e.printStackTrace(); }
+	catch (JsonParseException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		e.printStackTrace(); 
+	}
+	catch (JsonMappingException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		e.printStackTrace(); 
+	}
+	catch (IOException e) { 
+		Message.printWarning(1, routine, e);
+		e.printStackTrace(); 
+	}
 	
 	return results;
+}
+
+/**
+ * Helper method for methods that generate request strings from
+ * input filter. This method takes the operator and the value and
+ * returns the appropriately formatted string to append to the 
+ * request URL.
+ * @param operator
+ * @param value
+ * @return formatted String
+ */
+private String getRequestStringHelperMatches(String operator, String value){
+	String ret = "";
+	switch (operator.toUpperCase()){
+		case "MA":  ret += value;
+					break;
+		case "SW":  ret += value + "*";
+					break;
+		case "EW":  ret += "*" + value;
+					break;
+		case "CN":  ret += "*" + value + "*";
+					break;
+	}
+	return ret;
 }
 
 /**
@@ -351,21 +387,24 @@ on this.
 
 //TODO smalers 2018-06-19 the following should return something like StationTimeSeriesCatalog
 // but go with Station for now.
+//TODO @jurentie 06/27/2018 - this method is not currently being used, but needs written if
+// it plans to be.
 /**
  * Return the list of station time series, suitable for display in TSTool browse area.
  * @param dataType
  * @param interval
  * @param filterPanel
  * @return
- * @throws Exception //TODO @jurentie work out throws exception arguments
  */
-public List<Station> getStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Station_InputFilter_JPanel filterPanel ) throws Exception {
+public List<Station> getStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Station_InputFilter_JPanel filterPanel ) {
 	List<Station> stationList = new ArrayList<Station>();
 	return stationList;
 }
 
 //TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
 //but go with Structure for now.
+//TODO @jurentie 06/27/2018 - this method is not currently being used, but needs written if
+//it plans to be.
 /**
 * Return the list of structure time series, suitable for display in TSTool browse area.
 * @param dataType
@@ -375,139 +414,16 @@ public List<Station> getStationTimeSeriesCatalog ( String dataType, String inter
 */
 public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
 	List<Structure> structureList = new ArrayList<Structure>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
 	return structureList;
 }
-	
-public List<DiversionWaterClass> getWaterClasses(String dataType, String interval, List<String[]> listOfTriplets) throws IOException{ // TODO @jurentie 06/21/18 fix exceptions!
-	ObjectMapper mapper = new ObjectMapper();
-	List<DiversionWaterClass> waterclasses = new ArrayList<>();
-	// Create request string
-	String wcRequestString = getWaterClassesRequestString(dataType, interval, listOfTriplets);
-	// Retrieve different structures from request string
-	URL wcRequestURL = new URL(wcRequestString);
-	
-	JsonNode wcRootNode = mapper.readTree(wcRequestURL);
-	JsonNode waterclassesNode = wcRootNode.get("ResultList");
-	
-	System.out.println(wcRequestString);
-	
-	for(int i = 0; i < waterclassesNode.size(); i++){
-		DiversionWaterClass waterclass = mapper.treeToValue(waterclassesNode.get(i), DiversionWaterClass.class);
-		waterclasses.add(waterclass);
-	}
-	
-	return waterclasses;
-}
 
-public String getWaterClassesRequestString(String dataType, String interval, List<String []> listOfTriplets){
-	String wcRequestString = getServiceRootURI() + "/structures/divrec/waterclasses/?format=json&divrectype=" + dataType + "&timestep=" + interval;
-	// Step through all Triplets
-	for(int i = 0; i < listOfTriplets.size(); i++){
-		// Assign variables based off triplet
-		String[] triplet = listOfTriplets.get(i);
-		String argumentKey = triplet[0];
-		String operator = triplet[1];
-		String value = triplet[2];
-		System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
-		// Determine what to append to request string for specifiers
-		switch (argumentKey.toUpperCase()){
-			case "COUNTY":  
-						wcRequestString += "&county=" + getRequestStringHelperMatches(operator, value);
-						break;
-			case "LATITUDE":
-						wcRequestString += "&latitude=" + value;
-						break;
-			case "LONGITUDE":
-						wcRequestString += "&longitude=" + value;
-						break;
-			case "LATLONG RADIUS":
-						wcRequestString += "&radius=" + value;
-						break;
-			case "LATLONG RADIUS UNITS":
-						wcRequestString += "&units=" + value;
-						break;
-			case "WATER DISTRICT":
-						switch (operator.toUpperCase()){
-							case "ET":
-								wcRequestString += "&waterDistrict=" + value;
-								break;
-							case "LT":
-								wcRequestString += "&max-waterDistrict=" + value;
-								break;
-							case "GT":
-								wcRequestString += "&min-waterDistrict=" + value;
-								break;
-						}
-						break;
-			case "WATER DIVISION":
-						switch (operator.toUpperCase()){
-							case "ET":
-								wcRequestString += "&division=" + value;
-								break;
-							case "LT": 
-								wcRequestString += "&max-division" + value;
-								break;
-							case "GT":
-								wcRequestString += "&min-division" + value;
-								break;
-						}
-						break;
-			case "STRUCTURE WDID":
-						wcRequestString = "&wdid=" + value;
-						break;
-		}
-	}
-	if(apiKey != null){
-		wcRequestString += "&apiKey=" + apiKey;
-	}
-	return wcRequestString;
-}
-
-//TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
-//but go with Structure for now.
 /**
-* Return the list of structure time series, suitable for display in TSTool browse area.
-* @param dataType
-* @param interval
-* @param filterPanel
-* @return
-* @throws Exception // TODO @jurentie 06/21/20  work out throws exceptions
-*/
-public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) throws Exception {
-	List<DiversionWaterClass> waterclassList = new ArrayList<>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
-	InputFilter filter = null;
-	int nfg = filterPanel.getNumFilterGroups();
-	List<String[]> listOfTriplets = new ArrayList<String[]>();
-	for(int ifg = 0; ifg < nfg; ifg++){
-		filter = filterPanel.getInputFilter(ifg);
-		String op = filterPanel.getOperator(ifg);
-		String[] triplet = getSPFlexParametersTriplet(filter, op);
-		if(triplet != null){
-			listOfTriplets.add(triplet);
-		}
-	}
-	waterclassList = getWaterClasses(dataType, interval, listOfTriplets);
-	return waterclassList;
-}
-
-private String getRequestStringHelperMatches(String operator, String value){
-	String ret = "";
-	switch (operator.toUpperCase()){
-		case "MA":  ret += value;
-					break;
-		case "SW":  ret += value + "*";
-					break;
-		case "EW":  ret += "*" + value;
-					break;
-		case "CN":  ret += "*" + value + "*";
-					break;
-	}
-	return ret;
-}
-
+ * Returns a list of parameters specified from
+ * api/v2/referencetables/telemetryparams
+ * @return a list of telemetry parameters
+ */
 private String[] getTelemetryDataTypesFromWebServices(){	
+	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
 	ObjectMapper mapper = new ObjectMapper();
 	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams";
 	JsonNode telemetryDataTypes = getJsonNodeResultsFromURLString(telParametersRequest);
@@ -518,14 +434,24 @@ private String[] getTelemetryDataTypesFromWebServices(){
 		try {
 			dataTypes[i] = mapper.treeToValue(telemetryDataTypes.get(i), ReferenceTablesTelemetryParams.class).getParameter();
 		} catch (JsonProcessingException e) {
-			// TODO @jurentie 06/26/2018 - Deal with catch
+			Message.printWarning(1, routine, e);
 			e.printStackTrace();
 		}
 	}
 	return dataTypes;
 }
 
-public String getTelemetryParamsRequestString(String dataType, String interval, List<String []> listOfTriplets){
+/**
+ * Based on the given dataType, interval, and input filter values
+ * will format the request string necessary for retrieving data from 
+ * web services.
+ * @param dataType - any of the data types that can be returned from 
+ * getTelemetryDataTypesFromWebServices()
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return a formatted request string for retrieving telemetry data.
+ */
+public String getTelemetryDataTypesRequestString(String dataType, List<String []> listOfTriplets){
 	// All telemetry data is assumed to be 15 minute, not searching by interval
 	String tpRequestString = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes/?format=json&parameter=" + dataType;
 	// Step through all Triplets
@@ -537,75 +463,96 @@ public String getTelemetryParamsRequestString(String dataType, String interval, 
 		String value = triplet[2];
 		System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
 		// Determine what to append to request string for specifiers
-		switch (argumentKey.toUpperCase()){
-			case "COUNTY":  
-						tpRequestString += "&county=" + getRequestStringHelperMatches(operator, value);
+		try{
+			switch (argumentKey.toUpperCase()){
+				case "COUNTY":  
+						tpRequestString += "&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
 						break;
-			case "LATITUDE":
-						tpRequestString += "&latitude=" + value;
+				case "LATITUDE":
+						tpRequestString += "&latitude=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "LONGITUDE":
-						tpRequestString += "&longitude=" + value;
+				case "LONGITUDE":
+						tpRequestString += "&longitude=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "LATLONG RADIUS":
-						tpRequestString += "&radius=" + value;
+				case "RADIUS":
+						tpRequestString += "&radius=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "LATLONG RADIUS UNITS":
-						tpRequestString += "&units=" + value;
+				case "UNITS":
+						tpRequestString += "&units=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "WATER DISTRICT":
+				case "WATERDISTRICT":
 						switch (operator.toUpperCase()){
 							case "ET":
-								tpRequestString += "&waterDistrict=" + value;
+								tpRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								tpRequestString += "&max-waterDistrict=" + value;
+								tpRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								tpRequestString += "&min-waterDistrict=" + value;
+								tpRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
-			case "WATER DIVISION":
+				case "WATERDIVISION":
 						switch (operator.toUpperCase()){
 							case "ET":
-								tpRequestString += "&division=" + value;
+								tpRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT": 
-								tpRequestString += "&max-division" + value;
+								tpRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								tpRequestString += "&min-division" + value;
+								tpRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
-			case "STRUCTURE WDID":
-						tpRequestString = "&wdid=" + value;
+				case "WDID":
+						tpRequestString += "&wdid=" + URLEncoder.encode(value, "UTF-8");
 						break;
+			}
+		}catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	if(apiKey != null){
 		tpRequestString += "&apiKey=" + apiKey;
 	}
+		
 	return tpRequestString;
+	
 }
 
-public List<TelemetryStationDataTypes> getTelemetryParams(String dataType, String interval, List<String[]> listOfTriplets) throws IOException{ // TODO @jurentie 06/21/18 fix exceptions!
+/**
+ * Using the telemetry data types request string this method gets
+ * a list of telemetryStationDataTypes from DWR web services.
+ * @param dataType - any of the data types that can be returned from 
+ * getTelemetryDataTypesFromWebServices()
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return List<TelemeteryStationDataTypes>
+ */
+public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, List<String[]> listOfTriplets) {
+	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryParams";
 	ObjectMapper mapper = new ObjectMapper();
 	List<TelemetryStationDataTypes> telemetryParams = new ArrayList<>();
 	// Create request string
-	String tdRequestString = getTelemetryParamsRequestString(dataType, interval, listOfTriplets);
-	// Retrieve different structures from request string
-	URL tdRequestURL = new URL(tdRequestString);
+	String tdRequestString = getTelemetryDataTypesRequestString(dataType, listOfTriplets);
 	
-	JsonNode wcRootNode = mapper.readTree(tdRequestURL);
-	JsonNode telemetryParamsNode = wcRootNode.get("ResultList");
+	JsonNode telemetryParamsNode = getJsonNodeResultsFromURLString(tdRequestString);
 	
 	System.out.println(tdRequestString);
+	Message.printStatus(1, routine, "Retrieve telemetry params from url request: " + tdRequestString);
 	
 	for(int i = 0; i < telemetryParamsNode.size(); i++){
-		TelemetryStationDataTypes telemetryParam = mapper.treeToValue(telemetryParamsNode.get(i), TelemetryStationDataTypes.class);
-		telemetryParams.add(telemetryParam);
+		TelemetryStationDataTypes telemetryParam;
+		try {
+			telemetryParam = mapper.treeToValue(telemetryParamsNode.get(i), TelemetryStationDataTypes.class);
+			telemetryParams.add(telemetryParam);
+		} catch (JsonProcessingException e) {
+			Message.printWarning(1, routine, e);
+			e.printStackTrace();
+		}
 	}
 	
 	return telemetryParams;
@@ -615,13 +562,16 @@ public List<TelemetryStationDataTypes> getTelemetryParams(String dataType, Strin
 // but go with Station for now.
 /**
  * Return the list of telemetry station time series, suitable for display in TSTool browse area.
- * @param dataType
- * @param interval
- * @param filterPanel
- * @return
+ * @param dataType - any of the data types that can be returned from 
+ * getTelemetryDataTypesFromWebServices()
+ * @param interval - time interval 
+ * (telemetry always comes back in 15min intervals regardless)
+ * @param filterPanel - values for filtering requested data
+ * @return List<TelemetryStationDataTypes>
  */
 // TODO @jurentie fix throw catch
 public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel filterPanel ) {
+	String routine = "ColoradoHydroBaseRestDataStore.getTelemeteryStationTimeSeriesCatalog";
 	List<TelemetryStationDataTypes> telemetryList = new ArrayList<>();
 	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest telemetry station time series list");
 	InputFilter filter = null;
@@ -637,25 +587,21 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 				listOfTriplets.add(triplet);
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			Message.printWarning(1, routine, e);
 			e.printStackTrace();
 		}
 	}
-	try {
-		telemetryList = getTelemetryParams(dataType, interval, listOfTriplets);
-	} catch (IOException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
+	telemetryList = getTelemetryDataTypes(dataType, listOfTriplets);
 	return telemetryList;
 }
 
 /**
  * Returns a list of data types that can be displayed in TSTool
+ * @param group - if true return the group label in front of the 
+ * data types, otherwise just return data types.
  */
 public List<String> getTimeSeriesDataTypes(boolean group){
 	List<String> dataTypes = new ArrayList<String>();
-	ObjectMapper mapper = new ObjectMapper();
 	if(group){
 		dataTypes.add("Structure - DivTotal");
 		dataTypes.add("Structure - RelTotal");
@@ -682,6 +628,12 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 	return dataTypes;
 }
 
+/**
+ * Return a list of time steps associated with different
+ * data types
+ * @param selectedDataType
+ * @return List<String> - list of time steps
+ */
 public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	List<String> timeSteps = new ArrayList<String>();
 	if(selectedDataType.equalsIgnoreCase("DivTotal") || 
@@ -704,6 +656,161 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	return timeSteps;
 }
 
+/**
+ * Using the string request returned from 
+ * getWaterClassesRequestString() retrieve a list
+ * of DiversionWaterClasses from web services.
+ * @param dataType - any of the data types that can be returned from 
+ * getWaterClasses()
+ * @param interval - day, month, or year
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return List<DiversionWaterClass> 
+ */
+public List<DiversionWaterClass> getWaterClasses(String dataType, String interval, List<String[]> listOfTriplets) {
+	String routine = "ColoradoHydroBaseRestDataStore.getWaterClasses";
+	ObjectMapper mapper = new ObjectMapper();
+	List<DiversionWaterClass> waterclasses = new ArrayList<>();
+
+	String request = getWaterClassesRequestString(dataType, interval, listOfTriplets);
+	JsonNode waterclassesNode = getJsonNodeResultsFromURLString(request);
+	
+	System.out.println(request);
+	Message.printStatus(1, routine, "Get water classes from URL request: " + request);
+	
+	for(int i = 0; i < waterclassesNode.size(); i++){
+		DiversionWaterClass waterclass;
+		try {
+			waterclass = mapper.treeToValue(waterclassesNode.get(i), DiversionWaterClass.class);
+			waterclasses.add(waterclass);
+		} catch (JsonProcessingException e) {
+			Message.printWarning(1, routine, e);
+			e.printStackTrace();
+		}
+	}
+	
+	return waterclasses;
+}
+
+/**
+ * Based on the given dataType, interval, and input filter values
+ * will format the request string necessary for retrieving data from 
+ * web services.
+ * @param dataType - any of the data types that can be returned from 
+ * getWaterClasses()
+ * @param interval - day, month, or year
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return a formatted request string for retrieving water class data.
+ */
+public String getWaterClassesRequestString(String dataType, String interval, List<String []> listOfTriplets){
+	String wcRequestString = getServiceRootURI() + "/structures/divrec/waterclasses/?format=json&divrectype=" + dataType + "&timestep=" + interval;
+	// Step through all Triplets
+	for(int i = 0; i < listOfTriplets.size(); i++){
+		// Assign variables based off triplet
+		String[] triplet = listOfTriplets.get(i);
+		String argumentKey = triplet[0];
+		String operator = triplet[1];
+		String value = triplet[2];
+		System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
+		// Determine what to append to request string for specifiers
+		try{
+			switch (argumentKey.toUpperCase()){
+				case "COUNTY":  
+						wcRequestString += "&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						break;
+				case "LATITUDE":
+						wcRequestString += "&latitude=" + URLEncoder.encode(value, "UTF-8");
+						break;
+				case "LONGITUDE":
+						wcRequestString += "&longitude=" + URLEncoder.encode(value, "UTF-8");
+						break;
+				case "RADIUS":
+						wcRequestString += "&radius=" + URLEncoder.encode(value, "UTF-8");
+						break;
+				case "UNITS":
+						wcRequestString += "&units=" + URLEncoder.encode(value, "UTF-8");
+						break;
+				case "WATERDISTRICT":
+						switch (operator.toUpperCase()){
+							case "EQ":
+								wcRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LT":
+								wcRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GT":
+								wcRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+						}
+						break;
+				case "WATERDIVISION":
+						switch (operator.toUpperCase()){
+							case "EQ":
+								wcRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LT": 
+								wcRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GT":
+								wcRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
+								break;
+						}
+						break;
+				case "WDID":
+						wcRequestString += "&wdid=" + URLEncoder.encode(value, "UTF-8");
+						break;
+			}
+		}catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	if(apiKey != null){
+		wcRequestString += "&apiKey=" + apiKey;
+	}
+		
+	return wcRequestString;
+}
+
+//TODO smalers 2018-06-19 the following should return something like StructureTimeSeriesCatalog
+//but go with Structure for now.
+/**
+* Return the list of structure time series, suitable for display in TSTool browse area.
+* @param dataType
+* @param interval
+* @param filterPanel
+* @return
+* @throws Exception // TODO @jurentie 06/21/20  work out throws exceptions
+*/
+public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
+	String routine = "ColoradyHydroBaseRestDataStore.getWaterClassesTimeSeriesCatalog";
+	// Create list for returned water classes
+	List<DiversionWaterClass> waterclassList = new ArrayList<>();
+	Message.printStatus(1, routine, "Getting ColoradoHydroBaseRest structure time series list");
+	// Retrieve input filters
+	InputFilter filter = null;
+	int nfg = filterPanel.getNumFilterGroups();
+	// Create a list to hold input filter data
+	List<String[]> listOfTriplets = new ArrayList<String[]>();
+	for(int ifg = 0; ifg < nfg; ifg++){
+		filter = filterPanel.getInputFilter(ifg);
+		String op = filterPanel.getOperator(ifg);
+		String[] triplet;
+		try {
+			triplet = getSPFlexParametersTriplet(filter, op);
+			if(triplet != null){
+				listOfTriplets.add(triplet);
+			}
+		} catch (Exception e) {
+			Message.printWarning(1, routine, e);
+			e.printStackTrace();
+		}
+	}
+	// Pass dataType, Interval, and listOfTriplets (input filters) to getWaterClasses
+	waterclassList = getWaterClasses(dataType, interval, listOfTriplets);
+	return waterclassList;
+}
 
 /**
  * Get list of districts from global variable
@@ -730,11 +837,13 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 }
 
 public List<WaterLevelsWell> getWells(List<String[]> listOfTriplets){
+	String routine = "ColoradoHydroBaseRestDataStore.getWells";
 	ObjectMapper mapper = new ObjectMapper();
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
 	// Create request string
 	JsonNode wellsNode = getJsonNodeResultsFromURLString(getWellRequestString(listOfTriplets));
-	
+	System.out.println(getWellRequestString(listOfTriplets));
+	Message.printStatus(1, routine, "Request Url: " + getWellRequestString(listOfTriplets));
 	try{
 		for(int i = 0; i < wellsNode.size(); i++){
 			WaterLevelsWell well = mapper.treeToValue(wellsNode.get(i), WaterLevelsWell.class);
@@ -759,60 +868,65 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 		String value = triplet[2];
 		System.out.println("argkey: " + argumentKey.toUpperCase() + ", op: " + operator + ", val: " + value);
 		// Determine what to append to request string for specifiers
+		try{
 		switch (argumentKey.toUpperCase()){
 			case "COUNTY":  
-						wellRequestString += "&county=" + getRequestStringHelperMatches(operator, value);
+						wellRequestString += "&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
 						break;
 			case "DESIGNATEDBASIN":
-						wellRequestString += "&designatedBasin=" + getRequestStringHelperMatches(operator, value);
+						wellRequestString += "&designatedBasin=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
 						break;
 			case "LATITUDE":
-						wellRequestString += "&latitude=" + value;
+						wellRequestString += "&latitude=" + URLEncoder.encode(value, "UTF-8");
 						break;
 			case "LONGITUDE":
-						wellRequestString += "&longitude=" + value;
+						wellRequestString += "&longitude=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "LATLONGRADIUS":
-						wellRequestString += "&radius=" + value;
+			case "RADIUS":
+						wellRequestString += "&radius=" + URLEncoder.encode(value, "UTF-8");
 						break;
-			case "LATLONGRADIUSUNITS":
-						wellRequestString += "&units=" + value;
+			case "UNITS":
+						wellRequestString += "&units=" + URLEncoder.encode(value, "UTF-8");
 						break;
 			case "MANAGEMENTDISTRICT":
-						wellRequestString += "&managementDistrict=" + getRequestStringHelperMatches(operator, value);
+						wellRequestString += "&managementDistrict=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
 						break;
-			case "PUBLICATION NAME":
-						wellRequestString += "&publicationName=" + getRequestStringHelperMatches(operator, value);
+			case "PUBLICATIONNAME":
+						wellRequestString += "&publicationName=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
 						break;
 			case "WATERDISTRICT":
 						switch (operator.toUpperCase()){
-							case "ET":
-								wellRequestString += "&waterDistrict=" + value;
+							case "EQ":
+								wellRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								wellRequestString += "&max-waterDistrict=" + value;
+								wellRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								wellRequestString += "&min-waterDistrict=" + value;
+								wellRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
 			case "WATERDIVISION":
 						switch (operator.toUpperCase()){
-							case "ET":
-								wellRequestString += "&division=" + value;
+							case "EQ":
+								wellRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT": 
-								wellRequestString += "&max-division" + value;
+								wellRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								wellRequestString += "&min-division" + value;
+								wellRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
 			case "WELLID":
-						wellRequestString += "&wellId=" + value;
+						wellRequestString += "&wellId=" + URLEncoder.encode(value, "UTF-8");
 						break;
+			}
+		}catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	if(apiKey != null){
@@ -1333,6 +1447,7 @@ throws MalformedURLException, Exception
 
 	if(data_type.equalsIgnoreCase("DivTotal") || data_type.equalsIgnoreCase("RelTotal") ||
 			data_type.equalsIgnoreCase("WaterClass")){
+		
 		String wdid = locid;
 		
 		// Get Structure
@@ -1371,7 +1486,17 @@ throws MalformedURLException, Exception
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 		}
-		// TODO @jurentie 06/26/2018 - Add case "WaterClass"
+		if(data_type.equalsIgnoreCase("WaterClass")){
+			// Release records - total through release
+			// locid is the WDID in this case
+			boolean divTotalReq = false;
+			boolean relTotalReq = false;
+			String waterClassReqString = "";
+								
+			// Retrieve water class num for given wdid
+			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
+			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+		}
 		
 		/* Get first and last date */
 		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
@@ -1835,26 +1960,21 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 	
 	DiversionWaterClass waterClass = null;
 	
+	//Create apiKeyString
 	String apiKey = getAPIKey();
 	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+
 	try {
-		JsonNode waterClasses = mapper.readTree(new URL(getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + wdid + apiKeyString));
-		JsonNode resultList = waterClasses.path("ResultList");
+		String request = getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + URLEncoder.encode(wdid, "UTF-8") + apiKeyString;
+		request += (divTotalReq) ? "&divrectype=DivTotal" : "";
+		request += (relTotalReq) ? "&divrectype=RelTotal" : "";
+		if(waterClassReqString != ""){
+			request += "divrectype=WaterClass" + "&wcIdentifier=" + URLEncoder.encode(waterClassReqString, "UTF-8");
+		}
+		System.out.println(request);
+		JsonNode resultList = getJsonNodeResultsFromURLString(request);
 		for(int i = 0; i < resultList.size(); i++){
-			String divrectype = resultList.get(i).get("divrectype").textValue();
-			if(divTotalReq){
-				if(("DivTotal").equalsIgnoreCase(divrectype)){
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}else if(relTotalReq){
-				if(("RelTotal").equalsIgnoreCase(divrectype)){
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}else{
-				if((waterClassReqString).equals(resultList.get(i).get("wcIdentifier").textValue())){ // TODO @jurentie Confirm with Steve - wcIdentifier
-					waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
-				}
-			}
+			waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
 		}
 	} 
 	catch (JsonParseException e ) { e.printStackTrace(); }
@@ -2063,7 +2183,7 @@ public static void main(String[] args) throws URISyntaxException{
 		date2.setMonth(04);
 		date2.setDay(19);
 		
-		chrds.readTimeSeries("wellId:8773.DWR.WaterLevelDepth.15Min~ColoradoHydroBaseRest", date1, date2, true);
+		chrds.readTimeSeries("wdid:0100501.DWR.WaterClass-S:1 F: U:Q T:3 G: To:.Day~ColoradoHydroBaseRest", date1, date2, true);
 	} catch (MalformedURLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
