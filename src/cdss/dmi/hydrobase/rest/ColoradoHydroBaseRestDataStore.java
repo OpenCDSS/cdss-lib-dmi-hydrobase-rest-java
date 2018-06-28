@@ -454,6 +454,7 @@ private String[] getTelemetryDataTypesFromWebServices(){
 public String getTelemetryDataTypesRequestString(String dataType, List<String []> listOfTriplets){
 	// All telemetry data is assumed to be 15 minute, not searching by interval
 	String tpRequestString = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes/?format=json&parameter=" + dataType;
+	int newVal;
 	// Step through all Triplets
 	for(int i = 0; i < listOfTriplets.size(); i++){
 		// Assign variables based off triplet
@@ -480,28 +481,57 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 				case "UNITS":
 						tpRequestString += "&units=" + URLEncoder.encode(value, "UTF-8");
 						break;
+				case "ABBREV":
+						tpRequestString += "&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						break;
+				case "STATIONTYPE":
+						tpRequestString += "&stationType=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						break;
+				case "USGSSTATIONID":
+						tpRequestString += "&usgsStationId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						break;
 				case "WATERDISTRICT":
 						switch (operator.toUpperCase()){
-							case "ET":
+							case "EQ":
 								tpRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								tpRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE":
 								tpRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								tpRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
 								tpRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
 				case "WATERDIVISION":
 						switch (operator.toUpperCase()){
-							case "ET":
+							case "EQ":
 								tpRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
-							case "LT": 
+							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								tpRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE": 
 								tpRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								tpRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
 								tpRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
@@ -532,7 +562,7 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
  * ['County', 'MA', 'mesa'], [argument, operator, value].
  * @return List<TelemeteryStationDataTypes>
  */
-public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, List<String[]> listOfTriplets) {
+public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, String interval, List<String[]> listOfTriplets) {
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryParams";
 	ObjectMapper mapper = new ObjectMapper();
 	List<TelemetryStationDataTypes> telemetryParams = new ArrayList<>();
@@ -548,6 +578,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, Li
 		TelemetryStationDataTypes telemetryParam;
 		try {
 			telemetryParam = mapper.treeToValue(telemetryParamsNode.get(i), TelemetryStationDataTypes.class);
+			telemetryParam.setTimeStep(interval);
 			telemetryParams.add(telemetryParam);
 		} catch (JsonProcessingException e) {
 			Message.printWarning(1, routine, e);
@@ -591,7 +622,7 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 			e.printStackTrace();
 		}
 	}
-	telemetryList = getTelemetryDataTypes(dataType, listOfTriplets);
+	telemetryList = getTelemetryDataTypes(dataType, interval, listOfTriplets);
 	return telemetryList;
 }
 
@@ -682,6 +713,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 		DiversionWaterClass waterclass;
 		try {
 			waterclass = mapper.treeToValue(waterclassesNode.get(i), DiversionWaterClass.class);
+			waterclass.setTimeStep(interval);
 			waterclasses.add(waterclass);
 		} catch (JsonProcessingException e) {
 			Message.printWarning(1, routine, e);
@@ -705,6 +737,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
  */
 public String getWaterClassesRequestString(String dataType, String interval, List<String []> listOfTriplets){
 	String wcRequestString = getServiceRootURI() + "/structures/divrec/waterclasses/?format=json&divrectype=" + dataType + "&timestep=" + interval;
+	int newVal;
 	// Step through all Triplets
 	for(int i = 0; i < listOfTriplets.size(); i++){
 		// Assign variables based off triplet
@@ -737,9 +770,19 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 								wcRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								wcRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE":
 								wcRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								wcRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
 								wcRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
@@ -749,11 +792,21 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 							case "EQ":
 								wcRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
-							case "LT": 
-								wcRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
+							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								wcRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE": 
+								wcRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								wcRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								wcRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
+								wcRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
@@ -836,7 +889,7 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 	return divisionList;
 }
 
-public List<WaterLevelsWell> getWells(List<String[]> listOfTriplets){
+public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
 	String routine = "ColoradoHydroBaseRestDataStore.getWells";
 	ObjectMapper mapper = new ObjectMapper();
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
@@ -847,6 +900,8 @@ public List<WaterLevelsWell> getWells(List<String[]> listOfTriplets){
 	try{
 		for(int i = 0; i < wellsNode.size(); i++){
 			WaterLevelsWell well = mapper.treeToValue(wellsNode.get(i), WaterLevelsWell.class);
+			well.setDataType(dataType);
+			well.setTimeStep(interval);
 			waterclasses.add(well);
 		}
 	} catch (JsonProcessingException e) {
@@ -859,6 +914,7 @@ public List<WaterLevelsWell> getWells(List<String[]> listOfTriplets){
 
 public String getWellRequestString(List<String[]> listOfTriplets){
 	String wellRequestString = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json";
+	int newVal;
 	// Step through all Triplets
 	for(int i = 0; i < listOfTriplets.size(); i++){
 		// Assign variables based off triplet
@@ -900,9 +956,19 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 								wellRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								wellRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE":
 								wellRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								wellRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
 								wellRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
@@ -912,17 +978,47 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 							case "EQ":
 								wellRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
-							case "LT": 
-								wellRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
+							case "LT":
+								newVal = new Integer(value) - 1;
+								value = Integer.toString(newVal);
+								wellRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "LE": 
+								wellRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								wellRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
+								newVal = new Integer(value) + 1;
+								value = Integer.toString(newVal);
+								wellRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
+								break;
+							case "GE":
+								wellRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 						}
 						break;
 			case "WELLID":
-						wellRequestString += "&wellId=" + URLEncoder.encode(value, "UTF-8");
-						break;
+					switch (operator.toUpperCase()){
+						case "EQ":
+							wellRequestString += "&wellId=" + URLEncoder.encode(value, "UTF-8");
+							break;
+						case "LT":
+							newVal = new Integer(value) - 1;
+							value = Integer.toString(newVal);
+							wellRequestString += "&max-wellId=" + URLEncoder.encode(value, "UTF-8");
+							break;
+						case "LE": 
+							wellRequestString += "&max-wellId=" + URLEncoder.encode(value, "UTF-8");
+							break;
+						case "GT":
+							newVal = new Integer(value) + 1;
+							value = Integer.toString(newVal);
+							wellRequestString += "&min-wellId=" + URLEncoder.encode(value, "UTF-8");
+							break;
+						case "GE":
+							wellRequestString += "&min-wellId=" + URLEncoder.encode(value, "UTF-8");
+							break;
+					}
+					break;
 			}
 		}catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
@@ -964,7 +1060,7 @@ public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String 
 		// TODO @jurentie 06/26/2018 - Fix catch
 		e.printStackTrace();
 	}
-	wellsList = getWells(listOfTriplets);
+	wellsList = getWells(dataType, interval, listOfTriplets);
 	return wellsList;
 }
 
