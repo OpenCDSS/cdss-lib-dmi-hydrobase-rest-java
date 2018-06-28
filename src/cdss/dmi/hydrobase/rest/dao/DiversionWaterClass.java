@@ -105,6 +105,16 @@ public class DiversionWaterClass {
 	
 	/* Available Timesteps */
 	private String availableTimesteps;
+	
+	private String timeStep;
+
+	public String getTimeStep() {
+		return timeStep;
+	}
+
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
 
 	public String getDivrectype() {
 		return divrectype;

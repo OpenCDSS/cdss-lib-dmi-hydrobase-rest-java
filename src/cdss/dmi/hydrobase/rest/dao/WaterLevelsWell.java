@@ -152,6 +152,22 @@ public class WaterLevelsWell {
 	/* Link to additional information */
 	private String moreInformation;
 	
+	private String timeStep;
+	
+	private String dataType;
+	
+	public String getDataType() {
+		return dataType;
+	}
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
+	public String getTimeStep() {
+		return timeStep;
+	}
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
 	public int getWellId() {
 		return wellId;
 	}

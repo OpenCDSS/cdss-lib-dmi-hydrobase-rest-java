@@ -29,6 +29,13 @@ public class TelemetryStationDataTypes {
 	private double longdecdeg;
 	private String locationAccuracy;
 	private LocalDateTime modified;
+	private String timeStep;
+	public String getTimeStep() {
+		return timeStep;
+	}
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
 	public int getDivision() {
 		return division;
 	}
