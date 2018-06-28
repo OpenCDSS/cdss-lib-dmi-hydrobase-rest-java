@@ -19,7 +19,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import riverside.datastore.AbstractWebServiceDataStore;
 
 import RTi.TS.TS;
+import RTi.TS.TSData;
 import RTi.TS.TSIdent;
+import RTi.TS.TSIterator;
 import RTi.TS.TSUtil;
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.IO.IOUtil;
@@ -36,6 +38,7 @@ import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Well_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
+import cdss.dmi.hydrobase.rest.dao.DiversionComment;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesTelemetryParams;
@@ -149,8 +152,7 @@ private void determineAPIVersion()
  * @return apiKey
  */
 private String getAPIKey(){
-	Prop apiKeyProp = this.getProperties().getProp("apiKey");
-	String apiKey = apiKeyProp.getValue();
+	String apiKey = this.getProperty("apiKey");
 	return apiKey;
 }
 
@@ -189,6 +191,26 @@ public List<String> getDataIntervalStringsForDataType ( String dataType )
     //    dataIntervalStrings.add(interval);
     //}
     return dataIntervalStrings;
+}
+
+public List<DiversionComment> getDivComments(String wdid){
+	String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
+	List<DiversionComment> divComments = new ArrayList<>();
+	ObjectMapper mapper = new ObjectMapper();
+	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid;
+	JsonNode results = getJsonNodeResultsFromURLString(request);
+	
+	for(int i = 0; i < results.size(); i++){
+		try {
+			DiversionComment divComment = mapper.treeToValue(results.get(i), DiversionComment.class);
+			divComments.add(divComment);
+		} catch (JsonProcessingException e) {
+			Message.printWarning(2, routine, e);
+			e.printStackTrace();
+		}
+	}
+	
+	return divComments;
 }
 
 /**
@@ -1666,6 +1688,8 @@ throws MalformedURLException, Exception
 			ts.setInputName ( "HydroBase annual_amt.ann_amt");
 		}
 		
+		TSIterator iterator = ts.iterator();
+		
 		// 4. Set Properties:
 		//FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
 		//ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
@@ -1743,6 +1767,52 @@ throws MalformedURLException, Exception
 					double value = divRecCurrYear.getDataValue();
 					
 					ts.setDataValue(date, value);
+				}
+			}
+
+			// Diversion Comments
+			List<DiversionComment> divComments = getDivComments(wdid);
+			TSData it;
+			for(int i = 0; i < divComments.size(); i++){
+				DiversionComment divComment = divComments.get(i);
+				int irrYear = divComment.getIrrYear();
+				if(irrYear >= ts.getDate1().getYear() &&
+						irrYear <= ts.getDate2().getYear()){
+					DateTime start;
+					DateTime end;
+					if(interval_base == TimeInterval.DAY){
+						start = new DateTime(DateTime.PRECISION_DAY);
+						start.setYear(irrYear);
+						start.setMonth(11);
+						start.setDay(01);
+						end = new DateTime(DateTime.PRECISION_DAY);
+						end.setYear(irrYear + 1);
+						end.setMonth(10);
+						end.setDay(30);
+						iterator.setBeginTime(start);
+						iterator.setEndTime(end);
+						while(iterator.hasNext()){
+							it = iterator.next();
+							if(ts.isDataMissing(it.getDataValue())){
+								ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+							}
+						}
+					}
+					if(interval_base == TimeInterval.MONTH){
+						start = new DateTime(DateTime.PRECISION_MONTH);
+						start.setYear(irrYear);
+						start.setMonth(11);
+						end = new DateTime(DateTime.PRECISION_MONTH);
+						end.setYear(irrYear);
+						end.setMonth(10);
+						
+					}
+					if(interval_base == TimeInterval.YEAR){
+						start = new DateTime(DateTime.PRECISION_YEAR);
+						start.setYear(irrYear);
+						end = new DateTime(DateTime.PRECISION_YEAR);
+						end.setYear(irrYear);
+					}
 				}
 			}
 		}
@@ -2085,7 +2155,7 @@ public static void setCommentsStructure ( TS ts, Structure struct )
 	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
 	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
 	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Source                     = DWR");
 	ts.addToComments("Data Type                       = " + ts.getDataType());
 	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
 	ts.addToComments("Data Units                      = " + ts.getDataUnits());
@@ -2101,7 +2171,7 @@ public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
 	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
 	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
 	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Source                     = " + tel.getDataSource());
 	ts.addToComments("Data Type                       = " + ts.getDataType());
 	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
 	ts.addToComments("Data Units                      = " + ts.getDataUnits());
@@ -2117,7 +2187,7 @@ public static void setCommentsWell (TS ts, WaterLevelsWell well)
 	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
 	ts.addToComments("Time Series Identifier          = " + ts.getIdentifier());
 	ts.addToComments("Description                     = " + ts.getDescription());
-	ts.addToComments("Data Source                     = DWR REST");
+	ts.addToComments("Data Source                     = " + well.getDataSource());
 	ts.addToComments("Data Type                       = " + ts.getDataType());
 	ts.addToComments("Data Interval                   = " + ts.getIdentifier().getInterval());
 	ts.addToComments("Data Units                      = " + ts.getDataUnits());
@@ -2270,16 +2340,16 @@ public static void main(String[] args) throws URISyntaxException{
 		chrds.getStructures(filters);*/
 		
 		DateTime date1 = new DateTime(DateTime.PRECISION_DAY);
-		date1.setYear(1978);
-		date1.setMonth(07);
-		date1.setDay(06);
+		date1.setYear(2001);
+		date1.setMonth(04);
+		date1.setDay(10);
 		
 		DateTime date2 = new DateTime(DateTime.PRECISION_DAY);
-		date2.setYear(1979);
-		date2.setMonth(04);
-		date2.setDay(19);
+		date2.setYear(2005);
+		date2.setMonth(12);
+		date2.setDay(14);
 		
-		chrds.readTimeSeries("wdid:0100501.DWR.WaterClass-S:1 F: U:Q T:3 G: To:.Day~ColoradoHydroBaseRest", date1, date2, true);
+		chrds.readTimeSeries("wdid:0300915.DWR.DivTotal.Day~ColoradoHydroBaseRest", date1, date2, true);
 	} catch (MalformedURLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
