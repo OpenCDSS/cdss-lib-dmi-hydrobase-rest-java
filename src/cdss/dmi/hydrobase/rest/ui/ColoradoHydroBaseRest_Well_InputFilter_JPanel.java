@@ -131,7 +131,7 @@ throws Exception
 	input_filters.add ( filter );
 	
     input_filters.add ( new InputFilter ( "Well ID", "wellId", "wellId",
-        StringUtil.TYPE_STRING, null, null, true ) );
+        StringUtil.TYPE_INTEGER, null, null, true ) );
 
 	if ( numFilterGroups < 0 ) {
 		// Set number of filter groups to 4 so that latitude, longitude, radius, and units can be specified
