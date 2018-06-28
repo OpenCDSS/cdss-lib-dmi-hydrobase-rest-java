@@ -246,16 +246,16 @@ public Object getValueAt(int row, int col)
 		case COL_ID: return well.getWellId();
 		case COL_NAME: return well.getWellName();
 		case COL_DATA_SOURCE: return well.getDataSource();
-		//case COL_DATA_TYPE: return
-		//case COL_TIME_STEP: return
-		//case COL_UNITS: return 
+		case COL_DATA_TYPE: return well.getDataType();
+		case COL_TIME_STEP: return well.getTimeStep();
+		case COL_UNITS: return "FT";
 		case COL_START: return well.getPorStart().getYear();
 		case COL_END: return well.getPorEnd().getYear();
-		//case COL_MEAS_COUNT: return
+		case COL_MEAS_COUNT: return well.getPorCount();
 		case COL_DIV: return well.getDivision();
 		case COL_DIST: return well.getWaterDistrict();
 		case COL_COUNTY: return well.getCounty();
-		//case COL_STATE: return
+		case COL_STATE: return "CO";
 		//case COL_HUC: return
 		case COL_LONG: return well.getLongitude();
 		case COL_LAT: return well.getLatitude();

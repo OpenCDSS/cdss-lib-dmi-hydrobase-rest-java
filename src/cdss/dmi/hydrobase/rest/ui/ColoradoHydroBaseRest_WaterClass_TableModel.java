@@ -52,6 +52,8 @@ with other State-related data, such as ColoradoWaterSMS).
 */
 private String __inputType = "HydroBase";
 
+private String __timeStep = null;
+
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
 The input type defaults to "HydroBase".
@@ -257,9 +259,9 @@ public Object getValueAt(int row, int col)
 		// case 0 handled above.
 		case COL_ID: return divWC.getWdid();
 		case COL_NAME: return divWC.getStructureName();
-		case COL_DATA_SOURCE: return divWC.getSourceDescr();
+		case COL_DATA_SOURCE: return "DWR";
 		case COL_DATA_TYPE: return divWC.getDivrectype();
-		//case COL_TIME_STEP: return
+		case COL_TIME_STEP: return divWC.getTimeStep();
 		//case COL_UNITS: return 
 		case COL_START: return divWC.getPorStart().getYear();
 		case COL_END: return divWC.getPorEnd().getYear();
@@ -267,7 +269,7 @@ public Object getValueAt(int row, int col)
 		case COL_DIV: return divWC.getDivision();
 		case COL_DIST: return divWC.getWaterDistrict();
 		case COL_COUNTY: return divWC.getCounty();
-		//case COL_STATE: return
+		case COL_STATE: return "CO";
 		//case COL_HUC: return
 		//case COL_LONG: return
 		//case COL_LAT: return
@@ -288,6 +290,14 @@ multiple purposes.
 public void setInputType ( String inputType )
 {
     __inputType = inputType;
+}
+
+/**
+Sets the alternate time step to display, rather than the one read from the
+database.
+*/
+public void setTimeStep(String timeStep) {
+	__timeStep = timeStep;
 }
 
 /**

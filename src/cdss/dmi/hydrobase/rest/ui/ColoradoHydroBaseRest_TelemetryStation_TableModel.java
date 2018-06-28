@@ -242,7 +242,7 @@ public Object getValueAt(int row, int col)
 		case COL_NAME: return tsds.getStationName();
 		case COL_DATA_SOURCE: return tsds.getDataSource();
 		case COL_DATA_TYPE: return tsds.getParameter();
-		//case COL_TIME_STEP: return
+		case COL_TIME_STEP: return tsds.getTimeStep();
 		//case COL_UNITS: return
 		//case COL_START:
 		//case COL_END:
@@ -250,7 +250,7 @@ public Object getValueAt(int row, int col)
 		case COL_DIV: return tsds.getDivision();
 		case COL_DIST: return tsds.getWaterDistrict();
 		case COL_COUNTY: return tsds.getCounty();
-		//case COL_STATE: return 
+		case COL_STATE: return "CO";
 		case COL_HUC: return tsds.getHuc10();
 		case COL_LONG: return tsds.getLongdecdeg();
 		case COL_LAT: return tsds.getLatdecdeg();
