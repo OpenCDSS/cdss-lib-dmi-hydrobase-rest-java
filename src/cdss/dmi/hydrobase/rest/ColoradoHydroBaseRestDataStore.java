@@ -198,15 +198,14 @@ public List<DiversionComment> getDivComments(String wdid){
 	List<DiversionComment> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
 	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid;
-	JsonNode results = getJsonNodeResultsFromURLString(request);
-	
-	for(int i = 0; i < results.size(); i++){
-		try {
+	try{
+		JsonNode results = getJsonNodeResultsFromURLString(request);
+		for(int i = 0; i < results.size(); i++){
 			DiversionComment divComment = mapper.treeToValue(results.get(i), DiversionComment.class);
 			divComments.add(divComment);
-		} catch (JsonProcessingException e) {
-			return null;
 		}
+	}catch(Exception e){
+		return null;
 	}
 	
 	return divComments;
