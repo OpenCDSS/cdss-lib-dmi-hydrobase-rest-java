@@ -17,34 +17,35 @@ public class ColoradoHydroBaseRest_TelemetryStation_TableModel<T> extends JWorks
 /**
 Number of columns in the table model, including the row number.
 */
-private final int __COLUMNS = 20;
+private final int __COLUMNS = 21;
 
 public final int COL_ID = 0;
 public final int COL_ABBREV = 1;
 public final int COL_NAME = 2;
-public final int COL_DATA_SOURCE = 3;
-public final int COL_DATA_TYPE = 4;
-public final int COL_TIME_STEP = 5;
-public final int COL_UNITS = 6;
-public final int COL_START = 7;
-public final int COL_END = 8;
-public final int COL_MEAS_COUNT = 9;
-public final int COL_DIV = 10;
-public final int COL_DIST = 11;
-public final int COL_COUNTY = 12;
-public final int COL_STATE = 13;
-public final int COL_HUC = 14;
-public final int COL_LONG = 15;
-public final int COL_LAT = 16;
-public final int COL_UTM_X = 17;
-public final int COL_UTM_Y = 18;
-public final int COL_INPUT_TYPE = 19;
+public final int COL_DATA_SOURCE_NAME = 3;
+public final int COL_DATA_SOURCE = 4;
+public final int COL_DATA_TYPE = 5;
+public final int COL_TIME_STEP = 6;
+public final int COL_UNITS = 7;
+public final int COL_START = 8;
+public final int COL_END = 9;
+public final int COL_MEAS_COUNT = 10;
+public final int COL_DIV = 11;
+public final int COL_DIST = 12;
+public final int COL_COUNTY = 13;
+public final int COL_STATE = 14;
+public final int COL_HUC = 15;
+public final int COL_LONG = 16;
+public final int COL_LAT = 17;
+public final int COL_UTM_X = 18;
+public final int COL_UTM_Y = 19;
+public final int COL_INPUT_TYPE = 20;
 
 /**
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
 with other State-related data, such as ColoradoWaterSMS).
 */
-private String __inputType = "HydroBase";
+private String __inputType = "ColoradoHydroBaseRest";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -118,6 +119,7 @@ public String getColumnName(int columnIndex) {
 		case COL_ID: return "ID";
 		case COL_ABBREV: return "CO Abbrev.";
 		case COL_NAME: return "Name/Description";
+		case COL_DATA_SOURCE_NAME: return "Data Source Name";
 		case COL_DATA_SOURCE: return "Data Source";
 		case COL_DATA_TYPE: return "Data Type";
 		case COL_TIME_STEP: return "Time Step";
@@ -149,7 +151,8 @@ public String[] getColumnToolTips() {
     tips[COL_ABBREV] =
         "Station abbreviation used with Satellite Monitoring System (River3+Place3+State2, like \"PLAKERCO\").";
     tips[COL_NAME] = "Station name";
-    tips[COL_DATA_SOURCE] = "Organization/agency abbreviation";
+    tips[COL_DATA_SOURCE_NAME] = "Organization/agency abbreviation";
+    tips[COL_DATA_SOURCE] = "Ogranization/agency";
     tips[COL_DATA_TYPE] = "Data type";
     tips[COL_TIME_STEP] = "Time step";
     tips[COL_UNITS] = "Data units";
@@ -178,6 +181,7 @@ public int[] getColumnWidths() {
     widths[COL_ID] = 12;
     widths[COL_ABBREV] = 7;
     widths[COL_NAME] = 20;
+    widths[COL_DATA_SOURCE_NAME] = 10;
     widths[COL_DATA_SOURCE] = 10;
     widths[COL_DATA_TYPE] = 15;
     widths[COL_TIME_STEP] = 8;
@@ -240,7 +244,8 @@ public Object getValueAt(int row, int col)
 		case COL_ID: return tsds.getWdid();
 		case COL_ABBREV: return tsds.getAbbrev();
 		case COL_NAME: return tsds.getStationName();
-		case COL_DATA_SOURCE: return tsds.getDataSource();
+		case COL_DATA_SOURCE_NAME: return tsds.getDataSource();
+		case COL_DATA_SOURCE: return tsds.getDataSourceAbbrev();
 		case COL_DATA_TYPE: return tsds.getParameter();
 		case COL_TIME_STEP: return tsds.getTimeStep();
 		//case COL_UNITS: return

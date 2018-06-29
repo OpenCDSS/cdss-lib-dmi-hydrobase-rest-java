@@ -50,7 +50,7 @@ private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
 with other State-related data, such as ColoradoWaterSMS).
 */
-private String __inputType = "HydroBase";
+private String __inputType = "ColoradoHydroBaseRest";
 
 private String __timeStep = null;
 
@@ -195,7 +195,7 @@ public int[] getColumnWidths() {
     widths[COL_ID] = 12;
     widths[COL_NAME] = 20;
     widths[COL_DATA_SOURCE] = 10;
-    widths[COL_DATA_TYPE] = 15;
+    widths[COL_DATA_TYPE] = 30;
     widths[COL_TIME_STEP] = 8;
     widths[COL_UNITS] = 8;
     widths[COL_START] = 10;
@@ -260,7 +260,14 @@ public Object getValueAt(int row, int col)
 		case COL_ID: return divWC.getWdid();
 		case COL_NAME: return divWC.getStructureName();
 		case COL_DATA_SOURCE: return "DWR";
-		case COL_DATA_TYPE: return divWC.getDivrectype();
+		case COL_DATA_TYPE:
+			if(divWC.getDivrectype().equalsIgnoreCase("WATERCLASS")){
+				if(hasPeriodInString(divWC.getWcIdentifier())){
+					return "'" + divWC.getDivrectype() + "-" + divWC.getWcIdentifier() + "'";
+				}
+				return divWC.getDivrectype() + "-" + divWC.getWcIdentifier();
+			}
+			return divWC.getDivrectype();
 		case COL_TIME_STEP: return divWC.getTimeStep();
 		//case COL_UNITS: return 
 		case COL_START: return divWC.getPorStart().getYear();
@@ -306,6 +313,13 @@ Set the width of WDIDs, which controls formatting of the ID column for structure
 */
 public void setWDIDLength ( int wdid_length )
 {	__wdid_length = wdid_length;
+}
+
+private boolean hasPeriodInString(String ident){
+	if(ident.indexOf('.') >= 0){
+		return true;
+	}
+	return false;
 }
 
 }

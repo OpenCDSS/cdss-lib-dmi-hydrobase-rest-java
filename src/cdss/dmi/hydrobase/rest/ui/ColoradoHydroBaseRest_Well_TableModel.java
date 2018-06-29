@@ -53,7 +53,7 @@ private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
 with other State-related data, such as ColoradoWaterSMS).
 */
-private String __inputType = "HydroBase";
+private String __inputType = "ColoradoHydroBaseRest";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -243,7 +243,7 @@ public Object getValueAt(int row, int col)
 
 	switch(col){
 		// case 0 handled above.
-		case COL_ID: return well.getWellId();
+		case COL_ID: return new Integer(well.getWellId()).toString();
 		case COL_NAME: return well.getWellName();
 		case COL_DATA_SOURCE: return well.getDataSource();
 		case COL_DATA_TYPE: return well.getDataType();
