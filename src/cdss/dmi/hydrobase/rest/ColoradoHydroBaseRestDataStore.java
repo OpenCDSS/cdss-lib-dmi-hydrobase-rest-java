@@ -205,8 +205,7 @@ public List<DiversionComment> getDivComments(String wdid){
 			DiversionComment divComment = mapper.treeToValue(results.get(i), DiversionComment.class);
 			divComments.add(divComment);
 		} catch (JsonProcessingException e) {
-			Message.printWarning(2, routine, e);
-			e.printStackTrace();
+			return null;
 		}
 	}
 	
@@ -484,7 +483,7 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 		String argumentKey = triplet[0];
 		String operator = triplet[1];
 		String value = triplet[2];
-		System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
+		//System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
 		// Determine what to append to request string for specifiers
 		try{
 			switch (argumentKey.toUpperCase()){
@@ -593,7 +592,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
 	
 	JsonNode telemetryParamsNode = getJsonNodeResultsFromURLString(tdRequestString);
 	
-	System.out.println(tdRequestString);
+	//System.out.println(tdRequestString);
 	Message.printStatus(1, routine, "Retrieve telemetry params from url request: " + tdRequestString);
 	
 	for(int i = 0; i < telemetryParamsNode.size(); i++){
@@ -728,7 +727,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 	String request = getWaterClassesRequestString(dataType, interval, listOfTriplets);
 	JsonNode waterclassesNode = getJsonNodeResultsFromURLString(request);
 	
-	System.out.println(request);
+	//System.out.println(request);
 	Message.printStatus(1, routine, "Get water classes from URL request: " + request);
 	
 	for(int i = 0; i < waterclassesNode.size(); i++){
@@ -767,7 +766,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 		String argumentKey = triplet[0];
 		String operator = triplet[1];
 		String value = triplet[2];
-		System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
+		//System.out.println("argkey: " + argumentKey + ", op: " + operator + ", val: " + value);
 		// Determine what to append to request string for specifiers
 		try{
 			switch (argumentKey.toUpperCase()){
@@ -911,13 +910,19 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 	return divisionList;
 }
 
+private String getWCIdentStringFromDataType(String dataType){
+	int indexOf = dataType.indexOf("-");
+	return (dataType.charAt(dataType.length()  - 1) == ("'").charAt(0)) ? dataType.substring(indexOf + 1, dataType.length() - 1) : 
+						dataType.substring(indexOf + 1, dataType.length());
+}
+
 public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
 	String routine = "ColoradoHydroBaseRestDataStore.getWells";
 	ObjectMapper mapper = new ObjectMapper();
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
 	// Create request string
 	JsonNode wellsNode = getJsonNodeResultsFromURLString(getWellRequestString(listOfTriplets));
-	System.out.println(getWellRequestString(listOfTriplets));
+	//System.out.println(getWellRequestString(listOfTriplets));
 	Message.printStatus(1, routine, "Request Url: " + getWellRequestString(listOfTriplets));
 	try{
 		for(int i = 0; i < wellsNode.size(); i++){
@@ -944,7 +949,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 		String argumentKey = triplet[0];
 		String operator = triplet[1];
 		String value = triplet[2];
-		System.out.println("argkey: " + argumentKey.toUpperCase() + ", op: " + operator + ", val: " + value);
+		//System.out.println("argkey: " + argumentKey.toUpperCase() + ", op: " + operator + ", val: " + value);
 		// Determine what to append to request string for specifiers
 		try{
 		switch (argumentKey.toUpperCase()){
@@ -1548,9 +1553,11 @@ throws MalformedURLException, Exception
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
 	String locid = tsident.getLocation();
 	String data_type = tsident.getType(); // TSID data type
+	String data_source = tsident.getSource();
 	
 	String apiKeyString = (this.apiKey == null) ? "" : "&apiKey=" + this.apiKey;
 	
+	String tsUnits = null;
 
 	// 2. Create time series to receive the data.
 	ts = TSUtil.newTimeSeries(tsidentString, true);
@@ -1562,9 +1569,11 @@ throws MalformedURLException, Exception
 
 	// Create ObjectMapper for Jackson 
 	ObjectMapper mapper = new ObjectMapper();
+	
+	//System.out.println(data_type);
 
 	if(data_type.equalsIgnoreCase("DivTotal") || data_type.equalsIgnoreCase("RelTotal") ||
-			data_type.equalsIgnoreCase("WaterClass")){
+			data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
 		
 		String wdid = locid;
 		
@@ -1572,7 +1581,7 @@ throws MalformedURLException, Exception
 		String structRequest = getServiceRootURI() + "/structures/?format=json&wdid=" + wdid + apiKeyString;
 		JsonNode structResult = getJsonNodeResultsFromURLString(structRequest).get(0);
 		// Log structure request for debugging properties
-		System.out.println(structRequest);
+		//System.out.println(structRequest);
 		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
 		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
 		Structure struct = mapper.treeToValue(structResult, Structure.class);
@@ -1604,12 +1613,14 @@ throws MalformedURLException, Exception
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 		}
-		if(data_type.equalsIgnoreCase("WaterClass")){
+		if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
 			// Release records - total through release
 			// locid is the WDID in this case
 			boolean divTotalReq = false;
 			boolean relTotalReq = false;
-			String waterClassReqString = "";
+			String waterClassReqString = getWCIdentStringFromDataType(data_type);
+			
+			//System.out.println("water class: " + waterClassReqString);
 								
 			// Retrieve water class num for given wdid
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
@@ -1705,19 +1716,19 @@ throws MalformedURLException, Exception
 			if(interval_base == TimeInterval.DAY){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-				System.out.println(divRecRequest);
+				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.MONTH){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-				System.out.println(divRecRequest);
+				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.YEAR){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + apiKeyString;
-				System.out.println(divRecRequest);
+				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
 			}
 			// Get JsonNode results give the request URL
@@ -1728,6 +1739,22 @@ throws MalformedURLException, Exception
 				for(int i = 0; i < results.size(); i++){
 					
 					DiversionByDay divRecCurrDay = mapper.treeToValue(results.get(i), DiversionByDay.class);
+					
+					// 1. Check to see if units have been set
+					// if not, set them.
+					String units = divRecCurrDay.getMeasUnits();
+					if(tsUnits == null){
+						tsUnits = units;
+						ts.setDataUnits(tsUnits);
+						ts.setDataUnitsOriginal(tsUnits);
+					}
+					
+					// 2. Make sure units are the same
+					if(!units.equalsIgnoreCase(tsUnits)){
+						// TODO ... automatically convert units
+						continue;
+						// TODO ... decide whether and exception should be thrown?
+					}
 					
 					// Set Date
 					DateTime date = new DateTime(DateTime.PRECISION_DAY);
@@ -1772,46 +1799,59 @@ throws MalformedURLException, Exception
 
 			// Diversion Comments
 			List<DiversionComment> divComments = getDivComments(wdid);
-			TSData it;
-			for(int i = 0; i < divComments.size(); i++){
-				DiversionComment divComment = divComments.get(i);
-				int irrYear = divComment.getIrrYear();
-				if(irrYear >= ts.getDate1().getYear() &&
-						irrYear <= ts.getDate2().getYear()){
-					DateTime start;
-					DateTime end;
-					if(interval_base == TimeInterval.DAY){
-						start = new DateTime(DateTime.PRECISION_DAY);
-						start.setYear(irrYear);
-						start.setMonth(11);
-						start.setDay(01);
-						end = new DateTime(DateTime.PRECISION_DAY);
-						end.setYear(irrYear + 1);
-						end.setMonth(10);
-						end.setDay(30);
-						iterator.setBeginTime(start);
-						iterator.setEndTime(end);
-						while(iterator.hasNext()){
-							it = iterator.next();
-							if(ts.isDataMissing(it.getDataValue())){
-								ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+			if(divComments != null){
+				TSData it;
+				for(int i = 0; i < divComments.size(); i++){
+					DiversionComment divComment = divComments.get(i);
+					int irrYear = divComment.getIrrYear();
+					if(irrYear >= ts.getDate1().getYear() &&
+							irrYear <= ts.getDate2().getYear()){
+						DateTime start;
+						DateTime end;
+						if(interval_base == TimeInterval.DAY){
+							start = new DateTime(DateTime.PRECISION_DAY);
+							start.setYear(irrYear);
+							start.setMonth(11);
+							start.setDay(01);
+							end = new DateTime(DateTime.PRECISION_DAY);
+							end.setYear(irrYear + 1);
+							end.setMonth(10);
+							end.setDay(30);
+							iterator.setBeginTime(start);
+							iterator.setEndTime(end);
+							while(iterator.hasNext()){
+								it = iterator.next();
+								if(ts.isDataMissing(it.getDataValue())){
+									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+								}
 							}
 						}
-					}
-					if(interval_base == TimeInterval.MONTH){
-						start = new DateTime(DateTime.PRECISION_MONTH);
-						start.setYear(irrYear);
-						start.setMonth(11);
-						end = new DateTime(DateTime.PRECISION_MONTH);
-						end.setYear(irrYear);
-						end.setMonth(10);
-						
-					}
-					if(interval_base == TimeInterval.YEAR){
-						start = new DateTime(DateTime.PRECISION_YEAR);
-						start.setYear(irrYear);
-						end = new DateTime(DateTime.PRECISION_YEAR);
-						end.setYear(irrYear);
+						if(interval_base == TimeInterval.MONTH){
+							start = new DateTime(DateTime.PRECISION_MONTH);
+							start.setYear(irrYear);
+							start.setMonth(11);
+							end = new DateTime(DateTime.PRECISION_MONTH);
+							end.setYear(irrYear);
+							end.setMonth(10);
+							while(iterator.hasNext()){
+								it = iterator.next();
+								if(ts.isDataMissing(it.getDataValue())){
+									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+								}
+							}
+						}
+						if(interval_base == TimeInterval.YEAR){
+							start = new DateTime(DateTime.PRECISION_YEAR);
+							start.setYear(irrYear);
+							end = new DateTime(DateTime.PRECISION_YEAR);
+							end.setYear(irrYear);
+							while(iterator.hasNext()){
+								it = iterator.next();
+								if(ts.isDataMissing(it.getDataValue())){
+									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1837,17 +1877,17 @@ throws MalformedURLException, Exception
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
 			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
-			System.out.println(telRequest);
+			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series 15 min intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_HOUR){
 			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
-			System.out.println(telRequest);
+			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series hourly intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_DAY){
 			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
-			System.out.println(telRequest);
+			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
 		}
 		
@@ -1884,7 +1924,7 @@ throws MalformedURLException, Exception
 		if(interval_base == TimeInterval.DAY){ 
 			TelemetryTimeSeries telTSDay = mapper.treeToValue(results.get(0), TelemetryTimeSeries.class);
 			firstDate = new DateTime(DateTime.PRECISION_DAY);
-			System.out.println(telTSDay);
+			//System.out.println(telTSDay);
 			firstDate.setYear(telTSDay.getYear());
 			firstDate.setMonth(telTSDay.getMonth());
 			firstDate.setDay(telTSDay.getDay());
@@ -2005,7 +2045,7 @@ throws MalformedURLException, Exception
 		String wellRequest = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid +  apiKeyString;
 		JsonNode wellResults = getJsonNodeResultsFromURLString(wellRequest).get(0);
 		
-		System.out.println(wellRequest);
+		//System.out.println(wellRequest);
 		Message.printStatus(2, routine, "Get wells from DWR REST API request url: " + wellRequest);
 		
 		WaterLevelsWell well = mapper.treeToValue(wellResults, WaterLevelsWell.class);
@@ -2054,7 +2094,7 @@ throws MalformedURLException, Exception
 		if(readData){
 			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + apiKeyString;
 			JsonNode results = getJsonNodeResultsFromURLString(wellMeasurementRequest);
-			System.out.println(wellMeasurementRequest);
+			//System.out.println(wellMeasurementRequest);
 			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
 			for(int i = 0; i < results.size(); i++){
 				WaterLevelsWellMeasurement wellMeas = mapper.treeToValue(results.get(i), WaterLevelsWellMeasurement.class);
@@ -2135,9 +2175,9 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 		request += (divTotalReq) ? "&divrectype=DivTotal" : "";
 		request += (relTotalReq) ? "&divrectype=RelTotal" : "";
 		if(waterClassReqString != ""){
-			request += "divrectype=WaterClass" + "&wcIdentifier=" + URLEncoder.encode(waterClassReqString, "UTF-8");
+			request += "&divrectype=WaterClass" + "&wcIdentifier=" + URLEncoder.encode(waterClassReqString, "UTF-8");
 		}
-		System.out.println(request);
+		//System.out.println(request);
 		JsonNode resultList = getJsonNodeResultsFromURLString(request);
 		for(int i = 0; i < resultList.size(); i++){
 			waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
@@ -2330,7 +2370,7 @@ public static void main(String[] args) throws URISyntaxException{
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-		System.out.println(chrds.getAPIVersion());
+		//System.out.println(chrds.getAPIVersion());
 		
 		/*HashMap<String, String> filters = new HashMap<>();
 		
