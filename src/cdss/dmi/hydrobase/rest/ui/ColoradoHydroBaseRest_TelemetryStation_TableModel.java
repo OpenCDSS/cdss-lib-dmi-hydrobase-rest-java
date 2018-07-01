@@ -2,6 +2,8 @@ package cdss.dmi.hydrobase.rest.ui;
 
 import java.util.List;
 
+import RTi.TS.TSIdent;
+import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
@@ -12,6 +14,7 @@ By default the sheet will contain row and column numbers.
 */
 @SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_TelemetryStation_TableModel<T> extends JWorksheet_AbstractRowTableModel<T>
+implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -22,8 +25,8 @@ private final int __COLUMNS = 21;
 public final int COL_ID = 0;
 public final int COL_ABBREV = 1;
 public final int COL_NAME = 2;
-public final int COL_DATA_SOURCE_NAME = 3;
-public final int COL_DATA_SOURCE = 4;
+public final int COL_DATA_SOURCE = 3;
+public final int COL_DATA_SOURCE_NAME = 4;
 public final int COL_DATA_TYPE = 5;
 public final int COL_TIME_STEP = 6;
 public final int COL_UNITS = 7;
@@ -152,10 +155,10 @@ public String[] getColumnToolTips() {
         "Station abbreviation used with Satellite Monitoring System (River3+Place3+State2, like \"PLAKERCO\").";
     tips[COL_NAME] = "Station name";
     tips[COL_DATA_SOURCE_NAME] = "Organization/agency abbreviation";
-    tips[COL_DATA_SOURCE] = "Ogranization/agency";
+    tips[COL_DATA_SOURCE] = "Organization/agency name";
     tips[COL_DATA_TYPE] = "Data type";
     tips[COL_TIME_STEP] = "Time step";
-    tips[COL_UNITS] = "Data units";
+    tips[COL_UNITS] = "Data units are not currently available from web services for station/parameter";
     tips[COL_START] = "Starting date/time of available data";
     tips[COL_END] = "Ending date/time of available data";
     tips[COL_MEAS_COUNT] = "Count of available measurements";
@@ -220,6 +223,41 @@ public int getRowCount() {
 	return _rows;
 }
 
+/**
+Return a TSIdent object for the specified row, used to transfer the table to valid time series identifier.
+@return the TSIdent object for the specified row.
+@exception Exception if there is an error setting the interval in the TSIdent.
+*/
+public TSIdent getTimeSeriesIdentifier(int row) {
+    TSIdent tsid = new TSIdent();
+	String locType = "abbrev:";
+    String abbrev = (String)getValueAt( row, COL_ABBREV );
+    tsid.setLocation(locType + abbrev );
+    tsid.setSource((String)getValueAt( row, COL_DATA_SOURCE));
+    tsid.setType((String)getValueAt( row, COL_DATA_TYPE));
+    try {
+    	tsid.setInterval((String)getValueAt ( row, COL_TIME_STEP));
+    }
+    catch ( Exception e ) {
+    	// Recast exception so it does not require declaring in method signature
+    	throw new RuntimeException(e);
+    }
+    // Scenario is blank
+    // Sequence number is blank
+    tsid.setInputType((String)getValueAt( row, COL_INPUT_TYPE));
+    // No input name
+    // Format a simple comment that includes the telemetry station name
+    String id = (String)getValueAt( row, COL_ID );
+    if ( (id == null) || id.isEmpty() ) {
+    	// Only include ABBREV in comment
+    	tsid.setComment(abbrev + " - " + (String)getValueAt ( row, COL_NAME));
+    }
+    else {
+    	// Also include ID in comment
+    	tsid.setComment(abbrev + " (" + id + ") - " + (String)getValueAt ( row, COL_NAME));
+    }
+    return tsid;
+}
 
 //FIXME @jurentie 06/20/2018 imports/irrelevant code
 /**

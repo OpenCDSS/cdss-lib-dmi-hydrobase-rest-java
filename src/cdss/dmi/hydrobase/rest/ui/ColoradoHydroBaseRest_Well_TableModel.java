@@ -7,6 +7,8 @@ import java.util.List;
 ///import DWR.DMI.HydroBaseDMI.HydroBase_GroundWaterWellsView;
 
 import RTi.DMI.DMIUtil;
+import RTi.TS.TSIdent;
+import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import RTi.Util.String.StringUtil;
@@ -19,7 +21,7 @@ with structures.
 By default the sheet will contain row and column numbers.
 */
 public class ColoradoHydroBaseRest_Well_TableModel
-extends JWorksheet_AbstractRowTableModel
+extends JWorksheet_AbstractRowTableModel implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -223,6 +225,34 @@ From AbstractTableMode.  Returns the number of rows of data in the table.
 */
 public int getRowCount() {
 	return _rows;
+}
+
+/**
+Return a TSIdent object for the specified row, used to transfer the table to valid time series identifier.
+@return the TSIdent object for the specified row.
+@exception Exception if there is an error setting the interval in the TSIdent.
+*/
+public TSIdent getTimeSeriesIdentifier(int row) {
+    TSIdent tsid = new TSIdent();
+	String locType = "wellid:";
+    String id = (String)getValueAt( row, COL_ID );
+    tsid.setLocation(locType + id );
+    tsid.setSource((String)getValueAt( row, COL_DATA_SOURCE));
+    tsid.setType((String)getValueAt( row, COL_DATA_TYPE));
+    try {
+    	tsid.setInterval((String)getValueAt ( row, COL_TIME_STEP));
+    }
+    catch ( Exception e ) {
+    	// Recast exception so it does not require declaring in method signature
+    	throw new RuntimeException(e);
+    }
+    // Scenario is blank
+    // Sequence number is blank
+    tsid.setInputType((String)getValueAt( row, COL_INPUT_TYPE));
+    // No input name
+    // Format a simple comment that includes the telemetry station name
+   	tsid.setComment(id + " - " + (String)getValueAt ( row, COL_NAME));
+    return tsid;
 }
 
 // FIXME @jurentie 06/20/2018 imports/irrelevant code

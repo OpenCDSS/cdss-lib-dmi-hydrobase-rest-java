@@ -2,6 +2,8 @@ package cdss.dmi.hydrobase.rest.ui;
 
 import java.util.List;
 
+import RTi.TS.TSIdent;
+import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
@@ -12,8 +14,9 @@ import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 This class is a table model for time series header information for HydroBase waterclass time series.
 By default the sheet will contain row and column numbers.
 */
+@SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_WaterClass_TableModel
-extends JWorksheet_AbstractRowTableModel
+extends JWorksheet_AbstractRowTableModel implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -44,8 +47,6 @@ public final int COL_STRTYPE = 19;
 public final int COL_WDID = 20;
 public final int COL_INPUT_TYPE = 21;
 
-private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs.
-
 /**
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
 with other State-related data, such as ColoradoWaterSMS).
@@ -67,26 +68,21 @@ when using the class to display data from the ColoradoWaterSMS database.
 public ColoradoHydroBaseRest_WaterClass_TableModel ( JWorksheet worksheet, List<DiversionWaterClass> data )
 throws Exception
 {
-    this ( worksheet, -1, data, null );
+    this ( worksheet, data, null );
 }
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
 @param worksheet the JWorksheet that displays the data from the table model.
-@param wdid_length Total length to use when formatting WDIDs.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
 @inputType input type for time series (default if null or blank is "HydroBase").  Use this, for example,
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_WaterClass_TableModel ( JWorksheet worksheet, int wdid_length, List<DiversionWaterClass> data, String inputType )
+public ColoradoHydroBaseRest_WaterClass_TableModel ( JWorksheet worksheet, List<DiversionWaterClass> data, String inputType )
 throws Exception
-{	if ( wdid_length <= 0 ) {
-		wdid_length = 7;
-    }
-    __wdid_length = wdid_length;
-	if ( data == null ) {
+{	if ( data == null ) {
 		_rows = 0;
 	}
 	else {
@@ -168,9 +164,9 @@ public String[] getColumnToolTips() {
     tips[COL_START] = "Starting date/time of available data";
     tips[COL_END] = "Ending date/time of available data";
     tips[COL_MEAS_COUNT] = "Count of available measurements";
-    tips[COL_DIV] = "Water division";
-    tips[COL_DIST] = "Water district";
-    tips[COL_COUNTY] = "County name";
+    tips[COL_DIV] = "Water division, determined from spatial location";
+    tips[COL_DIST] = "Water district, determined from spatial location";
+    tips[COL_COUNTY] = "County name, determined from spatial location";
     tips[COL_STATE] = "State abbreviation";
     tips[COL_HUC] = "Hydrologic Unit Code";
     tips[COL_LONG] = "Longitude decimal degrees";
@@ -236,6 +232,33 @@ public int getRowCount() {
 }
 
 /**
+Return a TSIdent object for the specified row, used to transfer the table to valid time series identifier.
+@return the TSIdent object for the specified row.
+@exception Exception if there is an error setting the interval in the TSIdent.
+*/
+public TSIdent getTimeSeriesIdentifier(int row) {
+    TSIdent tsid = new TSIdent();
+    String id = (String)getValueAt( row, COL_ID );
+    tsid.setLocation(id);
+    tsid.setSource((String)getValueAt( row, COL_DATA_SOURCE));
+    tsid.setType((String)getValueAt( row, COL_DATA_TYPE));
+    try {
+    	tsid.setInterval((String)getValueAt ( row, COL_TIME_STEP));
+    }
+    catch ( Exception e ) {
+    	// Recast exception so it does not require declaring in method signature
+    	throw new RuntimeException(e);
+    }
+    // Scenario is blank
+    // Sequence number is blank
+    tsid.setInputType((String)getValueAt( row, COL_INPUT_TYPE));
+    // No input name
+    // Format a simple comment that includes the telemetry station name
+    tsid.setComment(id + " - " + (String)getValueAt ( row, COL_NAME));
+    return tsid;
+}
+
+/**
 From AbstractTableModel.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
 @param col the column for which to return data.
@@ -255,21 +278,44 @@ public Object getValueAt(int row, int col)
 	
 	// TODO @jurentie 06/22/2018 join structure with waterclass to finish populating table
 	// Populate table with data values
+	String divRecDataType = divWC.getDivrectype();
+	String timeStep = divWC.getTimeStep();
 	switch (col) {
 		// case 0 handled above.
 		case COL_ID: return divWC.getWdid();
 		case COL_NAME: return divWC.getStructureName();
 		case COL_DATA_SOURCE: return "DWR";
 		case COL_DATA_TYPE:
-			if(divWC.getDivrectype().equalsIgnoreCase("WATERCLASS")){
-				if(hasPeriodInString(divWC.getWcIdentifier())){
-					return "'" + divWC.getDivrectype() + "-" + divWC.getWcIdentifier() + "'";
+			if(divRecDataType.equalsIgnoreCase("WATERCLASS")){
+				String divWCIdentifier = divWC.getWcIdentifier();
+				if(divWCIdentifier.indexOf('.') >= 0){
+					// Have to wrap periods because they break normal TSID
+					return TSIdent.PERIOD_QUOTE + divRecDataType + "-" + divWCIdentifier + TSIdent.PERIOD_QUOTE;
 				}
-				return divWC.getDivrectype() + "-" + divWC.getWcIdentifier();
+				else {
+					// No need for wrapping quotes
+					return divRecDataType + "-" + divWCIdentifier;
+				}
 			}
-			return divWC.getDivrectype();
-		case COL_TIME_STEP: return divWC.getTimeStep();
-		//case COL_UNITS: return 
+			else {
+				// "Simple" data types like "DivTotal"
+				return divRecDataType;
+			}
+		case COL_TIME_STEP: return timeStep;
+		case COL_UNITS:
+			if ( divRecDataType.equalsIgnoreCase("DivTotal") || divRecDataType.equalsIgnoreCase("RelTotal") || divRecDataType.equalsIgnoreCase("WaterClass") ) {
+				// Diversion records that all derive from daily CFS measurements, aggregated to month and year AF
+				if ( timeStep.equalsIgnoreCase("Day")) {
+					return "CFS";
+				}
+				else {
+					return "AF";
+				}
+			}
+			else {
+				// TODO smalers 2018-06-30 fill this in as other data types are tested
+				return "";
+			}
 		case COL_START: return divWC.getPorStart().getYear();
 		case COL_END: return divWC.getPorEnd().getYear();
 		//case COL_MEAS_COUNT: return
@@ -305,21 +351,6 @@ database.
 */
 public void setTimeStep(String timeStep) {
 	__timeStep = timeStep;
-}
-
-/**
-Set the width of WDIDs, which controls formatting of the ID column for structures.
-@param wdid_length WDID length for formatting the ID.
-*/
-public void setWDIDLength ( int wdid_length )
-{	__wdid_length = wdid_length;
-}
-
-private boolean hasPeriodInString(String ident){
-	if(ident.indexOf('.') >= 0){
-		return true;
-	}
-	return false;
 }
 
 }
