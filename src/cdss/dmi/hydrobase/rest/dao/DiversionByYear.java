@@ -128,7 +128,7 @@ public class DiversionByYear {
 	}
 
 	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
 	}
 	
 	/* Additional getters where relevant */

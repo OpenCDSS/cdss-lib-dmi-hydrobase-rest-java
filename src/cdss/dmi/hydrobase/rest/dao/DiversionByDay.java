@@ -88,7 +88,7 @@ public class DiversionByDay {
 	}
 
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = LocalDateTime.parse(dataMeasDate);
+		this.dataMeasDate = (dataMeasDate == null) ? null : LocalDateTime.parse(dataMeasDate);
 	}
 
 	public double getDataValue() {
@@ -128,7 +128,7 @@ public class DiversionByDay {
 	}
 
 	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
 	}
 	
 	/* Additional getters where relevant */

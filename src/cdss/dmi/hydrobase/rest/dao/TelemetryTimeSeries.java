@@ -65,7 +65,7 @@ public class TelemetryTimeSeries {
 	}
 
 	public void setMeasDate(String measDate) {
-		this.measDate = LocalDateTime.parse(measDate);
+		this.measDate = (measDate == null) ? null : LocalDateTime.parse(measDate);
 	}
 
 	public LocalDateTime getMeasDateTime() {
@@ -73,7 +73,7 @@ public class TelemetryTimeSeries {
 	}
 
 	public void setMeasDateTime(String measDateTime) {
-		this.measDateTime = LocalDateTime.parse(measDateTime);
+		this.measDateTime = (measDateTime == null) ? null : LocalDateTime.parse(measDateTime);
 	}
 
 	public double getMeasValue() {

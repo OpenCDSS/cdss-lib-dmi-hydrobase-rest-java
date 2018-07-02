@@ -226,13 +226,13 @@ public class WaterLevelsWell {
 		return porStart;
 	}
 	public void setPorStart(String porStart) {
-		this.porStart = LocalDateTime.parse(porStart);
+		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
 	}
 	public LocalDateTime getPorEnd() {
 		return porEnd;
 	}
 	public void setPorEnd(String porEnd) {
-		this.porEnd = LocalDateTime.parse(porEnd);
+		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
 	}
 	public int getPorCount() {
 		return porCount;

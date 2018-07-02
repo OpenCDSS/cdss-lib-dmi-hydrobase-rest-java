@@ -223,6 +223,9 @@ public class TelemetryStation {
 	}
 
 	public void setMeasDateTime(String measDateTime) {
+		if(measDateTime == null){
+			this.measDateTime = null;
+		}
 		int indexOf = measDateTime.lastIndexOf("-");
 		measDateTime = measDateTime.substring(0, indexOf);
 		this.measDateTime = LocalDateTime.parse(measDateTime);
@@ -353,6 +356,9 @@ public class TelemetryStation {
 	}
 
 	public void setModified(String modified) {
+		if(modified == null){
+			this.modified = null;
+		}
 		int indexOf = modified.lastIndexOf("-");
 		modified = modified.substring(0, indexOf);
 		this.modified = LocalDateTime.parse(modified);
