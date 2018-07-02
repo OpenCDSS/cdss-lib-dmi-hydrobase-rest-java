@@ -1,0 +1,5 @@
+<project name="cdss-lib-dmi-hydrobase-rest-java" default="compile" basedir="../">
+    
+    <import file="../../cdss-util-buildtools/common-build.xml"/>
+    
+</project>
