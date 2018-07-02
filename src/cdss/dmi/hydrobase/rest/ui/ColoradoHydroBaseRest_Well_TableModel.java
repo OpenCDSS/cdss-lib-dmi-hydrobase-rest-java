@@ -1,5 +1,6 @@
 package cdss.dmi.hydrobase.rest.ui;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 // FIXME @jurentie imports/irrelevant code
@@ -270,6 +271,10 @@ public Object getValueAt(int row, int col)
 	}
 
 	WaterLevelsWell well = (WaterLevelsWell) _data.get(row);
+	
+	DecimalFormat df = new DecimalFormat();
+	df.setMaximumFractionDigits(6);
+	df.setMinimumFractionDigits(6);
 
 	switch(col){
 		// case 0 handled above.
@@ -287,8 +292,8 @@ public Object getValueAt(int row, int col)
 		case COL_COUNTY: return well.getCounty();
 		case COL_STATE: return "CO";
 		//case COL_HUC: return
-		case COL_LONG: return well.getLongitude();
-		case COL_LAT: return well.getLatitude();
+		case COL_LONG: return df.format(well.getLongitude());
+		case COL_LAT: return df.format(well.getLatitude());
 		case COL_UTM_X: return well.getUtmX();
     	case COL_UTM_Y: return well.getUtmY();
 		//case COL_STR_TYPE: return

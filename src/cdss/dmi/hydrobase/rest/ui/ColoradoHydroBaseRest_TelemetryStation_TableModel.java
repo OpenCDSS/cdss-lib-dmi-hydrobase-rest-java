@@ -1,5 +1,6 @@
 package cdss.dmi.hydrobase.rest.ui;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import RTi.TS.TSIdent;
@@ -274,6 +275,10 @@ public Object getValueAt(int row, int col)
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
+	
+	DecimalFormat df = new DecimalFormat();
+	df.setMaximumFractionDigits(6);
+	df.setMinimumFractionDigits(6);
 
 	TelemetryStationDataTypes tsds = (TelemetryStationDataTypes)_data.get(row);
 	
@@ -295,8 +300,8 @@ public Object getValueAt(int row, int col)
 		case COL_COUNTY: return tsds.getCounty();
 		case COL_STATE: return "CO";
 		case COL_HUC: return tsds.getHuc10();
-		case COL_LONG: return tsds.getLongdecdeg();
-		case COL_LAT: return tsds.getLatdecdeg();
+		case COL_LONG: return df.format(tsds.getLongdecdeg());
+		case COL_LAT: return df.format(tsds.getLatdecdeg());
 		case COL_UTM_X: return tsds.getUtmX();
 		case COL_UTM_Y: return tsds.getUtmY();
 		case COL_INPUT_TYPE: return __inputType;
