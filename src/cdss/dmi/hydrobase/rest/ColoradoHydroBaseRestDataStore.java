@@ -25,7 +25,6 @@ import RTi.TS.TSIterator;
 import RTi.TS.TSUtil;
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.IO.IOUtil;
-import RTi.Util.IO.Prop;
 import RTi.Util.IO.PropList;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
