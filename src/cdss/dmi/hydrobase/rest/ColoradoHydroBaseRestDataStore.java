@@ -193,7 +193,7 @@ public List<String> getDataIntervalStringsForDataType ( String dataType )
 }
 
 public List<DiversionComment> getDivComments(String wdid){
-	String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
+	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
 	List<DiversionComment> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
 	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid;
@@ -224,19 +224,22 @@ public JsonNode getJsonNodeResultsFromURLString(String url){
 	try{
 		URL request = new URL(url);
 		JsonNode divrecRootNode = mapper.readTree(request);
+		if(divrecRootNode.get("PageCount").asInt() > 1){
+			System.out.println("Unable to process multiple pages at this time. Needs updated.");
+		}
 		results = divrecRootNode.path("ResultList");
 	}
 	catch (JsonParseException e ) { 
 		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
-		e.printStackTrace(); 
+		return null;
 	}
 	catch (JsonMappingException e ) { 
 		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
-		e.printStackTrace(); 
+		return null;
 	}
 	catch (IOException e) { 
 		Message.printWarning(1, routine, e);
-		e.printStackTrace(); 
+		return null;
 	}
 	
 	return results;
