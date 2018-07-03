@@ -572,7 +572,7 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 	if(apiKey != null){
 		tpRequestString += "&apiKey=" + apiKey;
 	}
-		
+	System.out.println(tpRequestString);
 	return tpRequestString;
 	
 }
@@ -1882,17 +1882,17 @@ throws MalformedURLException, Exception
 
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?abbrev=" + abbrev + apiKeyString;
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series 15 min intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_HOUR){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?abbrev=" + abbrev + apiKeyString;
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series hourly intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_DAY){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?parameter=DISCHRG&abbrev=" + abbrev + apiKeyString;
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?abbrev=" + abbrev + apiKeyString;
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
 		}
