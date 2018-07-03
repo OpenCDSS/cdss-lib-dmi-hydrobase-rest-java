@@ -196,7 +196,8 @@ public List<DiversionComment> getDivComments(String wdid){
 	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
 	List<DiversionComment> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
-	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid;
+	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + apiKeyString;
 	try{
 		JsonNode results = getJsonNodeResultsFromURLString(request);
 		for(int i = 0; i < results.size(); i++){
