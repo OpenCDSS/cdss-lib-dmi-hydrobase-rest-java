@@ -447,7 +447,8 @@ public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String i
 private String[] getTelemetryDataTypesFromWebServices(){	
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
 	ObjectMapper mapper = new ObjectMapper();
-	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams";
+	String apiKeyString = (apiKey == null) ? "" : "?apiKey=" + apiKey; 
+	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/" + apiKeyString;
 	JsonNode telemetryDataTypes = getJsonNodeResultsFromURLString(telParametersRequest);
 
 	String[] dataTypes = new String[telemetryDataTypes.size()];
