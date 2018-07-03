@@ -196,7 +196,7 @@ public List<DiversionComment> getDivComments(String wdid){
 	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
 	List<DiversionComment> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = (apiKey == null) ? null : "?apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "?apiKey=" + apiKey;
 	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + apiKeyString;
 	try{
 		JsonNode results = getJsonNodeResultsFromURLString(request);
@@ -448,7 +448,7 @@ public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String i
 private String[] getTelemetryDataTypesFromWebServices(){	
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
 	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = (apiKey == null) ? "" : "?apiKey=" + apiKey; 
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "?apiKey=" + apiKey; 
 	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/" + apiKeyString;
 	JsonNode telemetryDataTypes = getJsonNodeResultsFromURLString(telParametersRequest);
 
@@ -569,7 +569,7 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null){
+	if(apiKey != null && apiKey.isEmpty()){
 		tpRequestString += "&apiKey=" + apiKey;
 	}
 	System.out.println(tpRequestString);
@@ -843,7 +843,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null){
+	if(apiKey != null && apiKey.isEmpty()){
 		wcRequestString += "&apiKey=" + apiKey;
 	}
 		
@@ -1055,7 +1055,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null){
+	if(apiKey != null && apiKey.isEmpty()){
 		wellRequestString += "&apiKey=" + apiKey;
 	}
 	return wellRequestString;
@@ -1234,7 +1234,7 @@ public boolean isWellTimeSeriesDataType ( String dataType ) {
 private void readCounties() throws MalformedURLException{
 	//String apiKey = getAPIKey();
 	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	URL countyRequest = new URL(getServiceRootURI() + "/referencetables/county/?format=json" + apiKeyString);
 	countyList = new ArrayList<ReferenceTablesCounty>();
 	try {
@@ -1257,7 +1257,7 @@ private void readCounties() throws MalformedURLException{
 private void readWaterDistricts() throws MalformedURLException{
 	//String apiKey = getAPIKey();
 	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	URL districtRequest = new URL(getServiceRootURI() + "/referencetables/waterdistrict/?format=json" + apiKeyString);
 	districtList = new ArrayList<ReferenceTablesWaterDistrict>();
 	try {
@@ -1281,7 +1281,7 @@ private void readWaterDistricts() throws MalformedURLException{
 private void readWaterDivisions() throws MalformedURLException{
 	//String apiKey = getAPIKey();
 	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	URL divisionRequest = new URL(getServiceRootURI() + "/referencetables/waterdivision/?format=json" + apiKeyString);
 	divisionList = new ArrayList<ReferenceTablesWaterDivision>();
 	try {
@@ -1558,7 +1558,7 @@ throws MalformedURLException, Exception
 	String data_type = tsident.getType(); // TSID data type
 	String data_source = tsident.getSource();
 	
-	String apiKeyString = (this.apiKey == null) ? "" : "&apiKey=" + this.apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	
 	String tsUnits = null;
 
@@ -2174,7 +2174,7 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 	
 	//Create apiKeyString
 	String apiKey = getAPIKey();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 
 	try {
 		String request = getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + URLEncoder.encode(wdid, "UTF-8") + apiKeyString;
@@ -2372,7 +2372,7 @@ public boolean waterclassHasComments(String wdid){
 	
 	//Create apiKeyString
 	String apiKey = getAPIKey();
-	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	
 	boolean hasComments = false;
 
