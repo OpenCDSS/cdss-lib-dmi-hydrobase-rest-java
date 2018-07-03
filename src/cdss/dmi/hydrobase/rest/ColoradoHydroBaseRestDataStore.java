@@ -1799,57 +1799,60 @@ throws MalformedURLException, Exception
 			}
 
 			// Diversion Comments
-			List<DiversionComment> divComments = getDivComments(wdid);
-			if(divComments != null){
-				TSData it;
-				for(int i = 0; i < divComments.size(); i++){
-					DiversionComment divComment = divComments.get(i);
-					int irrYear = divComment.getIrrYear();
-					if(irrYear >= ts.getDate1().getYear() &&
-							irrYear <= ts.getDate2().getYear()){
-						DateTime start;
-						DateTime end;
-						if(interval_base == TimeInterval.DAY){
-							start = new DateTime(DateTime.PRECISION_DAY);
-							start.setYear(irrYear);
-							start.setMonth(11);
-							start.setDay(01);
-							end = new DateTime(DateTime.PRECISION_DAY);
-							end.setYear(irrYear + 1);
-							end.setMonth(10);
-							end.setDay(30);
-							iterator.setBeginTime(start);
-							iterator.setEndTime(end);
-							while(iterator.hasNext()){
-								it = iterator.next();
-								if(ts.isDataMissing(it.getDataValue())){
-									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+			boolean hasComments = waterclassHasComments(wdid);
+			if(hasComments){
+				List<DiversionComment> divComments = getDivComments(wdid);
+				if(divComments != null){
+					TSData it;
+					for(int i = 0; i < divComments.size(); i++){
+						DiversionComment divComment = divComments.get(i);
+						int irrYear = divComment.getIrrYear();
+						if(irrYear >= ts.getDate1().getYear() &&
+								irrYear <= ts.getDate2().getYear()){
+							DateTime start;
+							DateTime end;
+							if(interval_base == TimeInterval.DAY){
+								start = new DateTime(DateTime.PRECISION_DAY);
+								start.setYear(irrYear);
+								start.setMonth(11);
+								start.setDay(01);
+								end = new DateTime(DateTime.PRECISION_DAY);
+								end.setYear(irrYear + 1);
+								end.setMonth(10);
+								end.setDay(30);
+								iterator.setBeginTime(start);
+								iterator.setEndTime(end);
+								while(iterator.hasNext()){
+									it = iterator.next();
+									if(ts.isDataMissing(it.getDataValue())){
+										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+									}
 								}
 							}
-						}
-						if(interval_base == TimeInterval.MONTH){
-							start = new DateTime(DateTime.PRECISION_MONTH);
-							start.setYear(irrYear);
-							start.setMonth(11);
-							end = new DateTime(DateTime.PRECISION_MONTH);
-							end.setYear(irrYear);
-							end.setMonth(10);
-							while(iterator.hasNext()){
-								it = iterator.next();
-								if(ts.isDataMissing(it.getDataValue())){
-									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+							if(interval_base == TimeInterval.MONTH){
+								start = new DateTime(DateTime.PRECISION_MONTH);
+								start.setYear(irrYear);
+								start.setMonth(11);
+								end = new DateTime(DateTime.PRECISION_MONTH);
+								end.setYear(irrYear);
+								end.setMonth(10);
+								while(iterator.hasNext()){
+									it = iterator.next();
+									if(ts.isDataMissing(it.getDataValue())){
+										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+									}
 								}
 							}
-						}
-						if(interval_base == TimeInterval.YEAR){
-							start = new DateTime(DateTime.PRECISION_YEAR);
-							start.setYear(irrYear);
-							end = new DateTime(DateTime.PRECISION_YEAR);
-							end.setYear(irrYear);
-							while(iterator.hasNext()){
-								it = iterator.next();
-								if(ts.isDataMissing(it.getDataValue())){
-									ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+							if(interval_base == TimeInterval.YEAR){
+								start = new DateTime(DateTime.PRECISION_YEAR);
+								start.setYear(irrYear);
+								end = new DateTime(DateTime.PRECISION_YEAR);
+								end.setYear(irrYear);
+								while(iterator.hasNext()){
+									it = iterator.next();
+									if(ts.isDataMissing(it.getDataValue())){
+										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+									}
 								}
 							}
 						}
@@ -2358,6 +2361,35 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 	ts.setProperty("data_source", (well.getDataSource() == null) ? null : well.getDataSource());
 	ts.setProperty("modified", (well.getModified() == null) ? null : well.getModified());
 	ts.setProperty("more_information", (well.getMoreInformation() == null) ? null : well.getMoreInformation());
+}
+
+public boolean waterclassHasComments(String wdid){
+	ObjectMapper mapper = new ObjectMapper();
+	
+	DiversionWaterClass waterClass = null;
+	
+	//Create apiKeyString
+	String apiKey = getAPIKey();
+	String apiKeyString = (apiKey == null) ? null : "&apiKey=" + apiKey;
+	
+	boolean hasComments = false;
+
+	try {
+		String request = getServiceRootURI() + "/structures/divrec/waterclasses/?wdid=" + URLEncoder.encode(wdid, "UTF-8") + apiKeyString;
+		//System.out.println(request);
+		JsonNode resultList = getJsonNodeResultsFromURLString(request);
+		for(int i = 0; i < resultList.size(); i++){
+			waterClass = mapper.treeToValue(resultList.get(i), DiversionWaterClass.class);
+			if(waterClass.getDivrectype().equalsIgnoreCase("DIVCOMMENT")){
+				hasComments = true;
+			}
+		}
+	} 
+	catch (JsonParseException e ) { e.printStackTrace(); }
+	catch (JsonMappingException e ) { e.printStackTrace(); }
+	catch (IOException e) { e.printStackTrace(); }
+	
+	return hasComments;
 }
 
 /**
