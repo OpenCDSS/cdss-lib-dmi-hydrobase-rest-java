@@ -569,10 +569,9 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null && apiKey.isEmpty()){
+	if(apiKey != null && !apiKey.isEmpty()){
 		tpRequestString += "&apiKey=" + apiKey;
 	}
-	System.out.println(tpRequestString);
 	return tpRequestString;
 	
 }
@@ -843,7 +842,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null && apiKey.isEmpty()){
+	if(apiKey != null && !apiKey.isEmpty()){
 		wcRequestString += "&apiKey=" + apiKey;
 	}
 		
@@ -1055,7 +1054,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 			e.printStackTrace();
 		}
 	}
-	if(apiKey != null && apiKey.isEmpty()){
+	if(apiKey != null && !apiKey.isEmpty()){
 		wellRequestString += "&apiKey=" + apiKey;
 	}
 	return wellRequestString;
