@@ -1,5 +1,7 @@
 package cdss.dmi.hydrobase.rest.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Placeholder class for stations with historical time series.
  * This is not to be confused with TelemetryStation, which records real-time data.
@@ -8,6 +10,7 @@ package cdss.dmi.hydrobase.rest.dao;
  * @author sam
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Station {
 
 	public Station () {

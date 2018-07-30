@@ -2,6 +2,9 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DiversionWaterClass {
 	
 	/**
@@ -9,6 +12,7 @@ public class DiversionWaterClass {
 	 * by DWR API. For more detail see: 
 	 * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-structures-divrec-waterclasses
 	 */
+	
 
 	/* Type of diversion records */
 	private String divrectype;
@@ -37,6 +41,11 @@ public class DiversionWaterClass {
 	/* Source description */
 	private String sourceDescr;
 	
+	/* Distance in miles to the confluence with the next downstream
+	 * water source (or distance to state line)
+	 */
+	private double streamMile;
+
 	/* From WDID */
 	private String fromWdid;
 	
@@ -97,6 +106,9 @@ public class DiversionWaterClass {
 	/* DWR Water District */
 	private int waterDistrict;
 	
+	/* Name of the water source as specified in the court case */
+	private String waterSource;
+
 	/* County */
 	private String county;
 	
@@ -186,6 +198,14 @@ public class DiversionWaterClass {
 
 	public void setSourceDescr(String sourceDescr) {
 		this.sourceDescr = sourceDescr;
+	}
+	
+	public double getStreamMile() {
+		return streamMile;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
 	}
 
 	public String getFromWdid() {
@@ -354,6 +374,14 @@ public class DiversionWaterClass {
 
 	public void setWaterDistrict(int waterDistrict) {
 		this.waterDistrict = waterDistrict;
+	}
+	
+	public String getWaterSource() {
+		return waterSource;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 
 	public String getCounty() {

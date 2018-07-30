@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DiversionByMonth {
 	
 	/**

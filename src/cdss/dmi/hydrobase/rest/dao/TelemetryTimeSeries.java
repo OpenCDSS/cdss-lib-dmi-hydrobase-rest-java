@@ -2,11 +2,15 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * This class works for telemeteryTimeSeriesRaw, telemetryTimeSeriesHour, and telemeteryTimeSeriesDay
  * @author jurentie
  *
  */
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryTimeSeries {
 	
 	/**
