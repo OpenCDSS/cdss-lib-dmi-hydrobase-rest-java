@@ -2,6 +2,10 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WaterRightsTransaction {
 
 	/*

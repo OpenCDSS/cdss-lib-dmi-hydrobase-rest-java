@@ -2,6 +2,9 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WaterRightsNetAmount {
 	
 	/* listed in alphabetical order */
@@ -266,6 +269,9 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setAdjudicationDate(String adjudicationDate) {
+		int len = adjudicationDate.length();
+		int lastHyphen = adjudicationDate.lastIndexOf('-');
+		adjudicationDate = adjudicationDate.substring(0, lastHyphen);
 		this.adjudicationDate = (adjudicationDate == null) ? null :  LocalDateTime.parse(adjudicationDate);
 	}
 
@@ -282,6 +288,9 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setAppropriationDate(String appropriationDate) {
+		int len = appropriationDate.length();
+		int lastHyphen = appropriationDate.lastIndexOf('-');
+		appropriationDate = appropriationDate.substring(0, lastHyphen);
 		this.appropriationDate = (appropriationDate == null) ? null : LocalDateTime.parse(appropriationDate);
 	}
 
@@ -378,6 +387,9 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setLastModified(String lastModified) {
+		int len = lastModified.length();
+		int lastHyphen = lastModified.lastIndexOf('-');
+		lastModified = lastModified.substring(0, lastHyphen);
 		this.lastModified = (lastModified == null) ? null : LocalDateTime.parse(lastModified);
 	}
 
@@ -474,6 +486,9 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setPriorAdjudicationDate(String priorAdjudicationDate) {
+		int len = priorAdjudicationDate.length();
+		int lastHyphen = priorAdjudicationDate.lastIndexOf('-');
+		priorAdjudicationDate = priorAdjudicationDate.substring(0, lastHyphen);
 		this.priorAdjudicationDate = (priorAdjudicationDate == null) ? null : LocalDateTime.parse(priorAdjudicationDate);
 	}
 

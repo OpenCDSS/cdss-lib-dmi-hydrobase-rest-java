@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import riverside.datastore.AbstractWebServiceDataStore;
-
+import RTi.DMI.DMISelectStatement;
+import RTi.DMI.DMIUtil;
 import RTi.TS.TS;
 import RTi.TS.TSData;
 import RTi.TS.TSIdent;
@@ -50,6 +52,7 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
+import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
@@ -226,7 +229,7 @@ public JsonNode getJsonNodeResultsFromURLString(String url){
 		URL request = new URL(url);
 		JsonNode divrecRootNode = mapper.readTree(request);
 		if(divrecRootNode.get("PageCount").asInt() > 1){
-			System.out.println("Unable to process multiple pages at this time. Needs updated.");
+			System.out.println("[ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString] Unable to process multiple pages at this time. Needs updated.");
 		}
 		results = divrecRootNode.path("ResultList");
 	}
@@ -1530,6 +1533,20 @@ throws IOException, MalformedURLException, URISyntaxException
 }
 */
 
+public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid)
+throws Exception {
+	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
+	// Create ObjectMapper for Jackson 
+	ObjectMapper mapper = new ObjectMapper();
+	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid;
+	JsonNode structResult = getJsonNodeResultsFromURLString(netAmtsRequest);
+	for(int i = 0; i < structResult.size(); i++){
+		WaterRightsNetAmount waterRight = mapper.treeToValue(structResult.get(i), WaterRightsNetAmount.class);
+		waterRightsList.add(waterRight);
+	}
+	return waterRightsList;
+}
+
 /**
 Read a time series.  Only one element type is read.
 @param tsidentString the time series identifier string as per TSTool conventions.  The location should be
@@ -2399,7 +2416,7 @@ public boolean waterclassHasComments(String wdid){
  */
 public static void main(String[] args) throws URISyntaxException{
 	
-	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 	
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
@@ -2411,7 +2428,7 @@ public static void main(String[] args) throws URISyntaxException{
 		filters.put("county", "mesa");
 		filters.put("wdid", "0900123");
 		
-		chrds.getStructures(filters);*/
+		chrds.getStructures(filters);
 		
 		DateTime date1 = new DateTime(DateTime.PRECISION_DAY);
 		date1.setYear(2001);
@@ -2430,7 +2447,7 @@ public static void main(String[] args) throws URISyntaxException{
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
+	}*/
 }
 
 }
