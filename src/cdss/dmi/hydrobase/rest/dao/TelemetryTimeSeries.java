@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author jurentie
  *
  */
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryTimeSeries {
 	
