@@ -16,6 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import riverside.datastore.AbstractWebServiceDataStore;
 import RTi.DMI.DMISelectStatement;
@@ -220,18 +221,22 @@ public List<DiversionComment> getDivComments(String wdid){
  * @param url request to be parsed by ObjectMapper
  * @return ResultList JsonNode from DWR REST API request
  */
-public JsonNode getJsonNodeResultsFromURLString(String url){
+public static JsonNode getJsonNodeResultsFromURLString(String url){
 	String routine = "ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString";
 	ObjectMapper mapper = new ObjectMapper();
 	JsonNode results = null;
 	
 	try{
 		URL request = new URL(url);
+		System.out.println(routine + ":230: request: " + request);
 		JsonNode divrecRootNode = mapper.readTree(request);
-		if(divrecRootNode.get("PageCount").asInt() > 1){
-			System.out.println("[ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString] Unable to process multiple pages at this time. Needs updated.");
+		int pageCount = divrecRootNode.get("PageCount").asInt();
+		if(pageCount > 1){
+			results = getJsonNodeResultsFromURLStringMultiplePages(url, pageCount);
+			//System.out.println("[ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString] Unable to process multiple pages at this time. Needs updated.");
+		}else{
+			results = divrecRootNode.path("ResultList");
 		}
-		results = divrecRootNode.path("ResultList");
 	}
 	catch (JsonParseException e ) { 
 		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
@@ -247,6 +252,59 @@ public JsonNode getJsonNodeResultsFromURLString(String url){
 	}
 	
 	return results;
+}
+
+public static JsonNode getJsonNodeResultsFromURLStringMultiplePages(String url, int pageCount){
+	String routine = "ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLStringsMultiplePages";
+	//Add page index 1 to url
+	String request = url += "&pageIndex=1";
+	JsonNode tempNode = null;
+	ObjectMapper mapper = new ObjectMapper();
+	
+	//Set tempNode to be the returned results from the first page 
+	try {
+		tempNode = mapper.readTree(new URL(request));
+	} 
+	catch (JsonParseException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		return null;
+	}
+	catch (JsonMappingException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		return null;
+	}
+	catch (IOException e) { 
+		Message.printWarning(1, routine, e);
+		return null;
+	}
+	
+	//Create an array node that will contain the results from the various pages
+	ArrayNode results = (ArrayNode) tempNode.path("ResultList");
+	
+	try{
+		//Set i=2 since the first page is added previous to stepping through the loop
+		for(int i = 2; i < (pageCount + 1) ; i++){
+			request += "&pageIndex=" + (i); 
+			tempNode = mapper.readTree(new URL(request));
+			JsonNode values = tempNode.path("ResultList");
+			for(int j = 0; j < values.size(); j++){
+				results.add(values.get(j));
+			}
+		}
+	}
+	catch (JsonParseException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		return null;
+	}
+	catch (JsonMappingException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		return null;
+	}
+	catch (IOException e) { 
+		Message.printWarning(1, routine, e);
+		return null;
+	}
+	return (JsonNode)results;
 }
 
 /**
@@ -1538,7 +1596,7 @@ throws Exception {
 	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
 	// Create ObjectMapper for Jackson 
 	ObjectMapper mapper = new ObjectMapper();
-	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid;
+	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid + "&apiKey=" + apiKey;
 	JsonNode structResult = getJsonNodeResultsFromURLString(netAmtsRequest);
 	for(int i = 0; i < structResult.size(); i++){
 		WaterRightsNetAmount waterRight = mapper.treeToValue(structResult.get(i), WaterRightsNetAmount.class);
@@ -2416,6 +2474,10 @@ public boolean waterclassHasComments(String wdid){
  */
 public static void main(String[] args) throws URISyntaxException{
 	
+	System.out.println("Main: Fix issue with multiple pages returned from web services.");
+	String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
+	JsonNode json = getJsonNodeResultsFromURLString(request);
+
 	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 	
 	try {
