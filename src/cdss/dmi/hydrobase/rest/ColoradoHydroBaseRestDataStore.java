@@ -9,6 +9,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -228,7 +230,6 @@ public static JsonNode getJsonNodeResultsFromURLString(String url){
 	
 	try{
 		URL request = new URL(url);
-		System.out.println(routine + ":230: request: " + request);
 		JsonNode divrecRootNode = mapper.readTree(request);
 		int pageCount = divrecRootNode.get("PageCount").asInt();
 		if(pageCount > 1){
@@ -250,6 +251,7 @@ public static JsonNode getJsonNodeResultsFromURLString(String url){
 		Message.printWarning(1, routine, e);
 		return null;
 	}
+	
 	
 	return results;
 }
@@ -1602,7 +1604,13 @@ throws Exception {
 		WaterRightsNetAmount waterRight = mapper.treeToValue(structResult.get(i), WaterRightsNetAmount.class);
 		waterRightsList.add(waterRight);
 	}
+	Collections.sort(waterRightsList, new ColoradyHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
 	return waterRightsList;
+}
+
+public List<WaterRightsNetAmount> sortWaterRightsNetAmount(List<WaterRightsNetAmount> waterRightsList){
+		
+	return null;
 }
 
 /**
@@ -2473,8 +2481,7 @@ public boolean waterclassHasComments(String wdid){
  * @throws URISyntaxException 
  */
 public static void main(String[] args) throws URISyntaxException{
-	
-	System.out.println("Main: Fix issue with multiple pages returned from web services.");
+
 	String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
 	JsonNode json = getJsonNodeResultsFromURLString(request);
 
