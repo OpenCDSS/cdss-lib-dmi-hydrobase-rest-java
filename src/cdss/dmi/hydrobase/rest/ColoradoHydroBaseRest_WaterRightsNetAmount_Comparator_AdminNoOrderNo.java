@@ -4,7 +4,7 @@ import java.util.Comparator;
 
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 
-public class ColoradyHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo 
+public class ColoradoHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo 
 implements Comparator<WaterRightsNetAmount>{
 	
 	/**
@@ -16,8 +16,8 @@ implements Comparator<WaterRightsNetAmount>{
 	 */
 	public int compare ( WaterRightsNetAmount o1, WaterRightsNetAmount o2){
 		
-		int adminNo1 = o1.getAdminNumber();
-		int adminNo2 = o2.getAdminNumber();
+		double adminNo1 = o1.getAdminNumber();
+		double adminNo2 = o2.getAdminNumber();
 		if( adminNo1 > adminNo2 ){
 			return 1;
 		}
