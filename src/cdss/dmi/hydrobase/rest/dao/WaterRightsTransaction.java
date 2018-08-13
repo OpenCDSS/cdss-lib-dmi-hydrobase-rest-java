@@ -44,7 +44,7 @@ public class WaterRightsTransaction {
 	 * the previous adjudication date; and, the right side is the number of days between 
 	 * 12/31/1849 and the appropriation date.
 	 */
-	private int adminNumber;
+	private double adminNumber;
 	
 	/*
 	 * The date that water was first put to a specific beneficial use or the date that an open, 
@@ -294,11 +294,11 @@ public class WaterRightsTransaction {
 		this.adjudicationType = adjudicationType;
 	}
 
-	public int getAdminNumber() {
+	public double getAdminNumber() {
 		return adminNumber;
 	}
 
-	public void setAdminNumber(int adminNumber) {
+	public void setAdminNumber(double adminNumber) {
 		this.adminNumber = adminNumber;
 	}
 

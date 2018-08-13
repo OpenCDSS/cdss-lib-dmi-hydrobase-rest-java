@@ -39,7 +39,7 @@ public class WaterRightsNetAmount {
 	 * the previous adjudication date; and, the right side is the number of days between 
 	 * 12/31/1849 and the appropriation date.
 	 */
-	private int adminNumber;
+	private double adminNumber;
 	
 	
 	/*
@@ -275,11 +275,11 @@ public class WaterRightsNetAmount {
 		this.adjudicationDate = (adjudicationDate == null) ? null :  LocalDateTime.parse(adjudicationDate);
 	}
 
-	public int getAdminNumber() {
+	public double getAdminNumber() {
 		return adminNumber;
 	}
 
-	public void setAdminNumber(int adminNumber) {
+	public void setAdminNumber(double adminNumber) {
 		this.adminNumber = adminNumber;
 	}
 
