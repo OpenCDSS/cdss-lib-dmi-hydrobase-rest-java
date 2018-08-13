@@ -44,6 +44,7 @@ import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
 import cdss.dmi.hydrobase.rest.dao.DiversionComment;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
+import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesTelemetryParams;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
@@ -83,6 +84,8 @@ private List<ReferenceTablesCounty> countyList = null;
 private List<ReferenceTablesWaterDistrict> districtList = null;
 
 private List<ReferenceTablesWaterDivision> divisionList = null;
+
+private List<ParcelUseTimeSeries> parcelUseTSList = null;
 
 /**
  * Variable for API Key:
@@ -331,6 +334,67 @@ private String getRequestStringHelperMatches(String operator, String value){
 					break;
 	}
 	return ret;
+}
+
+/*private List<ParcelUseTimeSeries> getParcelUseTSList(int cal_year, int div, int parcel_id,
+		String land_use, String irrig_type){	
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
+	//Create ObjectMapper for Jackson
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = ( apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	if(land_use != null){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {land use} is not supported by DWR web services.");
+	}
+	if(irrig_type != null){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {irrig_type} is not supported by DWR web services.");
+	}
+	if(div > 0){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {div} is not supported by DWR web services.");
+	}
+	
+	return null;
+
+}*/
+
+public void getParcelUseTSList(String wdid){	
+	String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
+	//Create ObjectMapper for Jackson
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = ( apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid;
+	JsonNode parcelUseResult = getJsonNodeResultsFromURLString(parcelUseRequest);
+	int div = getWaterDivisionFromWaterDistricts(wdid);
+	try{
+		for(int i = 0; i < parcelUseResult.size(); i++){
+			ParcelUseTimeSeries parcelUseTS = mapper.treeToValue(parcelUseResult.get(i), ParcelUseTimeSeries.class);
+			parcelUseTS.setDiv(div);
+			// Add div to parcelUseTS
+			parcelUseTSList.add(parcelUseTS);
+		}
+	}
+	catch (JsonParseException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+	}
+	catch (JsonMappingException e ) { 
+		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+	}
+	catch (IOException e) { 
+		Message.printWarning(1, routine, e);
+	}
+	Collections.sort(parcelUseTSList, new ColoradoHydroBaseRest_ParcelUseTimeSeries_DivParcelIdCalYear());
+	this.parcelUseTSList = parcelUseTSList;
+}
+
+public List<ParcelUseTimeSeries> getParcelUseTSList(String wdid, int parcel_id){
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>();
+	for(int i = 0; i < this.parcelUseTSList.size(); i++){
+		ParcelUseTimeSeries parcelUseTS = this.parcelUseTSList.get(i);
+		if(parcelUseTS.getParcelId() == parcel_id){
+			parcelUseTSList.add(parcelUseTS);
+		}
+	}
+	return parcelUseTSList;
 }
 
 /**
@@ -963,6 +1027,26 @@ public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedUR
 	return districtList;
 }
 
+public int getWaterDivisionFromWaterDistricts(String wdid){
+	String wd = wdid.substring(0, 2);
+	List<ReferenceTablesWaterDistrict> waterDistricts;
+	int div = 0;
+	try {
+		waterDistricts = getWaterDistricts();
+		for(int i = 0; i < waterDistricts.size(); i++){
+			ReferenceTablesWaterDistrict waterDistrict = waterDistricts.get(i);
+			int wdFromList = waterDistrict.getWaterDistrict();
+			if(Integer.parseInt(wd) == wdFromList){
+				div = waterDistrict.getDivision();
+			}
+		}
+	} catch (MalformedURLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	return div;
+}
+
 /**
  * Get list of divisions from global variable
  * @return list of divisions
@@ -975,12 +1059,31 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 	return divisionList;
 }
 
+//
+public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid)
+throws Exception {
+	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
+	// Create ObjectMapper for Jackson 
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid + apiKeyString;
+	JsonNode structResult = getJsonNodeResultsFromURLString(netAmtsRequest);
+	for(int i = 0; i < structResult.size(); i++){
+		WaterRightsNetAmount waterRight = mapper.treeToValue(structResult.get(i), WaterRightsNetAmount.class);
+		waterRightsList.add(waterRight);
+	}
+	Collections.sort(waterRightsList, new ColoradoHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
+	return waterRightsList;
+}
+
+//
 private String getWCIdentStringFromDataType(String dataType){
 	int indexOf = dataType.indexOf("-");
 	return (dataType.charAt(dataType.length()  - 1) == ("'").charAt(0)) ? dataType.substring(indexOf + 1, dataType.length() - 1) : 
 						dataType.substring(indexOf + 1, dataType.length());
 }
 
+//
 public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
 	String routine = "ColoradoHydroBaseRestDataStore.getWells";
 	ObjectMapper mapper = new ObjectMapper();
@@ -1592,26 +1695,6 @@ throws IOException, MalformedURLException, URISyntaxException
     }
 }
 */
-
-public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid)
-throws Exception {
-	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
-	// Create ObjectMapper for Jackson 
-	ObjectMapper mapper = new ObjectMapper();
-	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid + "&apiKey=" + apiKey;
-	JsonNode structResult = getJsonNodeResultsFromURLString(netAmtsRequest);
-	for(int i = 0; i < structResult.size(); i++){
-		WaterRightsNetAmount waterRight = mapper.treeToValue(structResult.get(i), WaterRightsNetAmount.class);
-		waterRightsList.add(waterRight);
-	}
-	Collections.sort(waterRightsList, new ColoradyHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
-	return waterRightsList;
-}
-
-public List<WaterRightsNetAmount> sortWaterRightsNetAmount(List<WaterRightsNetAmount> waterRightsList){
-		
-	return null;
-}
 
 /**
 Read a time series.  Only one element type is read.
@@ -2479,11 +2562,18 @@ public boolean waterclassHasComments(String wdid){
 /**
  * Inserting main method for testing purposes:
  * @throws URISyntaxException 
+ * @throws IOException 
  */
-public static void main(String[] args) throws URISyntaxException{
+public static void main(String[] args) throws URISyntaxException, IOException{
 
 	String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
 	JsonNode json = getJsonNodeResultsFromURLString(request);
+	
+	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+
+	ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
+
+	chrds.getParcelUseTSList("2000505");
 
 	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 	
