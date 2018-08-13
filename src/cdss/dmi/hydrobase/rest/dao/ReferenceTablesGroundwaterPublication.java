@@ -3,7 +3,7 @@ package cdss.dmi.hydrobase.rest.dao;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ReferenceTablesGroundwaterPublicationName {
+public class ReferenceTablesGroundwaterPublication {
 	
 	/**
 	 *  Variables declared in order as returned
