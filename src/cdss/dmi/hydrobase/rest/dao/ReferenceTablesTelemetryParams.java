@@ -17,7 +17,7 @@ public class ReferenceTablesTelemetryParams {
 	
 	@Override
 	public String toString(){
-		return "Parameter [ parameter: " + parameter + " ]";
+		return "ReferenceTablesTelemetryParams [ parameter: " + parameter + " ]";
 	}
 
 }
