@@ -46,6 +46,14 @@ import cdss.dmi.hydrobase.rest.dao.DiversionComment;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCurrentInUseCodes;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDesignatedBasin;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecObservationCodes;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecTypes;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDiversionNotUsedCodes;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesGroundwaterPublication;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesManagementDistrict;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesPermitActionName;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesTelemetryParams;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
@@ -81,9 +89,27 @@ private boolean __initialized = false;
  */
 private List<ReferenceTablesCounty> countyList = null;
 
-private List<ReferenceTablesWaterDistrict> districtList = null;
+private List<ReferenceTablesCurrentInUseCodes> currentInUseCodeList = null;
 
-private List<ReferenceTablesWaterDivision> divisionList = null;
+private List<ReferenceTablesDesignatedBasin> designatedBasinList = null;
+
+private List<ReferenceTablesDiversionNotUsedCodes> diversionNotUsedCodeList = null;
+
+private List<ReferenceTablesDivRecObservationCodes> divRecObservationCodeList = null;
+
+private List<ReferenceTablesDivRecTypes> divRecTypeList = null;
+
+private List<ReferenceTablesGroundwaterPublication> groundwaterPublicationList = null;
+
+private List<ReferenceTablesManagementDistrict> managementDistrictList = null;
+
+private List<ReferenceTablesPermitActionName> permitActionNameList = null;
+
+private List<ReferenceTablesTelemetryParams> telemetryParamsList = null;
+
+private List<ReferenceTablesWaterDistrict> waterDistrictList = null;
+
+private List<ReferenceTablesWaterDivision> waterDivisionList = null;
 
 private List<ParcelUseTimeSeries> parcelUseTSList = null;
 
@@ -1021,10 +1047,10 @@ public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataT
  * @throws MalformedURLException
  */
 public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedURLException{
-	if(districtList == null){
+	if(waterDistrictList == null){
 		readWaterDistricts();
 	}
-	return districtList;
+	return waterDistrictList;
 }
 
 public int getWaterDivisionFromWaterDistricts(String wdid){
@@ -1053,10 +1079,10 @@ public int getWaterDivisionFromWaterDistricts(String wdid){
  * @throws MalformedURLException
  */
 public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedURLException{
-	if(divisionList == null){
+	if(waterDivisionList == null){
 		readWaterDivisions();
 	}
-	return divisionList;
+	return waterDivisionList;
 }
 
 //
@@ -1416,6 +1442,205 @@ private void readCounties() throws MalformedURLException{
 }
 
 /**
+ * Read current in use codes from web services
+ * @throws MalformedURLException 
+ */
+private void readCurrentInUseCodes() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL currentInUseCodesRequest = new URL(getServiceRootURI() + "/referencetables/currentinusecodes/?format=json" + apiKeyString);
+	currentInUseCodeList = new ArrayList<ReferenceTablesCurrentInUseCodes>();
+	try{
+		JsonNode rootNode = mapper.readTree(currentInUseCodesRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			currentInUseCodeList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesCurrentInUseCodes.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read Designated Basins from web services
+ * @throws MalformedURLException 
+ */
+private void readDesignatedBasins() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL designatedBasinRequest = new URL(getServiceRootURI() + "/referencetables/designatedbasin/?format=json" + apiKeyString);
+	designatedBasinList = new ArrayList<ReferenceTablesDesignatedBasin>();
+	try{
+		JsonNode rootNode = mapper.readTree(designatedBasinRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			designatedBasinList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesDesignatedBasin.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read diversion not used codes from web services
+ * @throws MalformedURLException 
+ */
+private void readDiversionNotUsedCodes() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL diversionNotUsedCodesRequest = new URL(getServiceRootURI() + "/referencetables/diversionnotusedcodes/?format=json" + apiKeyString);
+	diversionNotUsedCodeList = new ArrayList<ReferenceTablesDiversionNotUsedCodes>();
+	try{
+		JsonNode rootNode = mapper.readTree(diversionNotUsedCodesRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			diversionNotUsedCodeList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesDiversionNotUsedCodes.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read div rec observation codes from web services
+ * @throws MalformedURLException 
+ */
+private void readDivRecObservationCodes() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL divRecObservationCodesRequest = new URL(getServiceRootURI() + "/referencetables/divrecobservationcodes/?format=json" + apiKeyString);
+	divRecObservationCodeList = new ArrayList<ReferenceTablesDivRecObservationCodes>();
+	try{
+		JsonNode rootNode = mapper.readTree(divRecObservationCodesRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			divRecObservationCodeList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesDivRecObservationCodes.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read div rec types from web services
+ * @throws MalformedURLException 
+ */
+private void readDivRecTypes() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL divRecTypeRequest = new URL(getServiceRootURI() + "/referencetables/divrectypes/?format=json" + apiKeyString);
+	divRecTypeList = new ArrayList<ReferenceTablesDivRecTypes>();
+	try{
+		JsonNode rootNode = mapper.readTree(divRecTypeRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			divRecTypeList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesDivRecTypes.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read groundwater publications from web services
+ * @throws MalformedURLException 
+ */
+private void readGroundwaterPublication() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL groundwaterPublicationRequest = new URL(getServiceRootURI() + "/referencetables/groundwaterpublication?format=json" + apiKeyString);
+	groundwaterPublicationList = new ArrayList<ReferenceTablesGroundwaterPublication>();
+	try{
+		JsonNode rootNode = mapper.readTree(groundwaterPublicationRequest);
+		//TODO @jurentie 08-13-2018 what if multiple pages?
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			groundwaterPublicationList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesGroundwaterPublication.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read management districts from web services
+ * @throws MalformedURLException 
+ */
+private void readManagementDistrict() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL managementDistrictRequest = new URL(getServiceRootURI() + "/referencetables/managementdistrict/?format=json" + apiKeyString);
+	managementDistrictList = new ArrayList<ReferenceTablesManagementDistrict>();
+	try{
+		JsonNode rootNode = mapper.readTree(managementDistrictRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			managementDistrictList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesManagementDistrict.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read permit action names from web services
+ * @throws MalformedURLException 
+ */
+private void readPermitActionName() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL permitActionNameRequest = new URL(getServiceRootURI() + "/referencetables/permitactionname/?format=json" + apiKeyString);
+	permitActionNameList = new ArrayList<ReferenceTablesPermitActionName>();
+	try{
+		JsonNode rootNode = mapper.readTree(permitActionNameRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			permitActionNameList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesPermitActionName.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
+ * Read telemetry params from web services
+ * @throws MalformedURLException 
+ */
+private void readTelemetryParams() throws MalformedURLException{
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	URL telemetryParamsRequest = new URL(getServiceRootURI() + "/referencetables/telemetryparams/?format=json" + apiKeyString);
+	telemetryParamsList = new ArrayList<ReferenceTablesTelemetryParams>();
+	try{
+		JsonNode rootNode = mapper.readTree(telemetryParamsRequest);
+		JsonNode resultList = rootNode.get("ResultList");
+		for(int i = 0; i < resultList.size(); i++){
+			telemetryParamsList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesTelemetryParams.class));
+		}
+	}
+	catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}
+
+/**
  * Read districts from web services
  * @throws MalformedURLException 
  */
@@ -1424,13 +1649,13 @@ private void readWaterDistricts() throws MalformedURLException{
 	ObjectMapper mapper = new ObjectMapper();
 	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	URL districtRequest = new URL(getServiceRootURI() + "/referencetables/waterdistrict/?format=json" + apiKeyString);
-	districtList = new ArrayList<ReferenceTablesWaterDistrict>();
+	waterDistrictList = new ArrayList<ReferenceTablesWaterDistrict>();
 	try {
 		JsonNode rootNode = mapper.readTree(districtRequest);
 		JsonNode resultList = rootNode.get("ResultList");
 		for(int i = 0; i < resultList.size(); i++){
 			//System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(resultList.get(i)));
-			districtList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesWaterDistrict.class));
+			waterDistrictList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesWaterDistrict.class));
 		}
 	} 
 	catch (IOException e) {
@@ -1440,7 +1665,7 @@ private void readWaterDistricts() throws MalformedURLException{
 }
 
 /**
- * Read divisions form web services
+ * Read divisions from web services
  * @throws MalformedURLException 
  */
 private void readWaterDivisions() throws MalformedURLException{
@@ -1448,12 +1673,12 @@ private void readWaterDivisions() throws MalformedURLException{
 	ObjectMapper mapper = new ObjectMapper();
 	String apiKeyString = (apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
 	URL divisionRequest = new URL(getServiceRootURI() + "/referencetables/waterdivision/?format=json" + apiKeyString);
-	divisionList = new ArrayList<ReferenceTablesWaterDivision>();
+	waterDivisionList = new ArrayList<ReferenceTablesWaterDivision>();
 	try {
 		JsonNode rootNode = mapper.readTree(divisionRequest);
 		JsonNode resultList = rootNode.get("ResultList");
 		for(int i = 0; i < resultList.size(); i++){
-			divisionList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesWaterDivision.class));
+			waterDivisionList.add(mapper.treeToValue(resultList.get(i), ReferenceTablesWaterDivision.class));
 		}
 	} 
 	catch (IOException e) {
@@ -1468,6 +1693,15 @@ private void readWaterDivisions() throws MalformedURLException{
  */
 private void readGlobalData() throws MalformedURLException{
 	readCounties();
+	readCurrentInUseCodes();
+	readDiversionNotUsedCodes();
+	readDivRecObservationCodes();
+	readDivRecTypes();
+	readGroundwaterPublication();
+	readDesignatedBasins();
+	readManagementDistrict();
+	readPermitActionName();
+	readTelemetryParams();
 	readWaterDistricts();
 	readWaterDivisions();
 }
