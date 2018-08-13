@@ -43,6 +43,16 @@ public class ParcelUseTimeSeries {
 	/* Associated ground water WDID */
 	private String assocGwWdid;
 	
+	private int div;
+	
+	public int getDiv() {
+		return div;
+	}
+
+	public void setDiv(int div) {
+		this.div = div;
+	}
+
 	/* Modified date/time */
 	private LocalDateTime modified;
 
@@ -136,7 +146,7 @@ public class ParcelUseTimeSeries {
 	
 	@Override
 	public String toString(){
-		return "ParcelUseTimeSeries: [ wdid: " + wdid + ", structureName: " + structureName + ", calYear: " + 
+		return "ParcelUseTimeSeries: [ wdid: " + wdid + ", div " + div + ", structureName: " + structureName + ", calYear: " + 
 				calYear + ", parcelId:  " + parcelId + ", landUse: " + landUse + ", irrigType: " + irrigType +
 				", acresProrated: " + acresProrated + ", acresTotal: " + acresTotal + ", assocSwWdid: " +
 				assocSwWdid + ", assocGwWdid: " + assocGwWdid + ", modified: " + modified + " ]";
