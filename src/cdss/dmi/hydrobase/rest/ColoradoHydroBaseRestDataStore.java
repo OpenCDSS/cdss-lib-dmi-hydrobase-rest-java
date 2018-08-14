@@ -209,7 +209,7 @@ public List<DiversionComment> getDivComments(String wdid){
 	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
 	List<DiversionComment> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
-	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + getApiKeyString();
+	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + "?apiKey=" + getApiKey();
 	try{
 		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 		for(int i = 0; i < results.size(); i++){
@@ -517,7 +517,7 @@ public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String i
  */
 private String[] getTelemetryDataTypesFromWebServices(){	
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
-	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/" + getApiKeyString();
+	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/?apiKey=" + getApiKey();
 	JsonNode telemetryDataTypes = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telParametersRequest);
 
 	String[] dataTypes = new String[telemetryDataTypes.size()];
