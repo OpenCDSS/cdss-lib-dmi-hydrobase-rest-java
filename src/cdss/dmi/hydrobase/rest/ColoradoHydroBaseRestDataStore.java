@@ -365,10 +365,8 @@ public void getParcelUseTSList(String wdid){
 	//Create ObjectMapper for Jackson
 	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid + "?apiKey=" + getApiKey();
 	JsonNode parcelUseResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(parcelUseRequest);
-	System.out.println("[ColoradoHydroBaseRest.getParcelUseTSList:368] parcelUseResult: " + parcelUseResult);
 	int div = getWaterDivisionFromWaterDistricts(wdid);
 	for(int i = 0; i < parcelUseResult.size(); i++){
-		System.out.println("[ColoradoHydroBaseREst.getParcelUseTSList:371] result: " + parcelUseResult.get(i));
 		ParcelUseTimeSeries parcelUseTS = (ParcelUseTimeSeries)JacksonToolkit.getInstance().treeToValue(parcelUseResult.get(i), ParcelUseTimeSeries.class);
 		// Add div to parcelUseTS
 		parcelUseTS.setDiv(div);
