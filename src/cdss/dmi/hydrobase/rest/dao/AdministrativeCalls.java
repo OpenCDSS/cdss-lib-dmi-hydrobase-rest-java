@@ -2,7 +2,7 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import RTi.Util.Time.DateTime;
 
-public class AdministrativeCallsActive {
+public class AdministrativeCalls {
 	
 	private double boundingStructureLatitude;
 	private double boundingStructureLongitude;
@@ -14,7 +14,7 @@ public class AdministrativeCallsActive {
 	private DateTime dateTimeSet;
 	private int division;
 	private double locationStructureLatitude;
-	private double locationStrucutreLongitude;
+	private double locationStructureLongitude;
 	private String locationStructureName;
 	private String locationWdid;
 	private double locationWdidStreammile;
@@ -70,14 +70,25 @@ public class AdministrativeCallsActive {
 		return dateTimeReleased;
 	}
 	public void setDateTimeReleased(String dateTimeReleased) {
-		System.out.println(DateTime.parse(dateTimeReleased));
-		this.dateTimeReleased = DateTime.parse(dateTimeReleased);
+		if(dateTimeReleased != null){
+			int indexLastHyphen = dateTimeReleased.lastIndexOf('-');
+			dateTimeReleased = dateTimeReleased.substring(0, indexLastHyphen);
+			this.dateTimeReleased = DateTime.parse(dateTimeReleased);
+		}else{
+			this.dateTimeReleased = null;
+		}
 	}
 	public DateTime getDateTimeSet() {
 		return dateTimeSet;
 	}
-	public void setDateTimeSet(DateTime dateTimeSet) {
-		this.dateTimeSet = dateTimeSet;
+	public void setDateTimeSet(String dateTimeSet) {
+		if(dateTimeSet != null){
+			int indexLastHyphen = dateTimeSet.lastIndexOf('-');
+			dateTimeSet = dateTimeSet.substring(0, indexLastHyphen);
+			this.dateTimeSet = DateTime.parse(dateTimeSet);
+		}else{
+			this.dateTimeSet = null;
+		}
 	}
 	public int getDivision() {
 		return division;
@@ -91,11 +102,11 @@ public class AdministrativeCallsActive {
 	public void setLocationStructureLatitude(double locationStructureLatitude) {
 		this.locationStructureLatitude = locationStructureLatitude;
 	}
-	public double getLocationStrucutreLongitude() {
-		return locationStrucutreLongitude;
+	public double getLocationStructureLongitude() {
+		return locationStructureLongitude;
 	}
-	public void setLocationStrucutreLongitude(double locationStrucutreLongitude) {
-		this.locationStrucutreLongitude = locationStrucutreLongitude;
+	public void setLocationStructureLongitude(double locationStructureLongitude) {
+		this.locationStructureLongitude = locationStructureLongitude;
 	}
 	public String getLocationStructureName() {
 		return locationStructureName;
@@ -118,8 +129,14 @@ public class AdministrativeCallsActive {
 	public DateTime getModified() {
 		return modified;
 	}
-	public void setModified(DateTime modified) {
-		this.modified = modified;
+	public void setModified(String modified) {
+		if(modified != null){
+			int indexLastHyphen = modified.lastIndexOf('-');
+			modified = modified.substring(0, indexLastHyphen);
+			this.modified = DateTime.parse(modified);
+		}else{
+			this.modified = null;
+		}
 	}
 	public String getMoreInformation() {
 		return moreInformation;
@@ -136,8 +153,14 @@ public class AdministrativeCallsActive {
 	public DateTime getPriorityDate() {
 		return priorityDate;
 	}
-	public void setPriorityDate(DateTime priorityDate) {
-		this.priorityDate = priorityDate;
+	public void setPriorityDate(String priorityDate) {
+		if(priorityDate != null){
+			int indexLastHyphen = priorityDate.lastIndexOf('-');
+			priorityDate = priorityDate.substring(0, indexLastHyphen);
+			this.priorityDate = DateTime.parse(priorityDate);
+		}else{
+			this.priorityDate = null;
+		}
 	}
 	public String getPriorityNumber() {
 		return priorityNumber;
@@ -182,6 +205,18 @@ public class AdministrativeCallsActive {
 		this.waterSourceName = waterSourceName;
 	}
 	
-	
+	@Override
+	public String toString(){
+		return "AdministrativeCallsActive: [ callNumber: " + callNumber + ", callType: " + callType + ", dateTimeSet: " + dateTimeSet + 
+				", dateTimeReleased: " + dateTimeReleased + ", waterSourceName: " + waterSourceName + ", locationWdid: " +
+				locationWdid + ", locationWdidStreammile: " + locationWdidStreammile + ", locationStructureName: " + 
+				locationStructureName + ", priorityWdid: " + priorityWdid + ", priorityStructureName: " + priorityStructureName + 
+				", priorityAdminNumber: " + priorityAdminNumber + ", priorityOrderNumber: " + priorityOrderNumber + ", priorityDate: " + 
+				priorityDate + ", priorityNumber: " + priorityNumber + ", boundingWdid: " + boundingWdid + ", boundingStructureName: " + 
+				", setComments: " + setComments + ", releaseComment: " + releaseComment + ", division: " + division + 
+				", locationStructureLatitude: " + locationStructureLatitude + ", locationStructureLongitude: " + locationStructureLongitude +
+				", boundingStructureLatitude: " + boundingStructureLatitude + ", boundingStructureLongitude: " + boundingStructureLongitude + 
+				", modified: " + modified + ", moreInformation: " + moreInformation + " ]";
+	}
 
 }
