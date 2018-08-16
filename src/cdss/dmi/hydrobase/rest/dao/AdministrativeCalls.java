@@ -1,34 +1,166 @@
 package cdss.dmi.hydrobase.rest.dao;
 
-import RTi.Util.Time.DateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
+
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-administrativecalls-active
+ * @author jurentie
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AdministrativeCalls {
 	
+	/**
+	 * Variables defined in alphabetical order. 
+	 * Documentation copied from web services.
+	 */
+	
+	/**
+	 * Latitude (decimal degrees) of bounding structure
+	 */
 	private double boundingStructureLatitude;
+	
+	/**
+	 * Longitude (decimal degrees) of bounding structure
+	 */
 	private double boundingStructureLongitude;
+	
+	/**
+	 * Structure Name of upper terminus of Call; if blank, the call extends 
+	 * to the headwaters of the basin
+	 */
 	private String boundingStructureName;
+	
+	/**
+	 * WDID of upper terminus of Call; if blank, the call extends to the 
+	 * headwaters of the basin
+	 */
 	private String boundingWdid;
+	
+	/**
+	 * Unique call identifier
+	 */
 	private int callNumber;
+	
+	/**
+	 * The type of administration being described: Call, Futile Call, 
+	 * Nonconsumptive Call, or Authorized Diversion
+	 */
 	private String callType;
+	
+	/**
+	 * Date and time that Administrative Call all was released
+	 */
 	private DateTime dateTimeReleased;
+	
+	/**
+	 * Date and time that Administrative Call all was set
+	 */
 	private DateTime dateTimeSet;
+	
+	/**
+	 * DWR Water Division
+	 */
 	private int division;
+	
+	/**
+	 * Latitude (decimal degrees) of calling structure
+	 */
 	private double locationStructureLatitude;
+	
+	/**
+	 * Longitude (decimal degrees) of calling structure
+	 */
 	private double locationStructureLongitude;
+	
+	/**
+	 * Call location structure name
+	 */
 	private String locationStructureName;
+	
+	/**
+	 * Call location structure WDID
+	 */
 	private String locationWdid;
+	
+	/**
+	 * Call location structure stream mile
+	 */
 	private double locationWdidStreammile;
+	
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
 	private DateTime modified;
+	
+	/**
+	 * Hyperlink to additional details
+	 */
 	private String moreInformation;
+	
+	/**
+	 * A calculated number developed by DWR to rank water rights in 
+	 * order of seniority.
+	 */
 	private double priorityAdminNumber;
+	
+	/**
+	 * Either the appropriation date or the previous adjudication date, 
+	 * whichever is earlier
+	 */
 	private DateTime priorityDate;
+	
+	/**
+	 * An early District Court’s method to indicate a water right’s seniority 
+	 * in a water drainage
+	 */
 	private String priorityNumber;
+	
+	/**
+	 * An order number may be assigned to distinguish decrees with identical dates 
+	 * but have been decreed to have specifically different priorities.
+	 */
 	private int priorityOrderNumber;
+	
+	/**
+	 * Waterright Structure...definition
+	 */
 	private String priorityStructureName;
+	
+	/**
+	 * Priority WDID
+	 */
 	private String priorityWdid;
+	
+	/**
+	 * Comments related to the release of the call
+	 */
 	private String releaseComment;
+	
+	/**
+	 * Comments related to setting the Administrative Call
+	 */
 	private String setComments;
+	
+	/**
+	 * Name of water source
+	 */
 	private String waterSourceName;
+	
+	/**
+	 * Getters and setters for defined variables
+	 */
 	
 	public double getBoundingStructureLatitude() {
 		return boundingStructureLatitude;
@@ -36,168 +168,168 @@ public class AdministrativeCalls {
 	public void setBoundingStructureLatitude(double boundingStructureLatitude) {
 		this.boundingStructureLatitude = boundingStructureLatitude;
 	}
+	
 	public double getBoundingStructureLongitude() {
 		return boundingStructureLongitude;
 	}
 	public void setBoundingStructureLongitude(double boundingStructureLongitude) {
 		this.boundingStructureLongitude = boundingStructureLongitude;
 	}
+	
 	public String getBoundingStructureName() {
 		return boundingStructureName;
 	}
 	public void setBoundingStructureName(String boundingStructureName) {
 		this.boundingStructureName = boundingStructureName;
 	}
+	
 	public String getBoundingWdid() {
 		return boundingWdid;
 	}
 	public void setBoundingWdid(String boundingWdid) {
 		this.boundingWdid = boundingWdid;
 	}
+	
 	public int getCallNumber() {
 		return callNumber;
 	}
 	public void setCallNumber(int callNumber) {
 		this.callNumber = callNumber;
 	}
+	
 	public String getCallType() {
 		return callType;
 	}
 	public void setCallType(String callType) {
 		this.callType = callType;
 	}
+	
 	public DateTime getDateTimeReleased() {
 		return dateTimeReleased;
 	}
 	public void setDateTimeReleased(String dateTimeReleased) {
-		if(dateTimeReleased != null){
-			int indexLastHyphen = dateTimeReleased.lastIndexOf('-');
-			dateTimeReleased = dateTimeReleased.substring(0, indexLastHyphen);
-			this.dateTimeReleased = DateTime.parse(dateTimeReleased);
-		}else{
-			this.dateTimeReleased = null;
-		}
+		this.dateTimeReleased = TimeToolkit.getInstance().toDateTime(dateTimeReleased, true);
 	}
+	
 	public DateTime getDateTimeSet() {
 		return dateTimeSet;
 	}
 	public void setDateTimeSet(String dateTimeSet) {
-		if(dateTimeSet != null){
-			int indexLastHyphen = dateTimeSet.lastIndexOf('-');
-			dateTimeSet = dateTimeSet.substring(0, indexLastHyphen);
-			this.dateTimeSet = DateTime.parse(dateTimeSet);
-		}else{
-			this.dateTimeSet = null;
-		}
+		this.dateTimeSet = TimeToolkit.getInstance().toDateTime(dateTimeSet, true);
 	}
+	
 	public int getDivision() {
 		return division;
 	}
 	public void setDivision(int division) {
 		this.division = division;
 	}
+	
 	public double getLocationStructureLatitude() {
 		return locationStructureLatitude;
 	}
 	public void setLocationStructureLatitude(double locationStructureLatitude) {
 		this.locationStructureLatitude = locationStructureLatitude;
 	}
+	
 	public double getLocationStructureLongitude() {
 		return locationStructureLongitude;
 	}
 	public void setLocationStructureLongitude(double locationStructureLongitude) {
 		this.locationStructureLongitude = locationStructureLongitude;
 	}
+	
 	public String getLocationStructureName() {
 		return locationStructureName;
 	}
 	public void setLocationStructureName(String locationStructureName) {
 		this.locationStructureName = locationStructureName;
 	}
+	
 	public String getLocationWdid() {
 		return locationWdid;
 	}
 	public void setLocationWdid(String locationWdid) {
 		this.locationWdid = locationWdid;
 	}
+	
 	public double getLocationWdidStreammile() {
 		return locationWdidStreammile;
 	}
 	public void setLocationWdidStreammile(double locationWdidStreammile) {
 		this.locationWdidStreammile = locationWdidStreammile;
 	}
+	
 	public DateTime getModified() {
 		return modified;
 	}
 	public void setModified(String modified) {
-		if(modified != null){
-			int indexLastHyphen = modified.lastIndexOf('-');
-			modified = modified.substring(0, indexLastHyphen);
-			this.modified = DateTime.parse(modified);
-		}else{
-			this.modified = null;
-		}
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
 	}
+	
 	public String getMoreInformation() {
 		return moreInformation;
 	}
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
 	}
+	
 	public double getPriorityAdminNumber() {
 		return priorityAdminNumber;
 	}
 	public void setPriorityAdminNumber(double priorityAdminNumber) {
 		this.priorityAdminNumber = priorityAdminNumber;
 	}
+	
 	public DateTime getPriorityDate() {
 		return priorityDate;
 	}
 	public void setPriorityDate(String priorityDate) {
-		if(priorityDate != null){
-			int indexLastHyphen = priorityDate.lastIndexOf('-');
-			priorityDate = priorityDate.substring(0, indexLastHyphen);
-			this.priorityDate = DateTime.parse(priorityDate);
-		}else{
-			this.priorityDate = null;
-		}
+		this.priorityDate = TimeToolkit.getInstance().toDateTime(priorityDate, true);
 	}
+	
 	public String getPriorityNumber() {
 		return priorityNumber;
 	}
 	public void setPriorityNumber(String priorityNumber) {
 		this.priorityNumber = priorityNumber;
 	}
+	
 	public int getPriorityOrderNumber() {
 		return priorityOrderNumber;
 	}
 	public void setPriorityOrderNumber(int priorityOrderNumber) {
 		this.priorityOrderNumber = priorityOrderNumber;
 	}
+	
 	public String getPriorityStructureName() {
 		return priorityStructureName;
 	}
 	public void setPriorityStructureName(String priorityStructureName) {
 		this.priorityStructureName = priorityStructureName;
 	}
+	
 	public String getPriorityWdid() {
 		return priorityWdid;
 	}
 	public void setPriorityWdid(String priorityWdid) {
 		this.priorityWdid = priorityWdid;
 	}
+	
 	public String getReleaseComment() {
 		return releaseComment;
 	}
 	public void setReleaseComment(String releaseComment) {
 		this.releaseComment = releaseComment;
 	}
+	
 	public String getSetComments() {
 		return setComments;
 	}
 	public void setSetComments(String setComments) {
 		this.setComments = setComments;
 	}
+	
 	public String getWaterSourceName() {
 		return waterSourceName;
 	}
@@ -205,6 +337,11 @@ public class AdministrativeCalls {
 		this.waterSourceName = waterSourceName;
 	}
 	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "AdministrativeCallsActive: [ callNumber: " + callNumber + ", callType: " + callType + ", dateTimeSet: " + dateTimeSet + 

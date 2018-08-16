@@ -11,7 +11,7 @@ import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
  * returned.
- * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-structures-divrec-stagevolume-wdid
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-structures-divrec-comments-wdid
  * @author jurentie
  *
  */
@@ -22,44 +22,53 @@ import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
  * but for now ignore anything that is new so as to not break the code.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DiversionStageVolume {
+public class DiversionComments {
 	
 	/**
 	 * Variables defined in alphabetical order.
 	 * Documentation copied from web services.
 	 */
-	
+
 	/**
-	 * Status of approval 
+	 * Approval status of comment 
 	 */
 	private String approvalStatus;
 	
 	/**
-	 * Date/time of measurement 
+	 * Irrigation year comments 
 	 */
-	private DateTime dataMeasDate;
+	private String comment;
 	
-	/**
+	/** 
+	 * Type of comment 
+	 */
+	private String commentType;
+	
+	/** 
+	 * Irrigation year (Nov 1 to Oct31) 
+	 */
+	private int irrYear;
+	
+	/** 
 	 * Modified date/time 
 	 */
 	private DateTime modified;
 	
-	/**
-	 * Recorded stage (feet) 
+	/** 
+	 * Not used code 
 	 */
-	private double stage;
+	private String notUsed;
 	
 	/** 
-	 * Recorded volume (AF) 
+	 * Not used code description 
 	 */
-	private double volume;
-
-	/**
+	private String notUsedDescr;
+	
+	/** 
 	 * WDID 
 	 */
 	private String wdid;
-	
-	
+
 	/**
 	 * Getters and setters for defined variables.
 	 */
@@ -70,32 +79,46 @@ public class DiversionStageVolume {
 		this.approvalStatus = approvalStatus;
 	}
 
-	public DateTime getDataMeasDate() {
-		return dataMeasDate;
+	public String getComment() {
+		return comment;
 	}
-	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, true);
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public String getCommentType() {
+		return commentType;
+	}
+	public void setCommentType(String commentType) {
+		this.commentType = commentType;
+	}
+
+	public int getIrrYear() {
+		return irrYear;
+	}
+	public void setIrrYear(int irrYear) {
+		this.irrYear = irrYear;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 
-	public double getStage() {
-		return stage;
+	public String getNotUsed() {
+		return notUsed;
 	}
-	public void setStage(double stage) {
-		this.stage = stage;
+	public void setNotUsed(String notUsed) {
+		this.notUsed = notUsed;
 	}
 
-	public double getVolume() {
-		return volume;
+	public String getNotUsedDescr() {
+		return notUsedDescr;
 	}
-	public void setVolume(double volume) {
-		this.volume = volume;
+	public void setNotUsedDescr(String notUsedDescr) {
+		this.notUsedDescr = notUsedDescr;
 	}
 
 	public String getWdid() {
@@ -112,9 +135,9 @@ public class DiversionStageVolume {
 	 */
 	@Override
 	public String toString(){
-		return "stageVolume : [ wdid: " + wdid + ", dataMeasDate: " + dataMeasDate + ", stage: " + 
-				stage + ", volume: " + volume + ", approvalStatus: " + approvalStatus + ", modified: " +
-				modified;
+		return "DiversionComment: [ wdid: " + wdid + ", commentType: " + commentType + ", irrYear: " + 
+				irrYear + ", notUsed: " + notUsed + ", notUsedDescr: " + notUsedDescr + ", comment: " + 
+				comment + ", approvalStatus: " + approvalStatus + ", modified: " + modified + " ]";
 	}
-
+	
 }

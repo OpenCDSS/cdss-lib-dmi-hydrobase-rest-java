@@ -43,7 +43,7 @@ import cdss.dmi.hydrobase.rest.dao.AdministrativeCalls;
 import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
-import cdss.dmi.hydrobase.rest.dao.DiversionComment;
+import cdss.dmi.hydrobase.rest.dao.DiversionComments;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
@@ -206,15 +206,15 @@ public List<ReferenceTablesCounty> getCounties() throws MalformedURLException{
 	return countyList;
 }
 
-public List<DiversionComment> getDivComments(String wdid){
+public List<DiversionComments> getDivComments(String wdid){
 	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
-	List<DiversionComment> divComments = new ArrayList<>();
+	List<DiversionComments> divComments = new ArrayList<>();
 	ObjectMapper mapper = new ObjectMapper();
 	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + "?apiKey=" + getApiKey();
 	try{
 		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 		for(int i = 0; i < results.size(); i++){
-			DiversionComment divComment = (DiversionComment)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionComment.class);
+			DiversionComments divComment = (DiversionComments)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionComments.class);
 			divComments.add(divComment);
 		}
 	}catch(Exception e){
@@ -1736,11 +1736,11 @@ throws MalformedURLException, Exception
 			// Diversion Comments
 			boolean hasComments = waterclassHasComments(wdid);
 			if(hasComments){
-				List<DiversionComment> divComments = getDivComments(wdid);
+				List<DiversionComments> divComments = getDivComments(wdid);
 				if(divComments != null){
 					TSData it;
 					for(int i = 0; i < divComments.size(); i++){
-						DiversionComment divComment = divComments.get(i);
+						DiversionComments divComment = divComments.get(i);
 						int irrYear = divComment.getIrrYear();
 						if(irrYear >= ts.getDate1().getYear() &&
 								irrYear <= ts.getDate2().getYear()){
@@ -2621,14 +2621,39 @@ public AdministrativeCalls getAdministrativeCallsActive(String callId){
  */
 public static void main(String[] args) throws URISyntaxException, IOException{
 
-	String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
+	/*String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
 	JsonNode json = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	
 	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 
 	ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-	System.out.println(chrds.getAdministrativeCallsActive("22501"));
+	System.out.println(chrds.getAdministrativeCallsActive("22501"));*/
+	
+	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+	
+	try {
+		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
+		//System.out.println(chrds.getAPIVersion());
+		
+		DateTime date1 = new DateTime(DateTime.PRECISION_DAY);
+		date1.setYear(2001);
+		date1.setMonth(04);
+		date1.setDay(10);
+		
+		DateTime date2 = new DateTime(DateTime.PRECISION_DAY);
+		date2.setYear(2005);
+		date2.setMonth(12);
+		date2.setDay(14);
+		
+		chrds.readTimeSeries("wdid:0300915.DWR.DivTotal.Year~ColoradoHydroBaseRest", date1, date2, true);
+	} catch (MalformedURLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
 }
 
 }
