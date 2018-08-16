@@ -39,6 +39,7 @@ import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Station_InputFilter_JPan
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Well_InputFilter_JPanel;
+import cdss.dmi.hydrobase.rest.dao.AdministrativeCalls;
 import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
@@ -2606,9 +2607,12 @@ where ID is the station.
 }*/
 
 // NEW CODE IN PROGRESS:
-/*public getAdministrativeCallsActive(){
-	
-}*/
+public AdministrativeCalls getAdministrativeCallsActive(String callId){
+	String request = getServiceRootURI() + "/administrativecalls/" + callId + "?format=json";
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	AdministrativeCalls aca = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
+	return aca;
+}
 
 /**
  * Inserting main method for testing purposes:
@@ -2624,40 +2628,7 @@ public static void main(String[] args) throws URISyntaxException, IOException{
 
 	ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-	chrds.getParcelUseTSList("2000505");
-
-	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
-	
-	try {
-		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
-
-		//System.out.println(chrds.getAPIVersion());
-		
-		/*HashMap<String, String> filters = new HashMap<>();
-		
-		filters.put("county", "mesa");
-		filters.put("wdid", "0900123");
-		
-		chrds.getStructures(filters);
-		
-		DateTime date1 = new DateTime(DateTime.PRECISION_DAY);
-		date1.setYear(2001);
-		date1.setMonth(04);
-		date1.setDay(10);
-		
-		DateTime date2 = new DateTime(DateTime.PRECISION_DAY);
-		date2.setYear(2005);
-		date2.setMonth(12);
-		date2.setDay(14);
-		
-		chrds.readTimeSeries("wdid:0300915.DWR.DivTotal.Day~ColoradoHydroBaseRest", date1, date2, true);
-	} catch (MalformedURLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}*/
+	System.out.println(chrds.getAdministrativeCallsActive("22501"));
 }
 
 }
