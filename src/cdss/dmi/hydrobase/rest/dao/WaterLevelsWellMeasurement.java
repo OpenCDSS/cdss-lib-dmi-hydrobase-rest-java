@@ -4,167 +4,214 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wellmeasurements
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wellmeasurements-wellId 
+ * @author jurentie
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WaterLevelsWellMeasurement {
 	
 	/**
-	 * Variables declared in order as returned
-	 * by DWR API. For more detail see: 
-	 * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wellmeasurements
-	 * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wellmeasurements-wellId
+	 * Variables defined in alphabetical order. 
+	 * Documentation copied from web services.
 	 */
 	
-	/* Well ID Number */
-	private int wellId;
-	
-	/* Well Name */
-	private String wellName;
-	
-	/* DWR Division */
+	/** 
+	 * County where the well is located
+	 */
+	private String county;
+
+	/** 
+	 * Primary source/provider of well measurement data
+	 */
+	private String dataSource;
+
+	/**
+	 * Elevation of water in well on this date minus elevation 
+	 * on the most recent prior date (feet)
+	 */
+	private double delta;
+
+	/**
+	 * Depth from measure point to water level in well (feet)
+	 */
+	private double depthToWater;
+
+	/**
+	 * Depth to Water Below Land Surface (ft)
+	 */
+	private double depthWaterBelowLandSurface;
+
+	/**
+	 * Eight established geographic areas in Colorado's Eastern Plains where users 
+	 * rely primarily on groundwater for water supply
+	 */
+	private String designatedBasin;
+
+	/** 
+	 * DWR Division 
+	 */
 	private int division;
-	
-	/* DWR Water District */
+
+	/**
+	 * Elevation of water level in well (feet above mean sea level)
+	 */
+	private double elevationOfWater;
+
+	/**
+	 * Thirteen local districts, within the Designated Basins, 
+	 * with additional administrative authority
+	 */
+	private String managementDistrict;
+
+	/**
+	 * Date of measurement
+	 */
+	private LocalDateTime measurementDate;
+
+	/**
+	 * Height of measure point above surface (feet)
+	 */
+	private double measuringPointAboveLandSurface;
+
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
+	private LocalDateTime modified;
+
+	/**
+	 * Name of DWR Basin Summary publication in which well is included, 
+	 * if applicable
+	 */
+	private String publication;
+
+	/**
+	 * Manual observation
+	 */
+	private String published;
+
+	/**
+	 * DWR Water District 
+	 */
 	private int waterDistrict;
 	
-	/* County */
-	private String county;
+	/**
+	 * Unique ID of well in DWR database
+	 */
+	private int wellId;
 	
-	/* Management District Name */
-	private String managementDistrict;
+	/**
+	 * Name of well in DWR database
+	 */
+	private String wellName;
 	
-	/* Designated Basin Name */
-	private String designatedBasin;
-	
-	/* Publication Name */
-	private String publication;
-	
-	/* Measurement Date */
-	private LocalDateTime measurementDate;
-	
-	/* Depth to Water (ft) */
-	private double depthToWater;
-	
-	/* Measuring Point Above Land Surface (ft) */
-	private double measuringPointAboveLandSurface;
-	
-	/* Depth to Water Below Land Surface */
-	private double depthWaterBelowLandSurface;
-	
-	/* Elevation of Water (Above Sea Level) */
-	private double elevationOfWater;
-	
-	/* Change From Previous Measure (ft) */
-	private double delta;
-	
-	/* Data Source */
-	private String dataSource;
-	
-	/* Published Measurement? */
-	private String published;
-	
-	/* Measurement Last Modified Date */
-	private LocalDateTime modified;
-	
-	public int getWellId() {
-		return wellId;
-	}
-	public void setWellId(int wellId) {
-		this.wellId = wellId;
-	}
-	public String getWellName() {
-		return wellName;
-	}
-	public void setWellName(String wellName) {
-		this.wellName = wellName;
-	}
-	public int getDivision() {
-		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
-	}
-	public int getWaterDistrict() {
-		return waterDistrict;
-	}
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
+	/**
+	 * Getters and setters of defined variables
+	 */
 	public String getCounty() {
 		return county;
 	}
-	public void setCounty(String county) {
-		this.county = county;
+	public String getDataSource() {
+		return dataSource;
 	}
-	public String getManagementDistrict() {
-		return managementDistrict;
+	public int getDay(){
+		return measurementDate.getDayOfMonth();
 	}
-	public void setManagementDistrict(String managementDistrict) {
-		this.managementDistrict = managementDistrict;
+	public double getDelta() {
+		return delta;
+	}
+	public double getDepthToWater() {
+		return depthToWater;
+	}
+	public double getDepthWaterBelowLandSurface() {
+		return depthWaterBelowLandSurface;
 	}
 	public String getDesignatedBasin() {
 		return designatedBasin;
 	}
-	public void setDesignatedBasin(String designatedBasin) {
-		this.designatedBasin = designatedBasin;
+	public int getDivision() {
+		return division;
+	}
+	public double getElevationOfWater() {
+		return elevationOfWater;
+	}
+	public String getManagementDistrict() {
+		return managementDistrict;
+	}
+	public LocalDateTime getMeasurementDate() {
+		return measurementDate;
+	}
+	public double getMeasuringPointAboveLandSurface() {
+		return measuringPointAboveLandSurface;
+	}
+	public LocalDateTime getModified() {
+		return modified;
+	}
+	public int getMonth(){
+		return measurementDate.getMonthValue();
 	}
 	public String getPublication() {
 		return publication;
 	}
-	public void setPublication(String publication) {
-		this.publication = publication;
+	public String getPublished() {
+		return published;
 	}
-	public LocalDateTime getMeasurementDate() {
-		return measurementDate;
+	public int getWaterDistrict() {
+		return waterDistrict;
+	}
+	public int getWellId() {
+		return wellId;
+	}
+	public String getWellName() {
+		return wellName;
+	}
+	public int getYear(){
+		return measurementDate.getYear();
+	}
+	public void setCounty(String county) {
+		this.county = county;
+	}
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	public void setDelta(double delta) {
+		this.delta = delta;
+	}
+	public void setDepthToWater(double depthToWater) {
+		this.depthToWater = depthToWater;
+	}
+	public void setDepthWaterBelowLandSurface(double depthWaterBelowLandSurface) {
+		this.depthWaterBelowLandSurface = depthWaterBelowLandSurface;
+	}
+	public void setDesignatedBasin(String designatedBasin) {
+		this.designatedBasin = designatedBasin;
+	}
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	public void setElevationOfWater(double elevationOfWater) {
+		this.elevationOfWater = elevationOfWater;
+	}
+	public void setManagementDistrict(String managementDistrict) {
+		this.managementDistrict = managementDistrict;
 	}
 	public void setMeasurementDate(String measurementDate) {
 		int indexOf = measurementDate.lastIndexOf("-");
 		measurementDate = measurementDate.substring(0, indexOf);
 		this.measurementDate = LocalDateTime.parse(measurementDate);
 	}
-	public double getDepthToWater() {
-		return depthToWater;
-	}
-	public void setDepthToWater(double depthToWater) {
-		this.depthToWater = depthToWater;
-	}
-	public double getMeasuringPointAboveLandSurface() {
-		return measuringPointAboveLandSurface;
-	}
 	public void setMeasuringPointAboveLandSurface(double measuringPointAboveLandSurface) {
 		this.measuringPointAboveLandSurface = measuringPointAboveLandSurface;
-	}
-	public double getDepthWaterBelowLandSurface() {
-		return depthWaterBelowLandSurface;
-	}
-	public void setDepthWaterBelowLandSurface(double depthWaterBelowLandSurface) {
-		this.depthWaterBelowLandSurface = depthWaterBelowLandSurface;
-	}
-	public double getElevationOfWater() {
-		return elevationOfWater;
-	}
-	public void setElevationOfWater(double elevationOfWater) {
-		this.elevationOfWater = elevationOfWater;
-	}
-	public double getDelta() {
-		return delta;
-	}
-	public void setDelta(double delta) {
-		this.delta = delta;
-	}
-	public String getDataSource() {
-		return dataSource;
-	}
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
-	}
-	public String getPublished() {
-		return published;
-	}
-	public void setPublished(String published) {
-		this.published = published;
-	}
-	public LocalDateTime getModified() {
-		return modified;
 	}
 	public void setModified(String modified) {
 		if(modified != null){
@@ -175,19 +222,29 @@ public class WaterLevelsWellMeasurement {
 			this.modified = null;
 		}
 	}
-	
-	public int getYear(){
-		return measurementDate.getYear();
+	public void setPublication(String publication) {
+		this.publication = publication;
+	}
+	public void setPublished(String published) {
+		this.published = published;
 	}
 	
-	public int getMonth(){
-		return measurementDate.getMonthValue();
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
 	}
 	
-	public int getDay(){
-		return measurementDate.getDayOfMonth();
+	public void setWellId(int wellId) {
+		this.wellId = wellId;
 	}
 	
+	public void setWellName(String wellName) {
+		this.wellName = wellName;
+	}
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "WaterLEvelsWellMeasurements [ wellId: " + wellId + ", wellName: " + wellName + 

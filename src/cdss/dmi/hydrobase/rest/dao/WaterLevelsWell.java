@@ -4,456 +4,589 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells-wellId * @author jurentie
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WaterLevelsWell {
 	
 	/**
-	 * Variables declared in order as returned
-	 * by DWR API. For more detail see: 
-	 * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells
-	 * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells-wellId
+	 * Variables defined in alphabetical order. 
+	 * Documentation copied from web services.
 	 */
 	
-	/* Well ID number */
-	private int wellId;
-	
-	/* Well Name */
-	private String wellName;
-	
-	/* Receipt */
-	private String receipt;
-	
-	/* Permit */
+	/**
+	 * Aquifer, or aquifers, in which well is located 
+	 * (as determined by the data source)
+	 */
+	private String aquifers;
+
+	/**
+	 * Depth from surface to base of grout (feet) 
+	 */
+	private int baseOfGrout;
+
+	/**
+	 * Depth from surface to bottom of perforated casing (feet) 
+	 */
+	private int bottomPerforatedCasing;
+
+	/**
+	 * Person(s) or entity associated with well either 
+	 * as applicant or primary contact
+	 */
+	private String contact;
+
+	/**
+	 * Distance and direction from East/West section line (feet)
+	 */
+	private int coordinatesEw;
+
+	/**
+	 * Direction of measurement from east/west section line 
+	 */
+	private String coordinatesEwDir;
+
+	/** 
+	 * Distance from north/south section line (feet) 
+	 */
+	private int coordinatesNs;
+
+	/**
+	 * Direction of measurement from north/south section line 
+	 * */
+	private String coordinatesNsDir;
+
+	/**
+	 * County where the well is located
+	 */
+	private String county;
+
+	/**
+	 * Primary source/provider of well measurement data
+	 */
+	private String dataSource;
+
+	/**
+	 * DataType is not from web services but was added by @jurentie. 
+	 * DataType is used later in the code such as ColoradoHydroBaseRest
+	 */
+	private String dataType;
+
+	/**
+	 * Eight established geographic areas in Colorado's Eastern Plains 
+	 * where users rely primarily on groundwater for water supply
+	 */
+	private String designatedBasin;
+
+	/** 
+	 * DWR Water Division 
+	 */
+	private int division;
+
+	/**
+	 * Surface elevation at the location of the well (feet above 
+	 * mean sea level)
+	 */
+	private double elevation;
+
+	/**
+	 * Accuracy of the ground surface elevation
+	 */
+	private String elevationAccuracy;
+
+	/**
+	 * Latitude value in decimal degrees
+	 */
+	private double latitude;
+
+	/**
+	 * Accuracy of location coordinates
+	 */
+	private String locationAccuracy;
+
+	/**
+	 * Bereau of Reclamation location identification string based on 
+	 * the PLSS location
+	 */
+	private String locationNumber;
+
+	/** 
+	 * Longitude in decimal degrees 
+	 */
+	private double longitude;
+
+	/**
+	 * Thirteen local districts, within the Designated Basins, 
+	 * with additional administrative authority
+	 */
+	private String managementDistrict;
+
+	/**
+	 * Name of the entity that measured the water level depth
+	 */
+	private String measurementBy;
+
+	/**
+	 * Date of last measurement
+	 */
+	private LocalDateTime measurementDate;
+
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
+	private LocalDateTime modified;
+
+	/** 
+	 * Hyperlink to additional information 
+	 */
+	private String moreInformation;
+
+	/**
+	 * Well permit number
+	 */
 	private String permit;
-	
-	/* Total Depth of Well */
+
+	/**
+	 * Principal Meridian of well’s legal location - there are 5 principal 
+	 * meridians in CO: Sixth (S), New Mexico (N), Baca (B), Costilla (C), 
+	 * and Ute (U)
+	 */
+	private String pm;
+
+	/**
+	 * Count of measurements in the well’s period of record
+	 */
+	private int porCount;
+
+	/**
+	 * Date of last measurement in the well’s period of record
+	 */
+	private LocalDateTime porEnd;
+
+	/**
+	 * Date of first measurement in the well’s period of record
+	 */
+	private LocalDateTime porStart;
+
+	/**
+	 * Name of DWR Basin Summary publication in which well is included, if applicable
+	 */
+	private String publicationName;
+
+	/**
+	 * Legal Location: 10 acre quarter section indicator 
+	 */
+	private String q10;
+
+	/** 
+	 * Legal Location: 160 acre quarter section indicator 
+	 */
+	private String q160;
+
+	/** 
+	 * Legal Location: 40 acre quarter section inidcator 
+	 */
+	private String q40;
+
+	/**
+	 * Legal location: A number in the format “nnnd” where “nnn” 
+	 * is the range number and “d” is the direction either East or West
+	 */
+	private String range;
+
+	/**
+	 * Permit application receipt number
+	 */
+	private String receipt;
+
+	/**
+	 * Section number - township, range divided into 36 one square mile sections; 
+	 * “U” indicates location in Ute Correction (Division 7 only)
+	 */
+	private String section;
+
+	/**
+	 * Timestep is not a part of web services and was added by @jurentie. 
+	 * Timestep is used in later code such as ColoradoHydroBaseRestDataStore
+	 */
+	private String timeStep;
+
+	/**
+	 * Depth from surface to top of perforated casing (feet)
+	 */
+	private int topPerforatedCasing;
+
+	/**
+	 * Legal Location: Township number and direction
+	 */
+	private String township;
+
+	/**
+	 * US Geologic Survey well identifier
+	 */
+	private String usgsSiteId;
+
+	/** 
+	 * The x (Easting) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum) 
+	 */
+	private double utmX;
+
+	/** 
+	 * The y (Northing) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum) 
+	 */
+	private double utmY;
+
+	/** 
+	 * DWR Water District 
+	 */
+	private int waterDistrict;
+
+	/** 
+	 * Depth to water below land surface (ft) on measurement date
+	 */
+	private double waterLevelDepth;
+
+	/** 
+	 * Elevation of water above mean sea level (feet)
+	 */
+	private double waterLevelElevation;
+
+	/**
+	 * DWR unique structure identifier
+	 */
+	private String wdid;
+
+	/**
+	 * Completed depth of well (ft)
+	 */
 	private int wellDepth;
 	
-	/* Last Measurement Date */
-	private LocalDateTime measurementDate;
+	/**
+	 * Unique ID of well in DWR database
+	 */
+	private int wellId;
 	
-	/* Water Level Depth */
-	private double waterLevelDepth;
+	/**
+	 * Name of well in DWR database
+	 */
+	private String wellName;
 	
-	/* Water Level Elevation */
-	private double waterLevelElevation;
-	
-	/* Entity Measuring Water */
-	private String measurementBy;
-	
-	/* Date of First Measurement */
-	private LocalDateTime porStart;
-	
-	/* Date of Last Measurement */
-	private LocalDateTime porEnd;
-	
-	/* Number of Measurements Made */
-	private int porCount;
-	
-	/* Publication Name */
-	private String publicationName;
-	
-	/* Water Aquifer(s) */
-	private String aquifers;
-	
-	/* Surface Elevation (Ft above Sea Level) */
-	private double elevation;
-	
-	/* Elevation Accuracy */
-	private String elevationAccuracy;
-	
-	/* Depth to Top of Perforated Casing (ft) */
-	private int topPerforatedCasing;
-	
-	/* Depth to Bottom of Perforated Casing (ft) */
-	private int bottomPerforatedCasing;
-	
-	/* Depth to Base of Grout (ft) */
-	private int baseOfGrout;
-	
-	/* WDID */
-	private String wdid;
-	
-	/* Location Number */
-	private String locationNumber;
-	
-	/* USGS Site ID */
-	private String usgsSiteId;
-	
-	/* Well Contact Information */
-	private String contact;
-	
-	/* Water Division */
-	private int division;
-	
-	/* Water District */
-	private int waterDistrict;
-	
-	/* County */
-	private String county;
-	
-	/* Designated Basin */
-	private String designatedBasin;
-	
-	/* Management District */
-	private String managementDistrict;
-	
-	/* 10 acre quarter section indicator */
-	private String q10;
-	
-	/* 40 acre quarter section inidcator */
-	private String q40;
-	
-	/* 160 acre quarter section indicator */
-	private String q160;
-	
-	/* Section */
-	private String section;
-	
-	/* Township */
-	private String township;
-	
-	/* Range */
-	private String range;
-	
-	/* Principal Meridian */
-	private String pm;
-	
-	/* Distance from east/west section line (feet) */
-	private int coordinatesEw;
-	
-	/* Direction of measurement from east/west section line */
-	private String coordinatesEwDir;
-	
-	/* Distance from north/south section line (feet) */
-	private int coordinatesNs;
-	
-	/* Direction of measurement from north/south section line */
-	private String coordinatesNsDir;
-	
-	/* The x (Easting) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum) */
-	private double utmX;
-	
-	/* The y (Northing) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum) */
-	private double utmY;
-	
-	/* Latitude in decimal degrees */
-	private double latitude;
-	
-	/* Longitude in decimal degrees */
-	private double longitude;
-	
-	/* Method used to measure location */
-	private String locationAccuracy;
-	
-	/* Entity Supplying Data */
-	private String dataSource;
-	
-	/* Date record last modified */
-	private LocalDateTime modified;
-	
-	/* Link to additional information */
-	private String moreInformation;
-	
-	private String timeStep;
-	
-	private String dataType;
-	
-	public String getDataType() {
-		return dataType;
-	}
-	public void setDataType(String dataType) {
-		this.dataType = dataType;
-	}
-	public String getTimeStep() {
-		return timeStep;
-	}
-	public void setTimeStep(String timeStep) {
-		this.timeStep = timeStep;
-	}
-	public int getWellId() {
-		return wellId;
-	}
-	public void setWellId(int wellId) {
-		this.wellId = wellId;
-	}
-	public String getWellName() {
-		return wellName;
-	}
-	public void setWellName(String wellName) {
-		this.wellName = wellName;
-	}
-	public String getReceipt() {
-		return receipt;
-	}
-	public void setReceipt(String receipt) {
-		this.receipt = receipt;
-	}
-	public String getPermit() {
-		return permit;
-	}
-	public void setPermit(String permit) {
-		this.permit = permit;
-	}
-	public int getWellDepth() {
-		return wellDepth;
-	}
-	public void setWellDepth(int wellDepth) {
-		this.wellDepth = wellDepth;
-	}
-	public LocalDateTime getMeasurementDate() {
-		return measurementDate;
-	}
-	public void setMeasurementDate(String measurementDate) {
-		this.measurementDate = LocalDateTime.parse(measurementDate);
-	}
-	public double getWaterLevelDepth() {
-		return waterLevelDepth;
-	}
-	public void setWaterLevelDepth(double waterLevelDepth) {
-		this.waterLevelDepth = waterLevelDepth;
-	}
-	public double getWaterLevelElevation() {
-		return waterLevelElevation;
-	}
-	public void setWaterLevelElevation(double waterLevelElevation) {
-		this.waterLevelElevation = waterLevelElevation;
-	}
-	public String getMeasurementBy() {
-		return measurementBy;
-	}
-	public void setMeasurementBy(String measurementBy) {
-		this.measurementBy = measurementBy;
-	}
-	public LocalDateTime getPorStart() {
-		return porStart;
-	}
-	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
-	}
-	public LocalDateTime getPorEnd() {
-		return porEnd;
-	}
-	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
-	}
-	public int getPorCount() {
-		return porCount;
-	}
-	public void setPorCount(int porCount) {
-		this.porCount = porCount;
-	}
-	public String getPublicationName() {
-		return publicationName;
-	}
-	public void setPublicationName(String publicationName) {
-		this.publicationName = publicationName;
-	}
+	/**
+	 * Getters and setters of defined variables
+	 */
 	public String getAquifers() {
 		return aquifers;
-	}
-	public void setAquifers(String aquifers) {
-		this.aquifers = aquifers;
-	}
-	public double getElevation() {
-		return elevation;
-	}
-	public void setElevation(double elevation) {
-		this.elevation = elevation;
-	}
-	public String getElevationAccuracy() {
-		return elevationAccuracy;
-	}
-	public void setElevationAccuracy(String elevationAccuracy) {
-		this.elevationAccuracy = elevationAccuracy;
-	}
-	public int getTopPerforatedCasing() {
-		return topPerforatedCasing;
-	}
-	public void setTopPerforatedCasing(int topPerforatedCasing) {
-		this.topPerforatedCasing = topPerforatedCasing;
-	}
-	public int getBottomPerforatedCasing() {
-		return bottomPerforatedCasing;
-	}
-	public void setBottomPerforatedCasing(int bottomPerforatedCasing) {
-		this.bottomPerforatedCasing = bottomPerforatedCasing;
 	}
 	public int getBaseOfGrout() {
 		return baseOfGrout;
 	}
-	public void setBaseOfGrout(int baseOfGrout) {
-		this.baseOfGrout = baseOfGrout;
-	}
-	public String getWdid() {
-		return wdid;
-	}
-	public void setWdid(String wdid) {
-		this.wdid = wdid;
-	}
-	public String getLocationNumber() {
-		return locationNumber;
-	}
-	public void setLocationNumber(String locationNumber) {
-		this.locationNumber = locationNumber;
-	}
-	public String getUsgsSiteId() {
-		return usgsSiteId;
-	}
-	public void setUsgsSiteId(String usgsSiteId) {
-		this.usgsSiteId = usgsSiteId;
+	
+	public int getBottomPerforatedCasing() {
+		return bottomPerforatedCasing;
 	}
 	public String getContact() {
 		return contact;
 	}
-	public void setContact(String contact) {
-		this.contact = contact;
-	}
-	public int getDivision() {
-		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
-	}
-	public int getWaterDistrict() {
-		return waterDistrict;
-	}
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
-	public String getCounty() {
-		return county;
-	}
-	public void setCounty(String county) {
-		this.county = county;
-	}
-	public String getDesignatedBasin() {
-		return designatedBasin;
-	}
-	public void setDesignatedBasin(String designatedBasin) {
-		this.designatedBasin = designatedBasin;
-	}
-	public String getManagementDistrict() {
-		return managementDistrict;
-	}
-	public void setManagementDistrict(String managementDistrict) {
-		this.managementDistrict = managementDistrict;
-	}
-	public String getQ10() {
-		return q10;
-	}
-	public void setQ10(String q10) {
-		this.q10 = q10;
-	}
-	public String getQ40() {
-		return q40;
-	}
-	public void setQ40(String q40) {
-		this.q40 = q40;
-	}
-	public String getQ160() {
-		return q160;
-	}
-	public void setQ160(String q160) {
-		this.q160 = q160;
-	}
-	public String getSection() {
-		return section;
-	}
-	public void setSection(String section) {
-		this.section = section;
-	}
-	public String getTownship() {
-		return township;
-	}
-	public void setTownship(String township) {
-		this.township = township;
-	}
-	public String getRange() {
-		return range;
-	}
-	public void setRange(String range) {
-		this.range = range;
-	}
-	public String getPm() {
-		return pm;
-	}
-	public void setPm(String pm) {
-		this.pm = pm;
-	}
 	public int getCoordinatesEw() {
 		return coordinatesEw;
-	}
-	public void setCoordinatesEw(int coordinatesEw) {
-		this.coordinatesEw = coordinatesEw;
 	}
 	public String getCoordinatesEwDir() {
 		return coordinatesEwDir;
 	}
-	public void setCoordinatesEwDir(String coordinatesEwDir) {
-		this.coordinatesEwDir = coordinatesEwDir;
-	}
 	public int getCoordinatesNs() {
 		return coordinatesNs;
-	}
-	public void setCoordinatesNs(int coordinatesNs) {
-		this.coordinatesNs = coordinatesNs;
 	}
 	public String getCoordinatesNsDir() {
 		return coordinatesNsDir;
 	}
-	public void setCoordinatesNsDir(String coordinatesNsDir) {
-		this.coordinatesNsDir = coordinatesNsDir;
-	}
-	public double getUtmX() {
-		return utmX;
-	}
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
-	}
-	public double getUtmY() {
-		return utmY;
-	}
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
-	}
-	public double getLatitude() {
-		return latitude;
-	}
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
-	}
-	public double getLongitude() {
-		return longitude;
-	}
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
-	public String getLocationAccuracy() {
-		return locationAccuracy;
-	}
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
+	public String getCounty() {
+		return county;
 	}
 	public String getDataSource() {
 		return dataSource;
 	}
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
+	public String getDataType() {
+		return dataType;
+	}
+	public String getDesignatedBasin() {
+		return designatedBasin;
+	}
+	public int getDivision() {
+		return division;
+	}
+	public double getElevation() {
+		return elevation;
+	}
+	public String getElevationAccuracy() {
+		return elevationAccuracy;
+	}
+	public double getLatitude() {
+		return latitude;
+	}
+	public String getLocationAccuracy() {
+		return locationAccuracy;
+	}
+	public String getLocationNumber() {
+		return locationNumber;
+	}
+	public double getLongitude() {
+		return longitude;
+	}
+	public String getManagementDistrict() {
+		return managementDistrict;
+	}
+	public String getMeasurementBy() {
+		return measurementBy;
+	}
+	public LocalDateTime getMeasurementDate() {
+		return measurementDate;
 	}
 	public LocalDateTime getModified() {
 		return modified;
 	}
-	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
-	}
 	public String getMoreInformation() {
 		return moreInformation;
+	}
+	public String getPermit() {
+		return permit;
+	}
+	public String getPm() {
+		return pm;
+	}
+	public int getPorCount() {
+		return porCount;
+	}
+	public LocalDateTime getPorEnd() {
+		return porEnd;
+	}
+	public LocalDateTime getPorStart() {
+		return porStart;
+	}
+	public String getPublicationName() {
+		return publicationName;
+	}
+	public String getQ10() {
+		return q10;
+	}
+	public String getQ160() {
+		return q160;
+	}
+	public String getQ40() {
+		return q40;
+	}
+	public String getRange() {
+		return range;
+	}
+	public String getReceipt() {
+		return receipt;
+	}
+	public String getSection() {
+		return section;
+	}
+	public String getTimeStep() {
+		return timeStep;
+	}
+	public int getTopPerforatedCasing() {
+		return topPerforatedCasing;
+	}
+	public String getTownship() {
+		return township;
+	}
+	public String getUsgsSiteId() {
+		return usgsSiteId;
+	}
+	public double getUtmX() {
+		return utmX;
+	}
+	public double getUtmY() {
+		return utmY;
+	}
+	public int getWaterDistrict() {
+		return waterDistrict;
+	}
+	public double getWaterLevelDepth() {
+		return waterLevelDepth;
+	}
+	public double getWaterLevelElevation() {
+		return waterLevelElevation;
+	}
+	public String getWdid() {
+		return wdid;
+	}
+	public int getWellDepth() {
+		return wellDepth;
+	}
+	public int getWellId() {
+		return wellId;
+	}
+	public String getWellName() {
+		return wellName;
+	}
+	public void setAquifers(String aquifers) {
+		this.aquifers = aquifers;
+	}
+	public void setBaseOfGrout(int baseOfGrout) {
+		this.baseOfGrout = baseOfGrout;
+	}
+	public void setBottomPerforatedCasing(int bottomPerforatedCasing) {
+		this.bottomPerforatedCasing = bottomPerforatedCasing;
+	}
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+	public void setCoordinatesEw(int coordinatesEw) {
+		this.coordinatesEw = coordinatesEw;
+	}
+	public void setCoordinatesEwDir(String coordinatesEwDir) {
+		this.coordinatesEwDir = coordinatesEwDir;
+	}
+	public void setCoordinatesNs(int coordinatesNs) {
+		this.coordinatesNs = coordinatesNs;
+	}
+	public void setCoordinatesNsDir(String coordinatesNsDir) {
+		this.coordinatesNsDir = coordinatesNsDir;
+	}
+	public void setCounty(String county) {
+		this.county = county;
+	}
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
+	public void setDesignatedBasin(String designatedBasin) {
+		this.designatedBasin = designatedBasin;
+	}
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	public void setElevation(double elevation) {
+		this.elevation = elevation;
+	}
+	public void setElevationAccuracy(String elevationAccuracy) {
+		this.elevationAccuracy = elevationAccuracy;
+	}
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+	public void setLocationNumber(String locationNumber) {
+		this.locationNumber = locationNumber;
+	}
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+	public void setManagementDistrict(String managementDistrict) {
+		this.managementDistrict = managementDistrict;
+	}
+	public void setMeasurementBy(String measurementBy) {
+		this.measurementBy = measurementBy;
+	}
+	public void setMeasurementDate(String measurementDate) {
+		this.measurementDate = LocalDateTime.parse(measurementDate);
+	}
+	public void setModified(String modified) {
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
 	}
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
 	}
-	
+	public void setPermit(String permit) {
+		this.permit = permit;
+	}
+	public void setPm(String pm) {
+		this.pm = pm;
+	}
+	public void setPorCount(int porCount) {
+		this.porCount = porCount;
+	}
+	public void setPorEnd(String porEnd) {
+		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
+	}
+	public void setPorStart(String porStart) {
+		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
+	}
+	public void setPublicationName(String publicationName) {
+		this.publicationName = publicationName;
+	}
+	public void setQ10(String q10) {
+		this.q10 = q10;
+	}
+	public void setQ160(String q160) {
+		this.q160 = q160;
+	}
+	public void setQ40(String q40) {
+		this.q40 = q40;
+	}
+	public void setRange(String range) {
+		this.range = range;
+	}
+	public void setReceipt(String receipt) {
+		this.receipt = receipt;
+	}
+	public void setSection(String section) {
+		this.section = section;
+	}
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
+	public void setTopPerforatedCasing(int topPerforatedCasing) {
+		this.topPerforatedCasing = topPerforatedCasing;
+	}
+	public void setTownship(String township) {
+		this.township = township;
+	}
+	public void setUsgsSiteId(String usgsSiteId) {
+		this.usgsSiteId = usgsSiteId;
+	}
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+	public void setWaterLevelDepth(double waterLevelDepth) {
+		this.waterLevelDepth = waterLevelDepth;
+	}
+	public void setWaterLevelElevation(double waterLevelElevation) {
+		this.waterLevelElevation = waterLevelElevation;
+	}
+	public void setWdid(String wdid) {
+		this.wdid = wdid;
+	}
+	public void setWellDepth(int wellDepth) {
+		this.wellDepth = wellDepth;
+	}
+	public void setWellId(int wellId) {
+		this.wellId = wellId;
+	}
+	public void setWellName(String wellName) {
+		this.wellName = wellName;
+	}
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "WaterLevelsWells [ wellId: " + wellId + ", wellName: " + wellName + ", receipt: " + receipt + 
@@ -471,6 +604,7 @@ public class WaterLevelsWell {
 				coordinatesEw + ", coordinatesEwDir: " + coordinatesEwDir + ", coordinatesNs: " + coordinatesNs + 
 				", coordinatesNsDir: " + coordinatesNsDir + ", utmX: " + utmX + ", utmY: " + utmY + ", latitude: " +
 				latitude + ", longitude: " + longitude + ", locationAccuracy: " + locationAccuracy + ", dataSource: " + 
-				dataSource + ", modified: " + modified + ", moreInformation: " + moreInformation; 
+				dataSource + ", modified: " + modified + ", moreInformation: " + moreInformation + ", timestep: " +
+				timeStep + ", datatype: " + dataType + " ]"; 
 	}
 }

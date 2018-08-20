@@ -1,74 +1,361 @@
 package cdss.dmi.hydrobase.rest.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import RTi.Util.Time.DateTime;
 
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-wellpermits-wellpermitactionhistory
+ * @author jurentie
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WellPermitActionHistory {
 	
+	/**
+	 * Variables defined in alphabetical order. 
+	 * Documentation copied from web services.
+	 */
+	
+	/**
+	 * Action Comment
+	 */
 	private String actionComment;
+	
+	/**
+	 * Action Date
+	 */
 	private DateTime actionDate;
+	
+	/**
+	 * Action Name
+	 */
 	private String actionName;
+	
+	/**
+	 * Associated Aquifers
+	 */
 	private String associatedAquifers;
+	
+	/**
+	 * Water court case number(s) associated with water right
+	 */
 	private String associatedCaseNumbers;
+	
+	/**
+	 * Associated Uses
+	 */
 	private String associatedUses;
+	
+	/**
+	 * Depth from surface to bottom of perforated casing (feet)
+	 */
 	private int bottomPerforatedCasing;
+	
+	/**
+	 * Contact Address
+	 */
 	private String contactAddress;
+	
+	/**
+	 * Contact City
+	 */
 	private String contactCity;
+	
+	/**
+	 * Contact Name
+	 */
 	private String contactName;
+	
+	/**
+	 * Contact Postal Code
+	 */
 	private String contactPostalCode;
+	
+	/**
+	 * Contact State Or Province
+	 */
 	private String contactStateOrProvince;
+	
+	/**
+	 * Distance and direction from East/West section line (feet)
+	 */
 	private int coordsEw;
+	
+	/**
+	 * Direction of measurement from East/West section line
+	 */
 	private String coordsEwDir;
+	
+	/**
+	 * Distance and direction from North/South section line (feet)
+	 */
 	private int coordsNs;
+	
+	/**
+	 * Direction of measurement from North/South section line
+	 */
 	private String coordsNsDir;
+	
+	/**
+	 * County where the well is located
+	 */
 	private String county;
+	
+	/**
+	 * date of First Beneficial Use
+	 */
 	private DateTime date1stBeneficialUse;
+	
+	/**
+	 * Date Application Received
+	 */
 	private DateTime dateApplicationReceived;
+	
+	/**
+	 * Date Permite Expires
+	 */
 	private DateTime datePermitExpires;
+	
+	/**
+	 * Date Permit Issued
+	 */
 	private DateTime datePermitIssued;
+	
+	/**
+	 * Date Permite Installed
+	 */
 	private DateTime datePumpInstalled;
+	
+	/**
+	 * Date Well Completed
+	 */
 	private DateTime dateWellCompleted;
+	
+	/**
+	 * Date Well Plugged
+	 */
 	private DateTime dateWellPlugged;
+	
+	/**
+	 * Denver Basin Aquifer
+	 */
 	private String denverBasinAquifer;
+	
+	/**
+	 * Depth Total (ft)
+	 */
 	private int depthTotal;
+	
+	/**
+	 * Eight established geographic areas in Colorado's Eastern Plains 
+	 * where users rely primarily on groundwater for water supply
+	 */
 	private String designatedBasinName;
+	
+	/**
+	 * DWR Water Division
+	 */
 	private int division;
+	
+	/**
+	 * Driller
+	 */
 	private String driller;
+	
+	/**
+	 * Driller License
+	 */
 	private String drillerLic;
+	
+	/**
+	 * Elevation (ft)
+	 */
 	private double elevation;
+	
+	/**
+	 * Latitude value in decimal degrees
+	 */
 	private double latitude;
+	
+	/**
+	 * Accuracy of location coordinates
+	 */
 	private String locationAccuracy;
+	
+	/**
+	 * Location Type
+	 */
 	private String locationType;
+	
+	/**
+	 * Longitude (decimal degrees)
+	 */
 	private double longitude;
+	
+	/**
+	 * Thirteen local districts, within the Designated Basins, 
+	 * with additional administrative authority
+	 */
 	private String managementDistrictName;
+	
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
 	private DateTime modified;
+	
+	/**
+	 * Hyperlink to additional details
+	 */
 	private String moreInformation;
+	
+	/**
+	 * Parcel Name
+	 */
 	private String parcelName;
+	
+	/**
+	 * Well permit number
+	 */
 	private String permit;
+	
+	/**
+	 * Permit Category Description
+	 */
 	private String permitCategoryDescr;
+	
+	/**
+	 * Permit Current Status Description
+	 */
 	private String permitCurrentStatusDescr;
+	
+	/**
+	 * Physical Address
+	 */
 	private String physicalAddress;
+	
+	/**
+	 * Physical City
+	 */
 	private String physicalCity;
+	
+	/**
+	 * Physical Postal Code
+	 */
 	private String physicalPostalCode;
+	
+	/**
+	 * Physical State Or Province
+	 */
 	private String physicalStateOrProvince;
+	
+	/**
+	 * Principal Meridian of well’s legal location - 
+	 * there are 5 principal meridians in CO: 
+	 * Sixth (S), New Mexico (N), Baca (B), Costilla (C), and Ute (U)
+	 */
 	private String pm;
+	
+	/**
+	 * Pump Installer
+	 */
 	private String pumpInstaller;
+	
+	/**
+	 * Pump License
+	 */
 	private String pumpLic;
+	
+	/**
+	 * Pump Test Yield
+	 */
 	private double pumpTestYield;
+	
+	/**
+	 * Legal Location: 10 acre quarter section
+	 */
 	private String q10;
+	
+	/**
+	 * Legal Location: 160 acre quarter section
+	 */
 	private String q160;
+	
+	/**
+	 * Legal Location: 40 acre quarter section
+	 */
 	private String q40;
+	
+	/**
+	 * Legal location: A number in the format “nnnd” where “nnn” is the range number 
+	 * and “d” is the direction either East or West
+	 */
 	private String range;
+	
+	/**
+	 * Permit application receipt number
+	 */
 	private String receipt;
+	
+	/**
+	 * Legal location: A number in the format “nnnd” where “nnn” is the range number 
+	 * and “d” is the direction either East or West
+	 */
 	private String section;
+	
+	/**
+	 * Static Water Level (feet)
+	 */
 	private double staticWaterLevel;
+	
+	/**
+	 * Static Water Level Date
+	 */
 	private DateTime staticWaterLevelDate;
+	
+	/**
+	 * Depth from surface to top of perforated casing (feet)
+	 */
 	private int topPerforatedCasing;
+	
+	/**
+	 * Legal Location: Township number and direction
+	 */
 	private String township;
+	
+	/**
+	 * The x (Easting) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum)
+	 */
 	private double utmX;
+	
+	/**
+	 * The y (Northing) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum)
+	 */
 	private double utmY;
+	
+	/**
+	 * DWR Water District
+	 */
 	private int waterDistrict;
+	
+	/**
+	 * DWR unique structure identifier
+	 */
 	private String wdid;
 	
+	/**
+	 * Getters and setters for defined varaibles
+	 */	
 	public String getActionComment() {
 		return actionComment;
 	}
@@ -514,6 +801,11 @@ public class WellPermitActionHistory {
 		this.wdid = wdid;
 	}
 	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "WellPermitActionHistory: [ receipt: " + receipt + ", permit: " + permit + ", permitCurrentStatusDescr: " +
