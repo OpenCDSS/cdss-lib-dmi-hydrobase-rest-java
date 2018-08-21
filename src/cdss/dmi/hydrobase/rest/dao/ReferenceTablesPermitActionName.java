@@ -34,8 +34,8 @@ public class ReferenceTablesPermitActionName {
 	 */
 	private String actionDescr;
 	
-	public void setActionName(String actionName){
-		this.actionName = actionName;
+	public String getActionDescr(){
+		return actionDescr;
 	}
 	
 	/**
@@ -49,8 +49,8 @@ public class ReferenceTablesPermitActionName {
 		this.actionDescr = actionDescr;
 	}
 	
-	public String getActionDescr(){
-		return actionDescr;
+	public void setActionName(String actionName){
+		this.actionName = actionName;
 	}
 	
 	/**

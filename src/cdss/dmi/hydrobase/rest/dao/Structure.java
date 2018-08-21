@@ -229,132 +229,64 @@ public class Structure {
 		return associatedAkas;
 	}
 
-	public void setAssociatedAkas(String associatedAkas) {
-		this.associatedAkas = associatedAkas;
-	}
-
 	public String getAssociatedCaseNumbers() {
 		return associatedCaseNumbers;
-	}
-
-	public void setAssociatedCaseNumbers(String associatedCaseNumbers) {
-		this.associatedCaseNumbers = associatedCaseNumbers;
 	}
 
 	public String getAssociatedContacts() {
 		return associatedContacts;
 	}
 
-	public void setAssociatedContacts(String associatedContacts) {
-		this.associatedContacts = associatedContacts;
-	}
-
 	public String getAssociatedMeters() {
 		return associatedMeters;
-	}
-
-	public void setAssociatedMeters(String associatedMeters) {
-		this.associatedMeters = associatedMeters;
 	}
 
 	public String getAssociatedPermits() {
 		return associatedPermits;
 	}
 
-	public void setAssociatedPermits(String associatedPermits) {
-		this.associatedPermits = associatedPermits;
-	}
-
 	public String getCiuCode() {
 		return ciuCode;
-	}
-
-	public void setCiuCode(String ciuCode) {
-		this.ciuCode = ciuCode;
 	}
 
 	public int getCoordsew() {
 		return coordsew;
 	}
 
-	public void setCoordsew(int coordsew) {
-		this.coordsew = coordsew;
-	}
-
 	public String getCoordsewDir() {
 		return coordsewDir;
-	}
-
-	public void setCoordsewDir(String coordsewDir) {
-		this.coordsewDir = coordsewDir;
 	}
 
 	public int getCoordsns() {
 		return coordsns;
 	}
 
-	public void setCoordsns(int coordsns) {
-		this.coordsns = coordsns;
-	}
-
 	public String getCoordsnsDir() {
 		return coordsnsDir;
-	}
-
-	public void setCoordsnsDir(String coordsnsDir) {
-		this.coordsnsDir = coordsnsDir;
 	}
 
 	public String getCounty() {
 		return county;
 	}
 
-	public void setCounty(String county) {
-		this.county = county;
-	}
-
 	public String getDesignatedBasinName() {
 		return designatedBasinName;
-	}
-
-	public void setDesignatedBasinName(String designatedBasinName) {
-		this.designatedBasinName = designatedBasinName;
 	}
 
 	public int getDivision() {
 		return division;
 	}
 
-	public void setDivision(int division) {
-		this.division = division;
-	}
-
 	public String getGnisId() {
 		return gnisId;
-	}
-
-	public void setGnisId(String gnisID) {
-		this.gnisId = gnisID;
 	}
 
 	public double getLatdecdeg() {
 		return latdecdeg;
 	}
 
-	public void setLatdecdeg(double latdecdeg) {
-		this.latdecdeg = latdecdeg;
-	}
-
 	public String getLocationAccuracy() {
 		return locationAccuracy;
-	}
-
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
-	}
-
-	public void setLongdecdeg(double longdecdeg) {
-		this.longdecdeg = longdecdeg;
 	}
 
 	public double getLongdecdeg() {
@@ -365,156 +297,224 @@ public class Structure {
 		return managementDistrictName;
 	}
 
-	public void setManagementDistrictName(String managementDistrictName) {
-		this.managementDistrictName = managementDistrictName;
-	}
-
 	public DateTime getModified() {
 		return modified;
-	}
-
-	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : DateTime.parse(modified);
 	}
 
 	public String getPm() {
 		return pm;
 	}
 
-	public void setPm(String pm) {
-		this.pm = pm;
-	}
-
 	public DateTime getPorEnd() {
 		return porEnd;
-	}
-
-	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
 	}
 
 	public DateTime getPorStart() {
 		return porStart;
 	}
 
-	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
-	}
-
 	public String getQ10() {
 		return q10;
-	}
-
-	public void setQ10(String q10) {
-		this.q10 = q10;
 	}
 
 	public String getQ160() {
 		return q160;
 	}
 
-	public void setQ160(String q160) {
-		this.q160 = q160;
-	}
-
 	public String getQ40() {
 		return q40;
-	}
-
-	public void setQ40(String q40) {
-		this.q40 = q40;
 	}
 
 	public String getRange() {
 		return range;
 	}
 
-	public void setRange(String range) {
-		this.range = range;
-	}
-
 	public String getSection() {
 		return section;
-	}
-
-	public void setSection(String section) {
-		this.section = section;
 	}
 
 	public double getStreamMile() {
 		return streamMile;
 	}
 
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
-	}
-
 	public String getStructureName() {
 		return structureName;
-	}
-
-	public void setStructureName(String structureName) {
-		this.structureName = structureName;
 	}
 
 	public String getStructureType() {
 		return structureType;
 	}
 
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
-
 	public String getSubdistrict() {
 		return subdistrict;
-	}
-
-	public void setSubdistrict(String subdistrict) {
-		this.subdistrict = subdistrict;
 	}
 
 	public String getTownship() {
 		return township;
 	}
 
-	public void setTownship(String township) {
-		this.township = township;
-	}
-
 	public double getUtmX() {
 		return utmX;
-	}
-
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
 	}
 
 	public double getUtmY() {
 		return utmY;
 	}
 
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
-	}
-
 	public int getWaterDistrict() {
 		return waterDistrict;
-	}
-
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
 	}
 
 	public String getWaterSource() {
 		return waterSource;
 	}
 
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
-	}
-
 	public String getWdid() {
 		return wdid;
+	}
+
+	public void setAssociatedAkas(String associatedAkas) {
+		this.associatedAkas = associatedAkas;
+	}
+
+	public void setAssociatedCaseNumbers(String associatedCaseNumbers) {
+		this.associatedCaseNumbers = associatedCaseNumbers;
+	}
+
+	public void setAssociatedContacts(String associatedContacts) {
+		this.associatedContacts = associatedContacts;
+	}
+
+	public void setAssociatedMeters(String associatedMeters) {
+		this.associatedMeters = associatedMeters;
+	}
+
+	public void setAssociatedPermits(String associatedPermits) {
+		this.associatedPermits = associatedPermits;
+	}
+
+	public void setCiuCode(String ciuCode) {
+		this.ciuCode = ciuCode;
+	}
+
+	public void setCoordsew(int coordsew) {
+		this.coordsew = coordsew;
+	}
+
+	public void setCoordsewDir(String coordsewDir) {
+		this.coordsewDir = coordsewDir;
+	}
+
+	public void setCoordsns(int coordsns) {
+		this.coordsns = coordsns;
+	}
+
+	public void setCoordsnsDir(String coordsnsDir) {
+		this.coordsnsDir = coordsnsDir;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+	public void setDesignatedBasinName(String designatedBasinName) {
+		this.designatedBasinName = designatedBasinName;
+	}
+
+	public void setDivision(int division) {
+		this.division = division;
+	}
+
+	public void setGnisId(String gnisID) {
+		this.gnisId = gnisID;
+	}
+
+	public void setLatdecdeg(double latdecdeg) {
+		this.latdecdeg = latdecdeg;
+	}
+
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+
+	public void setLongdecdeg(double longdecdeg) {
+		this.longdecdeg = longdecdeg;
+	}
+
+	public void setManagementDistrictName(String managementDistrictName) {
+		this.managementDistrictName = managementDistrictName;
+	}
+
+	public void setModified(String modified) {
+		this.modified = (modified == null) ? null : DateTime.parse(modified);
+	}
+
+	public void setPm(String pm) {
+		this.pm = pm;
+	}
+
+	public void setPorEnd(String porEnd) {
+		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
+	}
+
+	public void setPorStart(String porStart) {
+		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
+	}
+
+	public void setQ10(String q10) {
+		this.q10 = q10;
+	}
+
+	public void setQ160(String q160) {
+		this.q160 = q160;
+	}
+
+	public void setQ40(String q40) {
+		this.q40 = q40;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public void setSection(String section) {
+		this.section = section;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+
+	public void setStructureName(String structureName) {
+		this.structureName = structureName;
+	}
+
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+
+	public void setSubdistrict(String subdistrict) {
+		this.subdistrict = subdistrict;
+	}
+
+	public void setTownship(String township) {
+		this.township = township;
+	}
+
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 
 	public void setWdid(String wdid) {

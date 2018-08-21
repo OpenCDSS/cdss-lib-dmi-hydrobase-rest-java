@@ -141,164 +141,164 @@ public class TelemetryDischargeMeasurement {
 		return abbrev;
 	}
 
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
-	}
-
 	public double getChannelWidth() {
 		return channelWidth;
-	}
-
-	public void setChannelWidth(double channelWidth) {
-		this.channelWidth = channelWidth;
 	}
 
 	public String getCounty() {
 		return county;
 	}
 
-	public void setCounty(String county) {
-		this.county = county;
-	}
-
 	public double getDischarge() {
 		return discharge;
-	}
-
-	public void setDischarge(double discharge) {
-		this.discharge = discharge;
 	}
 
 	public int getDivision() {
 		return division;
 	}
 
-	public void setDivision(int division) {
-		this.division = division;
-	}
-
 	public double getGageHeight() {
 		return gageHeight;
-	}
-
-	public void setGageHeight(double gageHeight) {
-		this.gageHeight = gageHeight;
 	}
 
 	public double getGageHeightChange() {
 		return gageHeightChange;
 	}
 
-	public void setGageHeightChange(double gageHeightChange) {
-		this.gageHeightChange = gageHeightChange;
-	}
-
 	public double getMeanVelocity() {
 		return meanVelocity;
-	}
-
-	public void setMeanVelocity(double meanVelocity) {
-		this.meanVelocity = meanVelocity;
 	}
 
 	public DateTime getMeasDateTime() {
 		return measDateTime;
 	}
 
-	public void setMeasDateTime(String measDateTime) {
-		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
-	}
-
 	public double getMeasDuration() {
 		return measDuration;
-	}
-
-	public void setMeasDuration(double measDuration) {
-		this.measDuration = measDuration;
 	}
 
 	public String getMeasMadeBy() {
 		return measMadeBy;
 	}
 
-	public void setMeasMadeBy(String measMadeBy) {
-		this.measMadeBy = measMadeBy;
-	}
-
 	public String getMeasMethod() {
 		return measMethod;
-	}
-
-	public void setMeasMethod(String measMethod) {
-		this.measMethod = measMethod;
 	}
 
 	public String getMeasNo() {
 		return measNo;
 	}
 
-	public void setMeasNo(String measNo) {
-		this.measNo = measNo;
-	}
-
 	public String getMeasRemarks() {
 		return measRemarks;
-	}
-
-	public void setMeasRemarks(String measRemarks) {
-		this.measRemarks = measRemarks;
 	}
 
 	public int getMeasSections() {
 		return measSections;
 	}
 
-	public void setMeasSections(int measSections) {
-		this.measSections = measSections;
-	}
-
 	public String getMeterNo() {
 		return meterNo;
-	}
-
-	public void setMeterNo(String meterNo) {
-		this.meterNo = meterNo;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
 
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
-	}
-
 	public double getPercentDifference() {
 		return percentDifference;
-	}
-
-	public void setPercentDifference(double precentDifference) {
-		this.percentDifference = precentDifference;
 	}
 
 	public double getSectionArea() {
 		return sectionArea;
 	}
 
-	public void setSectionArea(double sectionArea) {
-		this.sectionArea = sectionArea;
-	}
-
 	public double getShiftAdjustment() {
 		return shiftAdjustment;
 	}
 
-	public void setShiftAdjustment(double shiftAdjustment) {
-		this.shiftAdjustment = shiftAdjustment;
-	}
-
 	public int getWaterDistrict() {
 		return waterDistrict;
+	}
+
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
+	}
+
+	public void setChannelWidth(double channelWidth) {
+		this.channelWidth = channelWidth;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+	public void setDischarge(double discharge) {
+		this.discharge = discharge;
+	}
+
+	public void setDivision(int division) {
+		this.division = division;
+	}
+
+	public void setGageHeight(double gageHeight) {
+		this.gageHeight = gageHeight;
+	}
+
+	public void setGageHeightChange(double gageHeightChange) {
+		this.gageHeightChange = gageHeightChange;
+	}
+
+	public void setMeanVelocity(double meanVelocity) {
+		this.meanVelocity = meanVelocity;
+	}
+
+	public void setMeasDateTime(String measDateTime) {
+		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
+	}
+
+	public void setMeasDuration(double measDuration) {
+		this.measDuration = measDuration;
+	}
+
+	public void setMeasMadeBy(String measMadeBy) {
+		this.measMadeBy = measMadeBy;
+	}
+
+	public void setMeasMethod(String measMethod) {
+		this.measMethod = measMethod;
+	}
+
+	public void setMeasNo(String measNo) {
+		this.measNo = measNo;
+	}
+
+	public void setMeasRemarks(String measRemarks) {
+		this.measRemarks = measRemarks;
+	}
+
+	public void setMeasSections(int measSections) {
+		this.measSections = measSections;
+	}
+
+	public void setMeterNo(String meterNo) {
+		this.meterNo = meterNo;
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+
+	public void setPercentDifference(double precentDifference) {
+		this.percentDifference = precentDifference;
+	}
+
+	public void setSectionArea(double sectionArea) {
+		this.sectionArea = sectionArea;
+	}
+
+	public void setShiftAdjustment(double shiftAdjustment) {
+		this.shiftAdjustment = shiftAdjustment;
 	}
 
 	public void setWaterDistrict(int waterDistrict) {

@@ -51,23 +51,23 @@ public class TelemetryShift {
 	public String getRatingTableName() {
 		return ratingTableName;
 	}
-	public void setRatingTableName(String ratingTableName) {
-		this.ratingTableName = ratingTableName;
-	}
 	public String getShiftCurveName() {
 		return shiftCurveName;
-	}
-	public void setShiftCurveName(String shiftCurveName) {
-		this.shiftCurveName = shiftCurveName;
 	}
 	public double getX() {
 		return X;
 	}
-	public void setX(double x) {
-		X = x;
-	}
 	public double getY() {
 		return Y;
+	}
+	public void setRatingTableName(String ratingTableName) {
+		this.ratingTableName = ratingTableName;
+	}
+	public void setShiftCurveName(String shiftCurveName) {
+		this.shiftCurveName = shiftCurveName;
+	}
+	public void setX(double x) {
+		X = x;
 	}
 	public void setY(double y) {
 		Y = y;

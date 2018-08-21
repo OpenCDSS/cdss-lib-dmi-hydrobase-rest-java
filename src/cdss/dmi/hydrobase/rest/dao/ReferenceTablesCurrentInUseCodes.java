@@ -40,11 +40,11 @@ public class ReferenceTablesCurrentInUseCodes {
 	public String getCiuCode() {
 		return ciuCode;
 	}
-	public void setCiuCode(String ciuCode) {
-		this.ciuCode = ciuCode;
-	}
 	public String getCiuCodeLong() {
 		return ciuCodeLong;
+	}
+	public void setCiuCode(String ciuCode) {
+		this.ciuCode = ciuCode;
 	}
 	public void setCiuCodeLong(String ciuCodeLong) {
 		this.ciuCodeLong = ciuCodeLong;

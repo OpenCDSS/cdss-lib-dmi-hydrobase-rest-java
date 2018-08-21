@@ -29,12 +29,12 @@ public class ReferenceTablesCounty {
 	 */
 	private String county;
 	
-	public void setCounty(String county){
-		this.county = county;
-	}
-	
 	public String getCounty(){
 		return county;
+	}
+	
+	public void setCounty(String county){
+		this.county = county;
 	}
 	
 	/**

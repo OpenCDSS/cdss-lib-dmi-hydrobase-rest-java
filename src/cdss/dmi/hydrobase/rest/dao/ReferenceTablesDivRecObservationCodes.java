@@ -55,29 +55,29 @@ public class ReferenceTablesDivRecObservationCodes {
 	public int getEndIyr() {
 		return endIyr;
 	}
-	public void setEndIyr(int endIyr) {
-		this.endIyr = endIyr;
-	}
 	public String getObsCode() {
 		return obsCode;
-	}
-	public void setObsCode(String obsCode) {
-		this.obsCode = obsCode;
 	}
 	public String getObsCodeLong() {
 		return obsCodeLong;
 	}
-	public void setObsCodeLong(String obsCodeLong) {
-		this.obsCodeLong = obsCodeLong;
-	}
 	public String getObsDescr() {
 		return obsDescr;
 	}
-	public void setObsDescr(String obsDescr) {
-		this.obsDescr = obsDescr;
-	}
 	public int getStartIyr() {
 		return startIyr;
+	}
+	public void setEndIyr(int endIyr) {
+		this.endIyr = endIyr;
+	}
+	public void setObsCode(String obsCode) {
+		this.obsCode = obsCode;
+	}
+	public void setObsCodeLong(String obsCodeLong) {
+		this.obsCodeLong = obsCodeLong;
+	}
+	public void setObsDescr(String obsDescr) {
+		this.obsDescr = obsDescr;
 	}
 	public void setStartIyr(int startIyr) {
 		this.startIyr = startIyr;

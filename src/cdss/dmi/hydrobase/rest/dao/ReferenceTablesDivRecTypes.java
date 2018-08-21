@@ -40,11 +40,11 @@ public class ReferenceTablesDivRecTypes {
 	public String getDivRecType() {
 		return divRecType;
 	}
-	public void setDivRecType(String divRecType) {
-		this.divRecType = divRecType;
-	}
 	public String getDivRecTypeLong() {
 		return divRecTypeLong;
+	}
+	public void setDivRecType(String divRecType) {
+		this.divRecType = divRecType;
 	}
 	public void setDivRecTypeLong(String divRecTypeLong) {
 		this.divRecTypeLong = divRecTypeLong;

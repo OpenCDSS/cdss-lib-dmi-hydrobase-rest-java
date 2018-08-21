@@ -104,71 +104,71 @@ public class TelemetryDecodeSettings {
 	public String getAbbrev() {
 		return abbrev;
 	}
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
-	}
-
 	public int getCurrentShift() {
 		return currentShift;
-	}
-	public void setCurrentShift(int currentShift) {
-		this.currentShift = currentShift;
 	}
 
 	public String getFunction() {
 		return function;
 	}
-	public void setFunction(String function) {
-		this.function = function;
-	}
-
 	public DateTime getModified() {
 		return modified;
-	}
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
 	}
 
 	public String getParameter() {
 		return parameter;
 	}
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
-	}
-
 	public DateTime getRatingStartDate() {
 		return ratingStartDate;
-	}
-	public void setRatingStartDate(String ratingStartDate) {
-		this.ratingStartDate = TimeToolkit.getInstance().toDateTime(ratingStartDate, true);
 	}
 
 	public String getRatingTableName() {
 		return ratingTableName;
 	}
-	public void setRatingTableName(String ratingTableName) {
-		this.ratingTableName = ratingTableName;
-	}
-
 	public String getShiftCurveName() {
 		return shiftCurveName;
-	}
-	public void setShiftCurveName(String shiftCurveName) {
-		this.shiftCurveName = shiftCurveName;
-	}
-
-	public DateTime getShiftStartDate() {
-		return shiftStartDate;
-	}
-	public void setShiftStartDate(String shiftStartDate) {
-		this.shiftStartDate = TimeToolkit.getInstance().toDateTime(shiftStartDate, true);
 	}
 
 	public DateTime getShiftcurveStartDate() {
 		return shiftcurveStartDate;
 	}
+	public DateTime getShiftStartDate() {
+		return shiftStartDate;
+	}
+
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
+	}
+	public void setCurrentShift(int currentShift) {
+		this.currentShift = currentShift;
+	}
+
+	public void setFunction(String function) {
+		this.function = function;
+	}
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+	public void setRatingStartDate(String ratingStartDate) {
+		this.ratingStartDate = TimeToolkit.getInstance().toDateTime(ratingStartDate, true);
+	}
+
+	public void setRatingTableName(String ratingTableName) {
+		this.ratingTableName = ratingTableName;
+	}
+	public void setShiftCurveName(String shiftCurveName) {
+		this.shiftCurveName = shiftCurveName;
+	}
+
 	public void setShiftcurveStartDate(String shiftcurveStartDate) {
 		this.shiftcurveStartDate = TimeToolkit.getInstance().toDateTime(shiftcurveStartDate, true);
+	}
+	public void setShiftStartDate(String shiftStartDate) {
+		this.shiftStartDate = TimeToolkit.getInstance().toDateTime(shiftStartDate, true);
 	}
 
 	/**

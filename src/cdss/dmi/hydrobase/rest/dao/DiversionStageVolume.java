@@ -66,40 +66,40 @@ public class DiversionStageVolume {
 	public String getApprovalStatus() {
 		return approvalStatus;
 	}
-	public void setApprovalStatus(String approvalStatus) {
-		this.approvalStatus = approvalStatus;
-	}
-
 	public DateTime getDataMeasDate() {
 		return dataMeasDate;
-	}
-	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, true);
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
-	}
-
 	public double getStage() {
 		return stage;
-	}
-	public void setStage(double stage) {
-		this.stage = stage;
 	}
 
 	public double getVolume() {
 		return volume;
 	}
-	public void setVolume(double volume) {
-		this.volume = volume;
-	}
-
 	public String getWdid() {
 		return wdid;
+	}
+
+	public void setApprovalStatus(String approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+	public void setDataMeasDate(String dataMeasDate) {
+		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, true);
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+	public void setStage(double stage) {
+		this.stage = stage;
+	}
+
+	public void setVolume(double volume) {
+		this.volume = volume;
 	}
 	public void setWdid(String wdid) {
 		this.wdid = wdid;

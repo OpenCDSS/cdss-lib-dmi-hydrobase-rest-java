@@ -325,399 +325,399 @@ public class DiversionWaterClass {
 	public String getAvailableTimesteps() {
 		return availableTimesteps;
 	}
-	public void setAvailableTimesteps(String availableTimesteps) {
-		this.availableTimesteps = availableTimesteps;
-	}
-
 	public String getCiuCode() {
 		return ciuCode;
-	}
-	public void setCiuCode(String ciuCode) {
-		this.ciuCode = ciuCode;
 	}
 
 	public String getCiuCodeLong() {
 		return ciuCodeLong;
 	}
-	public void setCiuCodeLong(String ciuCodeLong) {
-		this.ciuCodeLong = ciuCodeLong;
-	}
-
 	public int getCoordsew() {
 		return coordsew;
-	}
-	public void setCoordsew(int coordsew) {
-		this.coordsew = coordsew;
 	}
 
 	public String getCoordsewDir() {
 		return coordsewDir;
 	}
-	public void setCoordsewDir(String coordsewDir) {
-		this.coordsewDir = coordsewDir;
-	}
-
 	public int getCoordsns() {
 		return coordsns;
-	}
-	public void setCoordsns(int coordsns) {
-		this.coordsns = coordsns;
 	}
 
 	public String getCoordsnsDir() {
 		return coordsnsDir;
 	}
-	public void setCoordsnsDir(String coordsnsDir) {
-		this.coordsnsDir = coordsnsDir;
-	}
-
 	public String getCounty() {
 		return county;
-	}
-	public void setCounty(String county) {
-		this.county = county;
 	}
 
 	public String getDesignatedBasinName() {
 		return designatedBasinName;
 	}
-	public void setDesignatedBasinName(String designatedBasinName) {
-		this.designatedBasinName = designatedBasinName;
-	}
-	
 	public int getDivision() {
 		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
 	}
 
 	public String getDivrectype() {
 		return divrectype;
 	}
-	public void setDivrectype(String divrectype) {
-		this.divrectype = divrectype;
-	}
-
 	public String getFromStructureName() {
 		return fromStructureName;
 	}
-	public void setFromStructureName(String fromStructureName) {
-		this.fromStructureName = fromStructureName;
-	}
-
-
 
 	public String getFromWdid() {
 		return fromWdid;
 	}
-	public void setFromWdid(String fromWdid) {
-		this.fromWdid = fromWdid;
-	}
-
 	public int getFromWdidAcctId() {
 		return fromWdidAcctId;
-	}
-	public void setFromWdidAcctId(int fromWdidAcctId) {
-		this.fromWdidAcctId = fromWdidAcctId;
 	}
 
 	public int getFromWdidAcctName() {
 		return fromWdidAcctName;
 	}
-	public void setFromWdidAcctName(int fromWdidAcctName) {
-		this.fromWdidAcctName = fromWdidAcctName;
-	}
-
 	public String getGnisId() {
 		return gnisId;
-	}
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
 	}
 
 	public String getGroupStructureName() {
 		return groupStructureName;
 	}
-	public void setGroupStructureName(String groupStructureName) {
-		this.groupStructureName = groupStructureName;
-	}
-
 	public String getGroupWdid() {
 		return groupWdid;
 	}
-	public void setGroupWdid(String groupWdid) {
-		this.groupWdid = groupWdid;
-	}
-
+	
 	public double getLatdecdeg() {
 		return latdecdeg;
 	}
-	public void setLatdecdeg(double latdecdeg) {
-		this.latdecdeg = latdecdeg;
-	}
-
 	public double getLongdecdeg() {
 		return longdecdeg;
-	}
-	public void setLongdecdeg(double longdecdeg) {
-		this.longdecdeg = longdecdeg;
 	}
 
 	public String getManagementDistrictName() {
 		return managementDistrictName;
 	}
-	public void setManagementDistrictName(String managementDistrictName) {
-		this.managementDistrictName = managementDistrictName;
-	}
-
 	public DateTime getModified() {
 		return modified;
-	}
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 
 	public String getPm() {
 		return pm;
 	}
-	public void setPm(String pm) {
-		this.pm = pm;
-	}
-
 	public DateTime getPorEnd() {
 		return porEnd;
 	}
-	public void setPorEnd(String porEnd) {
-		this.porEnd = DateTime.parse(porEnd);
-	}
+
+
 
 	public DateTime getPorLastModified() {
 		return porLastModified;
 	}
-	public void setPorLastModified(String porLastModified) {
-		this.porLastModified = TimeToolkit.getInstance().toDateTime(porLastModified, false);
-	}
-	
 	public DateTime getPorStart() {
 		return porStart;
-	}
-	public void setPorStart(String porStart) {
-		this.porStart = TimeToolkit.getInstance().toDateTime(porStart, false);
 	}
 
 	public String getQ10() {
 		return q10;
 	}
-	public void setQ10(String q10) {
-		this.q10 = q10;
-	}
-
 	public String getQ160() {
 		return q160;
-	}
-	public void setQ160(String q160) {
-		this.q160 = q160;
 	}
 
 	public String getQ40() {
 		return q40;
 	}
-	public void setQ40(String q40) {
-		this.q40 = q40;
-	}
-
 	public String getRange() {
 		return range;
-	}
-	public void setRange(String range) {
-		this.range = range;
 	}
 
 	public String getSection() {
 		return section;
 	}
-	public void setSection(String section) {
-		this.section = section;
-	}
-
 	public String getSourceCode() {
 		return sourceCode;
-	}
-	public void setSourceCode(String sourceCode) {
-		this.sourceCode = sourceCode;
 	}
 
 	public String getSourceDescr() {
 		return sourceDescr;
 	}
-	public void setSourceDescr(String sourceDescr) {
-		this.sourceDescr = sourceDescr;
-	}
-
 	public double getStreamMile() {
 		return streamMile;
-	}
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
 	}
 
 	public String getStructureName() {
 		return structureName;
 	}
-	public void setStructureName(String structureName) {
-		this.structureName = structureName;
-	}
-
 	public String getStructureType() {
 		return structureType;
-	}
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
 	}
 
 	public String getSubdistrict() {
 		return subdistrict;
 	}
-	public void setSubdistrict(String subdistrict) {
-		this.subdistrict = subdistrict;
-	}
-	
 	public String getTimeStep() {
 		return timeStep;
-	}
-	public void setTimeStep(String timeStep) {
-		this.timeStep = timeStep;
 	}
 
 	public String getToStructureName() {
 		return toStructureName;
 	}
-	public void setToStructureName(String toStructureName) {
-		this.toStructureName = toStructureName;
-	}
-
 	public String getToWdid() {
 		return toWdid;
-	}
-	public void setToWdid(String toWdid) {
-		this.toWdid = toWdid;
 	}
 
 	public int getToWdidAcctId() {
 		return toWdidAcctId;
 	}
-	public void setToWdidAcctId(int toWdidAcctId) {
-		this.toWdidAcctId = toWdidAcctId;
-	}
-
 	public int getToWdidAcctName() {
 		return toWdidAcctName;
-	}
-	public void setToWdidAcctName(int toWdidAcctName) {
-		this.toWdidAcctName = toWdidAcctName;
 	}
 
 	public String getTownship() {
 		return township;
 	}
-	public void setTownship(String township) {
-		this.township = township;
-	}
-	
 	public String getTypeCode() {
 		return typeCode;
-	}
-	public void setTypeCode(String typeCode) {
-		this.typeCode = typeCode;
 	}
 
 	public String getTypeDescr() {
 		return typeDescr;
 	}
-	public void setTypeDescr(String typeDescr) {
-		this.typeDescr = typeDescr;
-	}
-
 	public String getUseCode() {
 		return useCode;
-	}
-	public void setUseCode(String useCode) {
-		this.useCode = useCode;
 	}
 
 	public String getUseDescr() {
 		return useDescr;
 	}
-	public void setUseDescr(String useDescr) {
-		this.useDescr = useDescr;
-	}
-
 	public double getUtmX() {
 		return utmX;
-	}
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
 	}
 
 	public double getUtmY() {
 		return utmY;
 	}
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
-	}
-
 	public int getWaterclassNum() {
 		return waterclassNum;
 	}
-	public void setWaterclassNum(int waterclassNum) {
-		this.waterclassNum = waterclassNum;
-	}
-
+	
 	public int getWaterDistrict() {
 		return waterDistrict;
 	}
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
-
 	public String getWaterSource() {
 		return waterSource;
-	}
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
 	}
 
 	public String getWcDescr() {
 		return wcDescr;
 	}
-	public void setWcDescr(String wcDescr) {
-		this.wcDescr = wcDescr;
-	}
-
 	public String getWcIdentifier() {
 		return wcIdentifier;
-	}
-	public void setWcIdentifier(String wcIdentifier) {
-		this.wcIdentifier = wcIdentifier;
 	}
 
 	public String getWdid() {
 		return wdid;
 	}
-	public void setWdid(String wdid) {
-		this.wdid = wdid;
-	}
-
 	public int getWdidAcctId() {
 		return wdidAcctId;
-	}
-	public void setWdidAcctId(int wdidAcctId) {
-		this.wdidAcctId = wdidAcctId;
 	}
 
 	public int getWdidAcctName() {
 		return wdidAcctName;
+	}
+	public void setAvailableTimesteps(String availableTimesteps) {
+		this.availableTimesteps = availableTimesteps;
+	}
+
+	public void setCiuCode(String ciuCode) {
+		this.ciuCode = ciuCode;
+	}
+	public void setCiuCodeLong(String ciuCodeLong) {
+		this.ciuCodeLong = ciuCodeLong;
+	}
+
+	public void setCoordsew(int coordsew) {
+		this.coordsew = coordsew;
+	}
+	public void setCoordsewDir(String coordsewDir) {
+		this.coordsewDir = coordsewDir;
+	}
+
+	public void setCoordsns(int coordsns) {
+		this.coordsns = coordsns;
+	}
+	public void setCoordsnsDir(String coordsnsDir) {
+		this.coordsnsDir = coordsnsDir;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+	public void setDesignatedBasinName(String designatedBasinName) {
+		this.designatedBasinName = designatedBasinName;
+	}
+
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	public void setDivrectype(String divrectype) {
+		this.divrectype = divrectype;
+	}
+
+	public void setFromStructureName(String fromStructureName) {
+		this.fromStructureName = fromStructureName;
+	}
+	public void setFromWdid(String fromWdid) {
+		this.fromWdid = fromWdid;
+	}
+
+	public void setFromWdidAcctId(int fromWdidAcctId) {
+		this.fromWdidAcctId = fromWdidAcctId;
+	}
+	public void setFromWdidAcctName(int fromWdidAcctName) {
+		this.fromWdidAcctName = fromWdidAcctName;
+	}
+
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	public void setGroupStructureName(String groupStructureName) {
+		this.groupStructureName = groupStructureName;
+	}
+	
+	public void setGroupWdid(String groupWdid) {
+		this.groupWdid = groupWdid;
+	}
+	public void setLatdecdeg(double latdecdeg) {
+		this.latdecdeg = latdecdeg;
+	}
+
+	public void setLongdecdeg(double longdecdeg) {
+		this.longdecdeg = longdecdeg;
+	}
+	public void setManagementDistrictName(String managementDistrictName) {
+		this.managementDistrictName = managementDistrictName;
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
+	}
+	public void setPm(String pm) {
+		this.pm = pm;
+	}
+
+	public void setPorEnd(String porEnd) {
+		this.porEnd = DateTime.parse(porEnd);
+	}
+	public void setPorLastModified(String porLastModified) {
+		this.porLastModified = TimeToolkit.getInstance().toDateTime(porLastModified, false);
+	}
+
+	public void setPorStart(String porStart) {
+		this.porStart = TimeToolkit.getInstance().toDateTime(porStart, false);
+	}
+	public void setQ10(String q10) {
+		this.q10 = q10;
+	}
+
+	public void setQ160(String q160) {
+		this.q160 = q160;
+	}
+	public void setQ40(String q40) {
+		this.q40 = q40;
+	}
+	
+	public void setRange(String range) {
+		this.range = range;
+	}
+	public void setSection(String section) {
+		this.section = section;
+	}
+
+	public void setSourceCode(String sourceCode) {
+		this.sourceCode = sourceCode;
+	}
+	public void setSourceDescr(String sourceDescr) {
+		this.sourceDescr = sourceDescr;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+	public void setStructureName(String structureName) {
+		this.structureName = structureName;
+	}
+
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+	public void setSubdistrict(String subdistrict) {
+		this.subdistrict = subdistrict;
+	}
+
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
+	public void setToStructureName(String toStructureName) {
+		this.toStructureName = toStructureName;
+	}
+
+	public void setToWdid(String toWdid) {
+		this.toWdid = toWdid;
+	}
+	public void setToWdidAcctId(int toWdidAcctId) {
+		this.toWdidAcctId = toWdidAcctId;
+	}
+
+	public void setToWdidAcctName(int toWdidAcctName) {
+		this.toWdidAcctName = toWdidAcctName;
+	}
+	public void setTownship(String township) {
+		this.township = township;
+	}
+
+	public void setTypeCode(String typeCode) {
+		this.typeCode = typeCode;
+	}
+	public void setTypeDescr(String typeDescr) {
+		this.typeDescr = typeDescr;
+	}
+
+	public void setUseCode(String useCode) {
+		this.useCode = useCode;
+	}
+	public void setUseDescr(String useDescr) {
+		this.useDescr = useDescr;
+	}
+
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+
+	public void setWaterclassNum(int waterclassNum) {
+		this.waterclassNum = waterclassNum;
+	}
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
+	}
+	public void setWcDescr(String wcDescr) {
+		this.wcDescr = wcDescr;
+	}
+
+	public void setWcIdentifier(String wcIdentifier) {
+		this.wcIdentifier = wcIdentifier;
+	}
+	public void setWdid(String wdid) {
+		this.wdid = wdid;
+	}
+
+	public void setWdidAcctId(int wdidAcctId) {
+		this.wdidAcctId = wdidAcctId;
 	}
 	public void setWdidAcctName(int wdidAcctName) {
 		this.wdidAcctName = wdidAcctName;

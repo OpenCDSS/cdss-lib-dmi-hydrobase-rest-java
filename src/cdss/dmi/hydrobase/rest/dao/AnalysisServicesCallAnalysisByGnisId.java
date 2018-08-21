@@ -154,166 +154,166 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	public DateTime getAnalysisDate() {
 		return analysisDate;
 	}
-	public void setAnalysisDate(String analysisDate) {
-		this.analysisDate = TimeToolkit.getInstance().toDateTime(analysisDate, true);
-	}
-	
 	public String getAnalysisGnisId() {
 		return analysisGnisId;
-	}
-	public void setAnalysisGnisId(String analysisGnisId) {
-		this.analysisGnisId = analysisGnisId;
 	}
 	
 	public double getAnalysisOutOfPriorityPercentOfDay() {
 		return analysisOutOfPriorityPercentOfDay;
 	}
-	public void setAnalysisOutOfPriorityPercentOfDay(double analysisOutOfPriorityPercentOfDay) {
-		this.analysisOutOfPriorityPercentOfDay = analysisOutOfPriorityPercentOfDay;
-	}
-	
 	public double getAnalysisStreamMile() {
 		return analysisStreamMile;
-	}
-	public void setAnalysisStreamMile(double analysisStreamMile) {
-		this.analysisStreamMile = analysisStreamMile;
 	}
 	
 	public String getAnalysisWaterSourceName() {
 		return analysisWaterSourceName;
 	}
-	public void setAnalysisWaterSourceName(String analysisWaterSourceName) {
-		this.analysisWaterSourceName = analysisWaterSourceName;
-	}
-	
 	public double getAnalysisWrAdminNo() {
 		return analysisWrAdminNo;
-	}
-	public void setAnalysisWrAdminNo(double analysisWrAdminNo) {
-		this.analysisWrAdminNo = analysisWrAdminNo;
 	}
 	
 	public String getBoundingStructureName() {
 		return boundingStructureName;
 	}
-	public void setBoundingStructureName(String boundingStructureName) {
-		this.boundingStructureName = boundingStructureName;
-	}
-	
 	public String getBoundingWdid() {
 		return boundingWdid;
-	}
-	public void setBoundingWdid(String boundingWdid) {
-		this.boundingWdid = boundingWdid;
 	}
 	
 	public String getCallType() {
 		return callType;
 	}
-	public void setCallType(String callType) {
-		this.callType = callType;
-	}
-	
 	public DateTime getDateTimeReleased() {
 		return dateTimeReleased;
-	}
-	public void setDateTimeReleased(String dateTimeReleased) {
-		this.dateTimeReleased = TimeToolkit.getInstance().toDateTime(dateTimeReleased, true);
 	}
 	
 	public DateTime getDateTimeSet() {
 		return dateTimeSet;
 	}
-	public void setDateTimeSet(String dateTimeSet) {
-		this.dateTimeSet = TimeToolkit.getInstance().toDateTime(dateTimeSet, true);
-	}
-	
 	public int getDivision() {
 		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
 	}
 	
 	public String getLocationStructure() {
 		return locationStructure;
 	}
-	public void setLocationStructure(String locationStructure) {
-		this.locationStructure = locationStructure;
-	}
-	
 	public String getLocationWdid() {
 		return locationWdid;
-	}
-	public void setLocationWdid(String locationWdid) {
-		this.locationWdid = locationWdid;
 	}
 	
 	public double getLocationWdidStreamMile() {
 		return locationWdidStreamMile;
 	}
-	public void setLocationWdidStreamMile(double locationWdidStreamMile) {
-		this.locationWdidStreamMile = locationWdidStreamMile;
-	}
-	
 	public double getPriorityAdminNo() {
 		return priorityAdminNo;
-	}
-	public void setPriorityAdminNo(double priorityAdminNo) {
-		this.priorityAdminNo = priorityAdminNo;
 	}
 	
 	public DateTime getPriorityDate() {
 		return priorityDate;
 	}
-	public void setPriorityDate(String priorityDate) {
-		this.priorityDate = TimeToolkit.getInstance().toDateTime(priorityDate, true);
-	}
-	
 	public String getPriorityNo() {
 		return priorityNo;
-	}
-	public void setPriorityNo(String priorityNo) {
-		this.priorityNo = priorityNo;
 	}
 	
 	public int getPriorityOrderNo() {
 		return priorityOrderNo;
 	}
-	public void setPriorityOrderNo(int priorityOrderNo) {
-		this.priorityOrderNo = priorityOrderNo;
-	}
-	
 	public String getPriorityStructure() {
 		return priorityStructure;
-	}
-	public void setPriorityStructure(String priorityStructure) {
-		this.priorityStructure = priorityStructure;
 	}
 	
 	public String getPriorityWdid() {
 		return priorityWdid;
 	}
-	public void setPriorityWdid(String priorityWdid) {
-		this.priorityWdid = priorityWdid;
-	}
-	
 	public String getReleaseComment() {
 		return releaseComment;
-	}
-	public void setReleaseComment(String releaseComment) {
-		this.releaseComment = releaseComment;
 	}
 	
 	public String getSetComments() {
 		return setComments;
 	}
-	public void setSetComments(String setComments) {
-		this.setComments = setComments;
-	}
-	
 	public String getWaterSourceName() {
 		return waterSourceName;
+	}
+	
+	public void setAnalysisDate(String analysisDate) {
+		this.analysisDate = TimeToolkit.getInstance().toDateTime(analysisDate, true);
+	}
+	public void setAnalysisGnisId(String analysisGnisId) {
+		this.analysisGnisId = analysisGnisId;
+	}
+	
+	public void setAnalysisOutOfPriorityPercentOfDay(double analysisOutOfPriorityPercentOfDay) {
+		this.analysisOutOfPriorityPercentOfDay = analysisOutOfPriorityPercentOfDay;
+	}
+	public void setAnalysisStreamMile(double analysisStreamMile) {
+		this.analysisStreamMile = analysisStreamMile;
+	}
+	
+	public void setAnalysisWaterSourceName(String analysisWaterSourceName) {
+		this.analysisWaterSourceName = analysisWaterSourceName;
+	}
+	public void setAnalysisWrAdminNo(double analysisWrAdminNo) {
+		this.analysisWrAdminNo = analysisWrAdminNo;
+	}
+	
+	public void setBoundingStructureName(String boundingStructureName) {
+		this.boundingStructureName = boundingStructureName;
+	}
+	public void setBoundingWdid(String boundingWdid) {
+		this.boundingWdid = boundingWdid;
+	}
+	
+	public void setCallType(String callType) {
+		this.callType = callType;
+	}
+	public void setDateTimeReleased(String dateTimeReleased) {
+		this.dateTimeReleased = TimeToolkit.getInstance().toDateTime(dateTimeReleased, true);
+	}
+	
+	public void setDateTimeSet(String dateTimeSet) {
+		this.dateTimeSet = TimeToolkit.getInstance().toDateTime(dateTimeSet, true);
+	}
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	
+	public void setLocationStructure(String locationStructure) {
+		this.locationStructure = locationStructure;
+	}
+	public void setLocationWdid(String locationWdid) {
+		this.locationWdid = locationWdid;
+	}
+	
+	public void setLocationWdidStreamMile(double locationWdidStreamMile) {
+		this.locationWdidStreamMile = locationWdidStreamMile;
+	}
+	public void setPriorityAdminNo(double priorityAdminNo) {
+		this.priorityAdminNo = priorityAdminNo;
+	}
+	
+	public void setPriorityDate(String priorityDate) {
+		this.priorityDate = TimeToolkit.getInstance().toDateTime(priorityDate, true);
+	}
+	public void setPriorityNo(String priorityNo) {
+		this.priorityNo = priorityNo;
+	}
+	
+	public void setPriorityOrderNo(int priorityOrderNo) {
+		this.priorityOrderNo = priorityOrderNo;
+	}
+	public void setPriorityStructure(String priorityStructure) {
+		this.priorityStructure = priorityStructure;
+	}
+	
+	public void setPriorityWdid(String priorityWdid) {
+		this.priorityWdid = priorityWdid;
+	}
+	public void setReleaseComment(String releaseComment) {
+		this.releaseComment = releaseComment;
+	}
+	
+	public void setSetComments(String setComments) {
+		this.setComments = setComments;
 	}
 	public void setWaterSourceName(String waterSourceName) {
 		this.waterSourceName = waterSourceName;

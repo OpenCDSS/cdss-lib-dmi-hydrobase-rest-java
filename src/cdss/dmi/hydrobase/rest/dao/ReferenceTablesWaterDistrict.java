@@ -46,20 +46,20 @@ public class ReferenceTablesWaterDistrict {
 		return division;
 	}
 
-	public void setDivision(int div) {
-		this.division = div;
-	}
-
 	public int getWaterDistrict() {
 		return waterDistrict;
 	}
 
-	public void setWaterDistrict(int wd) {
-		this.waterDistrict = wd;
-	}
-
 	public String getWaterDistrictName() {
 		return waterDistrictName;
+	}
+
+	public void setDivision(int div) {
+		this.division = div;
+	}
+
+	public void setWaterDistrict(int wd) {
+		this.waterDistrict = wd;
 	}
 
 	public void setWaterDistrictName(String wdName) {

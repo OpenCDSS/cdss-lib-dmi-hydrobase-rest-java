@@ -171,187 +171,187 @@ public class TelemetryStationDataTypes {
 	public String getAbbrev() {
 		return abbrev;
 	}
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
-	}
-	
 	public double getContrArea() {
 		return contrArea;
-	}
-	public void setContrArea(double contrArea) {
-		this.contrArea = contrArea;
 	}
 	
 	public String getCounty() {
 		return county;
 	}
-	public void setCounty(String county) {
-		this.county = county;
-	}
-	
 	public String getDataSource() {
 		return dataSource;
-	}
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
 	}
 	
 	public String getDataSourceAbbrev() {
 		return dataSourceAbbrev;
 	}
-	public void setDataSourceAbbrev(String dataSourceAbbrev) {
-		this.dataSourceAbbrev = dataSourceAbbrev;
-	}
-	
 	public int getDivision() {
 		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
 	}
 	
 	public double getDrainArea() {
 		return drainArea;
 	}
-	public void setDrainArea(double drainArea) {
-		this.drainArea = drainArea;
-	}
-	
 	public String getGnisId() {
 		return gnisId;
-	}
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
 	}
 	
 	public String getHuc10() {
 		return huc10;
 	}
-	public void setHuc10(String huc10) {
-		this.huc10 = huc10;
-	}
-	
 	public double getLatdecdeg() {
 		return latdecdeg;
-	}
-	public void setLatdecdeg(double latdecdeg) {
-		this.latdecdeg = latdecdeg;
 	}
 	
 	public String getLocationAccuracy() {
 		return locationAccuracy;
 	}
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
-	}
-	
 	public double getLongdecdeg() {
 		return longdecdeg;
-	}
-	public void setLongdecdeg(double longdecdeg) {
-		this.longdecdeg = longdecdeg;
 	}
 	
 	public LocalDateTime getModified() {
 		return modified;
 	}
-	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
-	}
-	
 	public String getParameter() {
 		return parameter;
-	}
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
 	}
 	
 	public String getParameterUnit(){
 		return parameterUnit;
 	}
-	public void setParameterUnit(String parameterUnit){
-		this.parameterUnit = parameterUnit;
-	}
-	
 	public String getStationName() {
 		return stationName;
-	}
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
 	}
 	
 	public String getStationStatus() {
 		return stationStatus;
 	}
-	public void setStationStatus(String stationStatus) {
-		this.stationStatus = stationStatus;
-	}
-	
 	public String getStationType() {
 		return stationType;
-	}
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
 	}
 	
 	public double getStreamMile() {
 		return streamMile;
 	}
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
-	}
-	
 	public String getStructureType() {
 		return structureType;
-	}
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
 	}
 	
 	public String getTimeStep() {
 		return timeStep;
 	}
-	public void setTimeStep(String timeStep) {
-		this.timeStep = timeStep;
-	}
-	
 	public String getUsgsStationId() {
 		return usgsStationId;
-	}
-	public void setUsgsStationId(String usgsStationId) {
-		this.usgsStationId = usgsStationId;
 	}
 	
 	public double getUtmX() {
 		return utmX;
 	}
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
-	}
-	
 	public double getUtmY() {
 		return utmY;
-	}
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
 	}
 	
 	public int getWaterDistrict() {
 		return waterDistrict;
 	}
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
-	
 	public String getWaterSource() {
 		return waterSource;
-	}
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
 	}
 	
 	public String getWdid() {
 		return wdid;
+	}
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
+	}
+	
+	public void setContrArea(double contrArea) {
+		this.contrArea = contrArea;
+	}
+	public void setCounty(String county) {
+		this.county = county;
+	}
+	
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	public void setDataSourceAbbrev(String dataSourceAbbrev) {
+		this.dataSourceAbbrev = dataSourceAbbrev;
+	}
+	
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	public void setDrainArea(double drainArea) {
+		this.drainArea = drainArea;
+	}
+	
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	public void setHuc10(String huc10) {
+		this.huc10 = huc10;
+	}
+	
+	public void setLatdecdeg(double latdecdeg) {
+		this.latdecdeg = latdecdeg;
+	}
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+	
+	public void setLongdecdeg(double longdecdeg) {
+		this.longdecdeg = longdecdeg;
+	}
+	public void setModified(String modified) {
+		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
+	}
+	
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+	public void setParameterUnit(String parameterUnit){
+		this.parameterUnit = parameterUnit;
+	}
+	
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+	public void setStationStatus(String stationStatus) {
+		this.stationStatus = stationStatus;
+	}
+	
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
+	}
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+	
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
+	
+	public void setUsgsStationId(String usgsStationId) {
+		this.usgsStationId = usgsStationId;
+	}
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+	
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+	
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 	public void setWdid(String wdid) {
 		this.wdid = wdid;

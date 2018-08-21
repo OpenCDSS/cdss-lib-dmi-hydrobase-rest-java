@@ -199,252 +199,252 @@ public class TelemetryStation {
 		return abbrev;
 	}
 
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
-	}
-
 	public double getContrArea() {
 		return contrArea;
-	}
-
-	public void setContrArea(double contrArea) {
-		this.contrArea = contrArea;
 	}
 
 	public String getCounty() {
 		return county;
 	}
 
-	public void setCounty(String county) {
-		this.county = county;
-	}
-
 	public String getDataSource() {
 		return dataSource;
-	}
-
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
 	}
 
 	public String getDataSourceAbbrev() {
 		return dataSourceAbbrev;
 	}
 
-	public void setDataSourceAbbrev(String dataSourceAbbrev) {
-		this.dataSourceAbbrev = dataSourceAbbrev;
-	}
-
 	public int getDivision() {
 		return division;
-	}
-
-	public void setDivision(int div) {
-		this.division = div;
 	}
 
 	public double getDrainArea() {
 		return drainArea;
 	}
 
-	public void setDrainArea(double drainArea) {
-		this.drainArea = drainArea;
-	}
-
 	public String getFlagA() {
 		return flagA;
-	}
-
-	public void setFlagA(String flagA) {
-		this.flagA = flagA;
 	}
 
 	public String getFlagB() {
 		return flagB;
 	}
 
-	public void setFlagB(String flagB) {
-		this.flagB = flagB;
-	}
-
 	public String getGnisId() {
 		return gnisId;
-	}
-
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
 	}
 
 	public String getHuc10() {
 		return huc10;
 	}
 
-	public void setHuc10(String huc10) {
-		this.huc10 = huc10;
-	}
-
 	public double getLatitude() {
 		return latitude;
-	}
-
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
 	}
 
 	public String getLocationAccuracy() {
 		return locationAccuracy;
 	}
 
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
-	}
-
 	public double getLongitude() {
 		return longitude;
-	}
-
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
 	}
 
 	public DateTime getMeasDateTime() {
 		return measDateTime;
 	}
 
-	public void setMeasDateTime(String measDateTime) {
-		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
-	}
-
 	public double getMeasValue() {
 		return measValue;
-	}
-
-	public void setMeasValue(double measValue) {
-		this.measValue = measValue;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
 
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
-	}
-
 	public String getMoreInformation() {
 		return moreInformation;
-	}
-
-	public void setMoreInformation(String moreInformation) {
-		this.moreInformation = moreInformation;
 	}
 
 	public String getParameter() {
 		return parameter;
 	}
 
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
-	}
-
 	public double getStage() {
 		return stage;
-	}
-
-	public void setStage(double stage) {
-		this.stage = stage;
 	}
 
 	public String getStationName() {
 		return stationName;
 	}
 
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
-	}
-	
 	public String getStationStatus() {
 		return stationStatus;
-	}
-
-	public void setStationStatus(String stationStatus) {
-		this.stationStatus = stationStatus;
 	}
 
 	public String getStationType() {
 		return stationType;
 	}
 
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
-	}
-
 	public double getStreamMile() {
 		return streamMile;
-	}
-
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
 	}
 
 	public String getStructureType() {
 		return structureType;
 	}
 
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
-
 	public String getUnits() {
 		return units;
-	}
-
-	public void setUnits(String units) {
-		this.units = units;
 	}
 
 	public String getUsgsStationId() {
 		return usgsStationId;
 	}
 
-	public void setUsgsStationId(String usgsStationId) {
-		this.usgsStationId = usgsStationId;
-	}
-
 	public double getUtmX() {
 		return utmX;
-	}
-
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
 	}
 
 	public double getUtmY() {
 		return utmY;
 	}
 
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
-	}
-
 	public int getWaterDistrict() {
 		return waterDistrict;
-	}
-
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
 	}
 
 	public String getWaterSource() {
 		return waterSource;
 	}
 
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
-	}
-
 	public String getWdid() {
 		return wdid;
+	}
+
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
+	}
+
+	public void setContrArea(double contrArea) {
+		this.contrArea = contrArea;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public void setDataSourceAbbrev(String dataSourceAbbrev) {
+		this.dataSourceAbbrev = dataSourceAbbrev;
+	}
+
+	public void setDivision(int div) {
+		this.division = div;
+	}
+
+	public void setDrainArea(double drainArea) {
+		this.drainArea = drainArea;
+	}
+
+	public void setFlagA(String flagA) {
+		this.flagA = flagA;
+	}
+
+	public void setFlagB(String flagB) {
+		this.flagB = flagB;
+	}
+
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	
+	public void setHuc10(String huc10) {
+		this.huc10 = huc10;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public void setMeasDateTime(String measDateTime) {
+		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
+	}
+
+	public void setMeasValue(double measValue) {
+		this.measValue = measValue;
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+
+	public void setMoreInformation(String moreInformation) {
+		this.moreInformation = moreInformation;
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+
+	public void setStage(double stage) {
+		this.stage = stage;
+	}
+
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+
+	public void setStationStatus(String stationStatus) {
+		this.stationStatus = stationStatus;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+
+	public void setUnits(String units) {
+		this.units = units;
+	}
+
+	public void setUsgsStationId(String usgsStationId) {
+		this.usgsStationId = usgsStationId;
+	}
+
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 
 	public void setWdid(String wdid) {

@@ -60,35 +60,35 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	public String getFeatureType() {
 		return featureType;
 	}
-	public void setFeatureType(String featureType) {
-		this.featureType = featureType;
-	}
 	public String getGnisId() {
 		return gnisId;
-	}
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
 	}
 	public double getStreamMile() {
 		return streamMile;
 	}
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
-	}
 	public String getStructureName() {
 		return structureName;
-	}
-	public void setStructureName(String structureName) {
-		this.structureName = structureName;
 	}
 	public String getStructureType() {
 		return structureType;
 	}
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
 	public String getWdid() {
 		return wdid;
+	}
+	public void setFeatureType(String featureType) {
+		this.featureType = featureType;
+	}
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+	public void setStructureName(String structureName) {
+		this.structureName = structureName;
+	}
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
 	}
 	public void setWdid(String wdid) {
 		this.wdid = wdid;

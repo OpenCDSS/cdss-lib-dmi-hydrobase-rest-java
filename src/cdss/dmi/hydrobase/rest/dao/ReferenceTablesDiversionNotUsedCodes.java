@@ -40,11 +40,11 @@ public class ReferenceTablesDiversionNotUsedCodes {
 	public String getNotUsedCode() {
 		return notUsedCode;
 	}
-	public void setNotUsedCode(String notUsedCode) {
-		this.notUsedCode = notUsedCode;
-	}
 	public String getNotUsedCodeDescr() {
 		return notUsedCodeDescr;
+	}
+	public void setNotUsedCode(String notUsedCode) {
+		this.notUsedCode = notUsedCode;
 	}
 	public void setNotUsedCodeDescr(String notUsedCodeDescr) {
 		this.notUsedCodeDescr = notUsedCodeDescr;

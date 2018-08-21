@@ -75,61 +75,61 @@ public class AnalysisServicesWaterSourceRouteFramework {
 	public int getDivision() {
 		return division;
 	}
-	public void setDivision(int division) {
-		this.division = division;
-	}
-	
 	public String getGnisId() {
 		return gnisId;
-	}
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
 	}
 	
 	public String getGnisName() {
 		return gnisName;
 	}
-	public void setGnisName(String gnisName) {
-		this.gnisName = gnisName;
-	}
-	
 	public double getStreamLength() {
 		return streamLength;
-	}
-	public void setStreamLength(double streamLength) {
-		this.streamLength = streamLength;
 	}
 	
 	public String getTribGnisName() {
 		return tribGnisName;
 	}
-	public void setTribGnisName(String tribGnisName) {
-		this.tribGnisName = tribGnisName;
-	}
-	
 	public String getTributaryToGnisId() {
 		return TributaryToGnisId;
-	}
-	public void setTributaryToGnisId(String tributaryToGnisId) {
-		TributaryToGnisId = tributaryToGnisId;
 	}
 	
 	public int getTributaryToLevel() {
 		return tributaryToLevel;
 	}
-	public void setTributaryToLevel(int tributaryToLevel) {
-		this.tributaryToLevel = tributaryToLevel;
-	}
-	
 	public double getTributaryToStreamMile() {
 		return tributaryToStreamMile;
-	}
-	public void setTributaryToStreamMile(double tributaryToStreamMile) {
-		this.tributaryToStreamMile = tributaryToStreamMile;
 	}
 	
 	public int getWaterDistrict() {
 		return waterDistrict;
+	}
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	public void setGnisName(String gnisName) {
+		this.gnisName = gnisName;
+	}
+	
+	public void setStreamLength(double streamLength) {
+		this.streamLength = streamLength;
+	}
+	public void setTribGnisName(String tribGnisName) {
+		this.tribGnisName = tribGnisName;
+	}
+	
+	public void setTributaryToGnisId(String tributaryToGnisId) {
+		TributaryToGnisId = tributaryToGnisId;
+	}
+	public void setTributaryToLevel(int tributaryToLevel) {
+		this.tributaryToLevel = tributaryToLevel;
+	}
+	
+	public void setTributaryToStreamMile(double tributaryToStreamMile) {
+		this.tributaryToStreamMile = tributaryToStreamMile;
 	}
 	public void setWaterDistrict(int waterDistrict) {
 		this.waterDistrict = waterDistrict;

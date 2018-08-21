@@ -75,54 +75,54 @@ public class DiversionComments {
 	public String getApprovalStatus() {
 		return approvalStatus;
 	}
-	public void setApprovalStatus(String approvalStatus) {
-		this.approvalStatus = approvalStatus;
-	}
-
 	public String getComment() {
 		return comment;
-	}
-	public void setComment(String comment) {
-		this.comment = comment;
 	}
 
 	public String getCommentType() {
 		return commentType;
 	}
-	public void setCommentType(String commentType) {
-		this.commentType = commentType;
-	}
-
 	public int getIrrYear() {
 		return irrYear;
-	}
-	public void setIrrYear(int irrYear) {
-		this.irrYear = irrYear;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
-	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
-	}
-
 	public String getNotUsed() {
 		return notUsed;
-	}
-	public void setNotUsed(String notUsed) {
-		this.notUsed = notUsed;
 	}
 
 	public String getNotUsedDescr() {
 		return notUsedDescr;
 	}
-	public void setNotUsedDescr(String notUsedDescr) {
-		this.notUsedDescr = notUsedDescr;
-	}
-
 	public String getWdid() {
 		return wdid;
+	}
+
+	public void setApprovalStatus(String approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public void setCommentType(String commentType) {
+		this.commentType = commentType;
+	}
+	public void setIrrYear(int irrYear) {
+		this.irrYear = irrYear;
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
+	}
+	public void setNotUsed(String notUsed) {
+		this.notUsed = notUsed;
+	}
+
+	public void setNotUsedDescr(String notUsedDescr) {
+		this.notUsedDescr = notUsedDescr;
 	}
 	public void setWdid(String wdid) {
 		this.wdid = wdid;

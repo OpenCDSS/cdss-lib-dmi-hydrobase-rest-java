@@ -29,15 +29,15 @@ public class ReferenceTablesGroundwaterPublication {
 	 */
 	private String publicationName;
 	
+	public String getPublicationName(){
+		return publicationName;
+	}
+	
 	/**
 	 * Getters and setters of defined variables
 	 */
 	public void setPublicationName(String publicationName){
 		this.publicationName = publicationName;
-	}
-	
-	public String getPublicationName(){
-		return publicationName;
 	}
 	
 	/**

@@ -91,92 +91,92 @@ public class ParcelUseTimeSeries {
 		return acresProrated;
 	}
 
-	public void setAcresProrated(double acresProrated) {
-		this.acresProrated = acresProrated;
-	}
-
 	public double getAcresTotal() {
 		return acresTotal;
-	}
-
-	public void setAcresTotal(double acresTotal) {
-		this.acresTotal = acresTotal;
 	}
 
 	public String getAssocGwWdid() {
 		return assocGwWdid;
 	}
 
-	public void setAssocGwWdid(String assocGwWdid) {
-		this.assocGwWdid = assocGwWdid;
-	}
-
 	public String getAssocSwWdid() {
 		return assocSwWdid;
-	}
-
-	public void setAssocSwWdid(String assocSwWdid) {
-		this.assocSwWdid = assocSwWdid;
 	}
 
 	public int getCalYear() {
 		return calYear;
 	}
 
-	public void setCalYear(int calYear) {
-		this.calYear = calYear;
-	}
-
 	public int getDiv() {
 		return div;
-	}
-
-	public void setDiv(int div) {
-		this.div = div;
 	}
 
 	public String getIrrigType() {
 		return irrigType;
 	}
 
-	public void setIrrigType(String irrigType) {
-		this.irrigType = irrigType;
-	}
-
 	public String getLandUse() {
 		return landUse;
-	}
-
-	public void setLandUse(String landUse) {
-		this.landUse = landUse;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
 
-	public void setModified(String modified) {
-		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
-	}
-
 	public int getParcelId() {
 		return parcelId;
-	}
-
-	public void setParcelId(int parcelId) {
-		this.parcelId = parcelId;
 	}
 
 	public String getStructureName() {
 		return structureName;
 	}
 
-	public void setStructureName(String structureName) {
-		this.structureName = structureName;
-	}
-
 	public String getWdid() {
 		return wdid;
+	}
+
+	public void setAcresProrated(double acresProrated) {
+		this.acresProrated = acresProrated;
+	}
+
+	public void setAcresTotal(double acresTotal) {
+		this.acresTotal = acresTotal;
+	}
+
+	public void setAssocGwWdid(String assocGwWdid) {
+		this.assocGwWdid = assocGwWdid;
+	}
+
+	public void setAssocSwWdid(String assocSwWdid) {
+		this.assocSwWdid = assocSwWdid;
+	}
+
+	public void setCalYear(int calYear) {
+		this.calYear = calYear;
+	}
+
+	public void setDiv(int div) {
+		this.div = div;
+	}
+
+	public void setIrrigType(String irrigType) {
+		this.irrigType = irrigType;
+	}
+
+	public void setLandUse(String landUse) {
+		this.landUse = landUse;
+	}
+
+	public void setModified(String modified) {
+		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
+	}
+
+	public void setParcelId(int parcelId) {
+		this.parcelId = parcelId;
+	}
+
+	public void setStructureName(String structureName) {
+		this.structureName = structureName;
 	}
 
 	public void setWdid(String wdid) {

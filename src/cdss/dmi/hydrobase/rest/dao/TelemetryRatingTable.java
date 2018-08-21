@@ -45,17 +45,17 @@ public class TelemetryRatingTable {
 	public String getRatingTableName() {
 		return ratingTableName;
 	}
-	public void setRatingTableName(String ratingTableName) {
-		this.ratingTableName = ratingTableName;
-	}
 	public double getX() {
 		return X;
 	}
-	public void setX(double x) {
-		X = x;
-	}
 	public double getY() {
 		return Y;
+	}
+	public void setRatingTableName(String ratingTableName) {
+		this.ratingTableName = ratingTableName;
+	}
+	public void setX(double x) {
+		X = x;
 	}
 	public void setY(double y) {
 		Y = y;

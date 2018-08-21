@@ -41,12 +41,12 @@ public class ReferenceTablesWaterDivision {
 		return division;
 	}
 
-	public void setDivision(int div) {
-		this.division = div;
-	}
-
 	public String getDivisionName() {
 		return divisionName;
+	}
+
+	public void setDivision(int div) {
+		this.division = div;
 	}
 
 	public void setDivisionName(String divName) {

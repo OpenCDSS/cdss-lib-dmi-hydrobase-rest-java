@@ -80,78 +80,19 @@ public class TelemetryTimeSeries {
 	public String getAbbrev() {
 		return abbrev;
 	}
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
+	public int getDay(){
+		if(measDateTime != null){
+			return measDateTime.getDayOfMonth();
+		}else{
+			return measDate.getDayOfMonth();
+		}
 	}
 
 	public String getFlagA() {
 		return flagA;
 	}
-	public void setFlagA(String flagA) {
-		this.flagA = flagA;
-	}
-
 	public String getFlagB() {
 		return flagB;
-	}
-	public void setFlagB(String flagB) {
-		this.flagB = flagB;
-	}
-
-	public int getMeasCount() {
-		return measCount;
-	}
-	public void setMeasCount(int measCount) {
-		this.measCount = measCount;
-	}
-
-	public LocalDateTime getMeasDate() {
-		return measDate;
-	}
-	public void setMeasDate(String measDate) {
-		this.measDate = (measDate == null) ? null : LocalDateTime.parse(measDate);
-	}
-
-	public LocalDateTime getMeasDateTime() {
-		return measDateTime;
-	}
-	public void setMeasDateTime(String measDateTime) {
-		this.measDateTime = (measDateTime == null) ? null : LocalDateTime.parse(measDateTime);
-	}
-
-	public double getMeasValue() {
-		return measValue;
-	}
-	public void setMeasValue(double measValue) {
-		this.measValue = measValue;
-	}
-	
-	public LocalDateTime getModified() {
-		return modified;
-	}
-	public void setModified(String modified) {
-		if(modified == "N/A" || modified == null){
-			this.modified = null;
-		}else{
-			int indexOf = modified.lastIndexOf("-");
-			modified = modified.substring(0, indexOf);
-			this.modified = LocalDateTime.parse(modified);
-		}
-	}
-	
-	public String getParameter() {
-		return parameter;
-	}
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
-	}
-
-	public int getMinute(){
-		if(measDateTime != null){
-			return measDateTime.getMinute();
-		}else{
-			return measDate.getMinute();
-		}
 	}
 
 	/**
@@ -164,15 +105,31 @@ public class TelemetryTimeSeries {
 			return measDate.getHour();
 		}
 	}
+	public int getMeasCount() {
+		return measCount;
+	}
 
-	public int getDay(){
+	public LocalDateTime getMeasDate() {
+		return measDate;
+	}
+	public LocalDateTime getMeasDateTime() {
+		return measDateTime;
+	}
+
+	public double getMeasValue() {
+		return measValue;
+	}
+	public int getMinute(){
 		if(measDateTime != null){
-			return measDateTime.getDayOfMonth();
+			return measDateTime.getMinute();
 		}else{
-			return measDate.getDayOfMonth();
+			return measDate.getMinute();
 		}
 	}
 
+	public LocalDateTime getModified() {
+		return modified;
+	}
 	public int getMonth(){
 		if(measDateTime != null){
 			return measDateTime.getMonthValue();
@@ -182,6 +139,9 @@ public class TelemetryTimeSeries {
 		
 	}
 
+	public String getParameter() {
+		return parameter;
+	}
 	public int getYear(){
 		if(measDateTime != null){
 			return measDateTime.getYear();
@@ -189,6 +149,46 @@ public class TelemetryTimeSeries {
 			return measDate.getYear();
 		}
 		
+	}
+	
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
+	}
+	public void setFlagA(String flagA) {
+		this.flagA = flagA;
+	}
+	
+	public void setFlagB(String flagB) {
+		this.flagB = flagB;
+	}
+	public void setMeasCount(int measCount) {
+		this.measCount = measCount;
+	}
+
+	public void setMeasDate(String measDate) {
+		this.measDate = (measDate == null) ? null : LocalDateTime.parse(measDate);
+	}
+
+	public void setMeasDateTime(String measDateTime) {
+		this.measDateTime = (measDateTime == null) ? null : LocalDateTime.parse(measDateTime);
+	}
+
+	public void setMeasValue(double measValue) {
+		this.measValue = measValue;
+	}
+
+	public void setModified(String modified) {
+		if(modified == "N/A" || modified == null){
+			this.modified = null;
+		}else{
+			int indexOf = modified.lastIndexOf("-");
+			modified = modified.substring(0, indexOf);
+			this.modified = LocalDateTime.parse(modified);
+		}
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
 	}
 
 	/**

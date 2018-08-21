@@ -86,82 +86,50 @@ public class DiversionByDay {
 		return approvalStatus;
 	}
 
-	public void setApprovalStatus(String approvalStatus) {
-		this.approvalStatus = approvalStatus;
-	}
-
 	public DateTime getDataMeasDate() {
 		return dataMeasDate;
-	}
-
-	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
 	}
 
 	public double getDataValue() {
 		return dataValue;
 	}
 
-	public void setDataValue(double dataValue) {
-		this.dataValue = dataValue;
+	public int getDay(){
+		return dataMeasDate.getDay();
 	}
 
 	public String getMeasInterval() {
 		return measInterval;
 	}
 
-	public void setMeasInterval(String measInterval) {
-		this.measInterval = measInterval;
-	}
-
 	public String getMeasUnits() {
 		return measUnits;
-	}
-
-	public void setMeasUnits(String measUnits) {
-		this.measUnits = measUnits;
 	}
 
 	public DateTime getModified() {
 		return modified;
 	}
 
-	public void setModified(String modified) {
-		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
+	public int getMonth(){
+		return dataMeasDate.getMonth();
 	}
 
 	public String getObsCode() {
 		return obsCode;
 	}
 
-	public void setObsCode(String obsCode) {
-		this.obsCode = obsCode;
-	}
-
 	public int getWaterClassNum() {
 		return waterClassNum;
-	}
-
-	public void setWaterClassNum(int waterClassNum) {
-		this.waterClassNum = waterClassNum;
 	}
 
 	public String getWcIdentifier() {
 		return wcIdentifier;
 	}
 
-	public void setWcIdentifier(String wcIdentifier) {
-		this.wcIdentifier = wcIdentifier;
-	}
-
 	public String getWdid() {
 		return wdid;
 	}
 
-	public void setWdid(String wdid) {
-		this.wdid = wdid;
-	}
-	
 	/**
 	 *  Additional getters that are necessary in other locations in the code
 	 */
@@ -169,12 +137,44 @@ public class DiversionByDay {
 		return dataMeasDate.getYear();
 	}
 
-	public int getMonth(){
-		return dataMeasDate.getMonth();
+	public void setApprovalStatus(String approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public void setDataMeasDate(String dataMeasDate) {
+		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
+	}
+
+	public void setDataValue(double dataValue) {
+		this.dataValue = dataValue;
+	}
+
+	public void setMeasInterval(String measInterval) {
+		this.measInterval = measInterval;
+	}
+
+	public void setMeasUnits(String measUnits) {
+		this.measUnits = measUnits;
+	}
+
+	public void setModified(String modified) {
+		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
+	}
+
+	public void setObsCode(String obsCode) {
+		this.obsCode = obsCode;
 	}
 	
-	public int getDay(){
-		return dataMeasDate.getDay();
+	public void setWaterClassNum(int waterClassNum) {
+		this.waterClassNum = waterClassNum;
+	}
+
+	public void setWcIdentifier(String wcIdentifier) {
+		this.wcIdentifier = wcIdentifier;
+	}
+	
+	public void setWdid(String wdid) {
+		this.wdid = wdid;
 	}
 	
 	/**

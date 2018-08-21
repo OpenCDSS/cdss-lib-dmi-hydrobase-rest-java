@@ -29,12 +29,12 @@ public class ReferenceTablesDesignatedBasin {
 	 */
 	private String designatedBasinName;
 	
-	public void setDesignatedBasinName(String designatedBasinName){
-		this.designatedBasinName = designatedBasinName;
-	}
-	
 	public String getDesignatedBasinName(){
 		return designatedBasinName;
+	}
+	
+	public void setDesignatedBasinName(String designatedBasinName){
+		this.designatedBasinName = designatedBasinName;
 	}
 	
 	/**

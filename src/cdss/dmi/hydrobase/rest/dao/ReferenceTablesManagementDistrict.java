@@ -29,15 +29,15 @@ public class ReferenceTablesManagementDistrict {
 	 */
 	private String managementDistrictName;
 	
+	public String getManagementDistrictName(){
+		return managementDistrictName;
+	}
+	
 	/**
 	 * Getters and setters for defined variables
 	 */
 	public void setManagementDistrictName(String managementDistrictName){
 		this.managementDistrictName = managementDistrictName;
-	}
-	
-	public String getManagementDistrictName(){
-		return managementDistrictName;
 	}
 	
 	/**
