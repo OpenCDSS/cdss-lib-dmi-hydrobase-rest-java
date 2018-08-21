@@ -97,7 +97,7 @@ public class DiversionByYear {
 		return dataMeasDate;
 	}
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = DateTime.parse(dataMeasDate);
+		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
 	}
 
 	public double getDataValue() {

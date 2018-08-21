@@ -4,190 +4,375 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrystationdatatypes
+ * @author jurentie
+ *
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryStationDataTypes {
 	
-	private int division;
-	private int waterDistrict;
-	private String county;
-	private String stationName;
-	private String dataSourceAbbrev;
-	private String dataSource;
+	/**
+	 * Variables declared in alphabetical order.
+	 * Documentation copied from web services.
+	 */
+	
+	/**
+	 * Abbreviation
+	 */
 	private String abbrev;
-	private String wdid;
-	private String usgsStationId;
-	private String stationStatus;
-	private String stationType;
-	private String waterSource;
-	private String gnisId;
-	private double streamMile;
-	private String structureType;
-	private String parameter;
+	
+	/**
+	 * Contributing Area
+	 */
 	private double contrArea;
+	
+	/**
+	 * County where the well is located
+	 */
+	private String county;
+	
+	/**
+	 * Primary source/provider of well measurement data
+	 */
+	private String dataSource;
+	
+	/**
+	 * Data source abbreviation
+	 */
+	private String dataSourceAbbrev;
+	
+	/**
+	 * DWR Water Division
+	 */
+	private int division;
+	
+	/**
+	 * Drainage Area
+	 */
 	private double drainArea;
+	
+	/**
+	 * National Hydrographic Dataset stream identifier
+	 */
+	private String gnisId;
+	
+	/**
+	 * HUC 10
+	 */
 	private String huc10;
-	private double utmX;
-	private double utmY;
+	
+	/**
+	 * Latitude value in decimal degrees
+	 */
 	private double latdecdeg;
-	private double longdecdeg;
+	
+	/**
+	 * Accuracy of location coordinates
+	 */
 	private String locationAccuracy;
+	
+	/**
+	 * Longitude in decimal degrees
+	 */
+	private double longdecdeg;
+	
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
 	private LocalDateTime modified;
+	
+	/**
+	 * Parameter
+	 */
+	private String parameter;
+	
+	/**
+	 * Unit for given Parameter
+	 */
+	private String parameterUnit;
+	
+	/**
+	 * Station Name
+	 */
+	private String stationName;
+	
+	/**
+	 * Station Status
+	 */
+	private String stationStatus;
+	
+	/**
+	 * Station Type
+	 */
+	private String stationType;
+	
+	/**
+	 * Distance in miles to the confluence with the next downstream 
+	 * water source (or distance to state line)
+	 */
+	private double streamMile;
+	
+	/**
+	 * Type of structure
+	 */
+	private String structureType;
+	
+	/**
+	 * USGS Station ID
+	 */
+	private String usgsStationId;
+	
+	/**
+	 * The x (Easting) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum)
+	 */
+	private double utmX;
+	
+	/**
+	 * The y (Northing) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum)
+	 */
+	private double utmY;
+	/**
+	 * Added variable for use in other places in the code. 
+	 * Not originally from web services
+	 * @jurentie
+	 */
 	private String timeStep;
-	public String getTimeStep() {
-		return timeStep;
-	}
-	public void setTimeStep(String timeStep) {
-		this.timeStep = timeStep;
-	}
-	public int getDivision() {
-		return division;
-	}
-	public void setDivision(int division) {
-		this.division = division;
-	}
-	public int getWaterDistrict() {
-		return waterDistrict;
-	}
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
-	public String getCounty() {
-		return county;
-	}
-	public void setCounty(String county) {
-		this.county = county;
-	}
-	public String getStationName() {
-		return stationName;
-	}
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
-	}
-	public String getDataSourceAbbrev() {
-		return dataSourceAbbrev;
-	}
-	public void setDataSourceAbbrev(String dataSourceAbbrev) {
-		this.dataSourceAbbrev = dataSourceAbbrev;
-	}
-	public String getDataSource() {
-		return dataSource;
-	}
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
-	}
+	
+	/**
+	 * DWR Water District
+	 */
+	private int waterDistrict;
+	
+	/**
+	 * Name of the water source as specified in the court case
+	 */
+	private String waterSource;
+	
+	/**
+	 * DWR unique structure identifier
+	 */
+	private String wdid;
+	
+	/**
+	 * Getters and setters for defined variables
+	 */
 	public String getAbbrev() {
 		return abbrev;
 	}
 	public void setAbbrev(String abbrev) {
 		this.abbrev = abbrev;
 	}
-	public String getWdid() {
-		return wdid;
-	}
-	public void setWdid(String wdid) {
-		this.wdid = wdid;
-	}
-	public String getUsgsStationId() {
-		return usgsStationId;
-	}
-	public void setUsgsStationId(String usgsStationId) {
-		this.usgsStationId = usgsStationId;
-	}
-	public String getStationStatus() {
-		return stationStatus;
-	}
-	public void setStationStatus(String stationStatus) {
-		this.stationStatus = stationStatus;
-	}
-	public String getStationType() {
-		return stationType;
-	}
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
-	}
-	public String getWaterSource() {
-		return waterSource;
-	}
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
-	}
-	public String getGnisId() {
-		return gnisId;
-	}
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
-	}
-	public double getStreamMile() {
-		return streamMile;
-	}
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
-	}
-	public String getStructureType() {
-		return structureType;
-	}
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
-	public String getParameter() {
-		return parameter;
-	}
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
-	}
+	
 	public double getContrArea() {
 		return contrArea;
 	}
 	public void setContrArea(double contrArea) {
 		this.contrArea = contrArea;
 	}
+	
+	public String getCounty() {
+		return county;
+	}
+	public void setCounty(String county) {
+		this.county = county;
+	}
+	
+	public String getDataSource() {
+		return dataSource;
+	}
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	public String getDataSourceAbbrev() {
+		return dataSourceAbbrev;
+	}
+	public void setDataSourceAbbrev(String dataSourceAbbrev) {
+		this.dataSourceAbbrev = dataSourceAbbrev;
+	}
+	
+	public int getDivision() {
+		return division;
+	}
+	public void setDivision(int division) {
+		this.division = division;
+	}
+	
 	public double getDrainArea() {
 		return drainArea;
 	}
 	public void setDrainArea(double drainArea) {
 		this.drainArea = drainArea;
 	}
+	
+	public String getGnisId() {
+		return gnisId;
+	}
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
+	}
+	
 	public String getHuc10() {
 		return huc10;
 	}
 	public void setHuc10(String huc10) {
 		this.huc10 = huc10;
 	}
-	public double getUtmX() {
-		return utmX;
-	}
-	public void setUtmX(double utmX) {
-		this.utmX = utmX;
-	}
-	public double getUtmY() {
-		return utmY;
-	}
-	public void setUtmY(double utmY) {
-		this.utmY = utmY;
-	}
+	
 	public double getLatdecdeg() {
 		return latdecdeg;
 	}
 	public void setLatdecdeg(double latdecdeg) {
 		this.latdecdeg = latdecdeg;
 	}
-	public double getLongdecdeg() {
-		return longdecdeg;
-	}
-	public void setLongdecdeg(double longdecdeg) {
-		this.longdecdeg = longdecdeg;
-	}
+	
 	public String getLocationAccuracy() {
 		return locationAccuracy;
 	}
 	public void setLocationAccuracy(String locationAccuracy) {
 		this.locationAccuracy = locationAccuracy;
 	}
+	
+	public double getLongdecdeg() {
+		return longdecdeg;
+	}
+	public void setLongdecdeg(double longdecdeg) {
+		this.longdecdeg = longdecdeg;
+	}
+	
 	public LocalDateTime getModified() {
 		return modified;
 	}
 	public void setModified(String modified) {
 		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
+	}
+	
+	public String getParameter() {
+		return parameter;
+	}
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+	
+	public String getParameterUnit(){
+		return parameterUnit;
+	}
+	public void setParameterUnit(String parameterUnit){
+		this.parameterUnit = parameterUnit;
+	}
+	
+	public String getStationName() {
+		return stationName;
+	}
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+	
+	public String getStationStatus() {
+		return stationStatus;
+	}
+	public void setStationStatus(String stationStatus) {
+		this.stationStatus = stationStatus;
+	}
+	
+	public String getStationType() {
+		return stationType;
+	}
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
+	}
+	
+	public double getStreamMile() {
+		return streamMile;
+	}
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+	
+	public String getStructureType() {
+		return structureType;
+	}
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+	
+	public String getTimeStep() {
+		return timeStep;
+	}
+	public void setTimeStep(String timeStep) {
+		this.timeStep = timeStep;
+	}
+	
+	public String getUsgsStationId() {
+		return usgsStationId;
+	}
+	public void setUsgsStationId(String usgsStationId) {
+		this.usgsStationId = usgsStationId;
+	}
+	
+	public double getUtmX() {
+		return utmX;
+	}
+	public void setUtmX(double utmX) {
+		this.utmX = utmX;
+	}
+	
+	public double getUtmY() {
+		return utmY;
+	}
+	public void setUtmY(double utmY) {
+		this.utmY = utmY;
+	}
+	
+	public int getWaterDistrict() {
+		return waterDistrict;
+	}
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
+	}
+	
+	public String getWaterSource() {
+		return waterSource;
+	}
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
+	}
+	
+	public String getWdid() {
+		return wdid;
+	}
+	public void setWdid(String wdid) {
+		this.wdid = wdid;
+	}
+	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
+	@Override
+	public String toString(){
+		return "TelemetryStationDataTypes: [ division: " + division + ", waterDistrict: " + waterDistrict + 
+				", county: " + county + ", stationName: " + stationName + ", dataSourceAbbrev: " + dataSourceAbbrev + 
+				", dataSource: " + dataSource + ", abbrev: " + abbrev + ", wdid: " + wdid + ", usgsStationId: "+
+				usgsStationId + ", stationStatus: " + stationStatus + ", stationType: " + stationType + ", stationType: " +
+				stationType + ", stationType: " + stationType + ", waterSource: " + waterSource + ", gnisId: " + gnisId + 
+				", streamMile: " + streamMile + ", structureType: " + structureType + ", parameter: " + parameter + 
+				", parameterUnit: " + parameterUnit + ", contrArea: " + contrArea + ", drainArea: " + drainArea + 
+				", huc10: " + huc10 + ", utmX: " + utmX + ", utmY: " + ", latdecdeg: " + latdecdeg + ", longdecdeg: " + 
+				longdecdeg + ", locationAccuracy: " + locationAccuracy + ", modified: " + modified + " ]";
 	}
 
 }

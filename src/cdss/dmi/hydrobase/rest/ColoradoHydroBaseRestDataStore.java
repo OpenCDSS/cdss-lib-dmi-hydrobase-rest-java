@@ -1569,8 +1569,8 @@ throws MalformedURLException, Exception
 		if(interval_base == TimeInterval.DAY){ 
 			firstDate = new DateTime(DateTime.PRECISION_DAY); 
 			firstDate.setYear(struct.getPorStart().getYear());
-			firstDate.setMonth(struct.getPorStart().getMonthValue());
-			firstDate.setDay(struct.getPorStart().getDayOfMonth());
+			firstDate.setMonth(struct.getPorStart().getMonth());
+			firstDate.setDay(struct.getPorStart().getDay());
 			ts.setDate1Original(firstDate);
 			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
 			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
@@ -1578,7 +1578,7 @@ throws MalformedURLException, Exception
 		if(interval_base == TimeInterval.MONTH){ 
 			firstDate = new DateTime(DateTime.PRECISION_MONTH); 
 			firstDate.setYear(struct.getPorStart().getYear());
-			firstDate.setMonth(struct.getPorStart().getMonthValue());
+			firstDate.setMonth(struct.getPorStart().getMonth());
 			ts.setDate1Original(firstDate);
 		}
 		if(interval_base == TimeInterval.YEAR){ 
@@ -1592,8 +1592,8 @@ throws MalformedURLException, Exception
 		if(interval_base == TimeInterval.DAY){ 
 			lastDate = new DateTime(DateTime.PRECISION_DAY); 
 			lastDate.setYear(struct.getPorEnd().getYear());
-			lastDate.setMonth(struct.getPorEnd().getMonthValue());
-			lastDate.setDay(struct.getPorEnd().getDayOfMonth());
+			lastDate.setMonth(struct.getPorEnd().getMonth());
+			lastDate.setDay(struct.getPorEnd().getDay());
 			ts.setDate2Original(lastDate);
 			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
 			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
@@ -1601,7 +1601,7 @@ throws MalformedURLException, Exception
 		if(interval_base == TimeInterval.MONTH){ 
 			lastDate = new DateTime(DateTime.PRECISION_MONTH); 
 			lastDate.setYear(struct.getPorEnd().getYear());
-			lastDate.setMonth(struct.getPorEnd().getMonthValue());
+			lastDate.setMonth(struct.getPorEnd().getMonth());
 			ts.setDate2Original(lastDate);
 		}
 		if(interval_base == TimeInterval.YEAR){ 

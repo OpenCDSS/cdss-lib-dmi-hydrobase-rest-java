@@ -4,190 +4,233 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-structures
+ * @author jurentie
+ *
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Structure {
 	
 	/**
-	 *  Variables declared in order as returned
-	 *  by DWR API. For more detail see: 
-	 *  https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-structures
+	 * Variables declared in alphabetical order.
+	 * Documentation copied from web services.
 	 */
 
-	/* WDID */
-	private String wdid;
-	
-	/* Name of Structure */
+	/** 
+	 * Alternate names for structure
+	 */
+	private String associatedAkas;
+
+	/** 
+	 * Water court case number(s) associated with water right
+	 */
+	private String associatedCaseNumbers;
+
+	/** 
+	 * Contacts associated with structure
+	 */
+	private String associatedContacts;
+
+	/**
+	 * List of meters associated with WDID
+	 */
+	private String associatedMeters;
+
+	/**
+	 * List of well permits associated with WDID
+	 */
+	private String associatedPermits;
+
+	/**
+	 * Current in use code of structure
+	 */
+	private String ciuCode;
+
+	/**
+	 * Distance and direction from east/west section line (feet) 
+	 */
+	private int coordsew;
+
+	/** 
+	 * Direction of measurement from east/west section line 
+	 */
+	private String coordsewDir;
+
+	/** 
+	 * Distance and direction from north/south section line 
+	 */
+	private int coordsns;
+
+	/** 
+	 * Direction of measurement from north/south section line 
+	 */
+	private String coordsnsDir;
+
+	/** 
+	 * County where the well is located 
+	 */
+	private String county;
+
+	/**
+	 * Eight established geographic areas in Colorado's Eastern Plains 
+	 * where users rely primarily on groundwater for water supply
+	 */
+	private String designatedBasinName;
+
+	/** 
+	 * DWR Water Division 
+	 */
+	private int division;
+
+	/** 
+	 * National Hydrographic Dataset stream identifier 
+	 */
+	private String  gnisId;
+
+	/**
+	 * Latitude value in decimal degrees 
+	 */
+	private double latdecdeg;
+
+	/** 
+	 * Accuracy of location coordiantes
+	 */
+	private String locationAccuracy;
+
+	/** 
+	 * Longitude in decimal degrees 
+	 */
+	private double longdecdeg;
+
+	/**
+	 * Thirteen local districts, within the Designated Basins, with 
+	 * additional administrative authority
+	 */
+	private String managementDistrictName;
+
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
+	private DateTime modified;
+
+	/**
+	 * Principal Meridian of well’s legal location - there are 5 principal 
+	 * meridians in CO: Sixth (S), New Mexico (N), Baca (B), Costilla (C), 
+	 * and Ute (U)
+	 */
+	private String pm;
+
+	/**
+	 * Date of last measurement in the well’s period of record
+	 */
+	private DateTime porEnd;
+
+	/**
+	 * Date of first measurement in the well’s period of record
+	 */
+	private DateTime porStart;
+
+	/**
+	 * Legal location: 10 acre quarter section
+	 */
+	private String q10;
+
+	/**
+	 * Legal location: 160 acre quarter section
+	 */
+	private String q160;
+
+	/**
+	 * Legal location: 40 acre quarter section
+	 */
+	private String q40;
+
+	/**
+	 * Legal location: A number in the format “nnnd” where “nnn” is 
+	 * the range number and “d” is the direction either East or West
+	 */
+	private String range;
+
+	/**
+	 * Section number - township, range divided into 36 one square mile sections; 
+	 * “U” indicates location in Ute Correction (Division 7 only)
+	 */
+	private String section;
+
+	/**
+	 * Distance in miles to the confluence with the next downstream water source 
+	 * (or distance to state line)
+	 */
+	private double streamMile;
+
+	/** 
+	 * Name of Structure 
+	 */
 	private String structureName;
 	
-	/* Associated AKA's */
-	private String associatedAkas;
-	
-	/* Current in use code */
-	private String ciuCode;
-	
-	/* Type of Structure */
+	/** 
+	 * Type of Structure 
+	 */
 	private String structureType;
 	
-	/* Water Source */
+	/**
+	 * User's association that the structure is included in
+	 */
+	private String subdistrict;
+
+	/**
+	 * Legal location: Township number and direction
+	 */
+	private String township;
+
+	/**
+	 * The x (Easting) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum)
+	 */
+	private double utmX;
+
+	/** 
+	 * The y (Northing) component of the Universal Transverse Mercator system. 
+	 * (Zone 12, NAD83 datum) 
+	 */
+	private double utmY;
+
+	/**
+	 * DWR Water District 
+	 */
+	private int waterDistrict;
+
+	/**
+	 * Name of the water source as specified in the court case
+	 */
 	private String waterSource;
 	
-	/* GNIS ID */
-	private String  gnisId;
+	/**
+	 * DWR unique structure identifier
+	 */
+	private String wdid;
 	
-	/* Stream Mile Number */
-	private double streamMile;
-	
-	/* Associated Case Numbers */
-	private String associatedCaseNumbers;
-	
-	/* Associated Permits */
-	private String associatedPermits;
-	
-	/* Associated Meters */
-	private String associatedMeters;
-	
-	/*Associated Contacts*/
-	private String associatedContacts;
-	
-	/* Start Time */
-	private LocalDateTime porStart;
-	
-	/* End Time */
-	private LocalDateTime porEnd;
-	
-	/* DWR Water Division */
-	private int division;
-	
-	/*DWR Water District */
-	private int waterDistrict;
-	
-	/* Water subdistrict */
-	private String subdistrict;
-	
-	/* County */
-	private String county;
-	
-	/* Designated Basin Name */
-	private String designatedBasinName;
-	
-	/* Management District Name */
-	private String managementDistrictName;
-	
-	/* Principal Meridian */
-	private String pm;
-	
-	/* Township */
-	private String township;
-	
-	/* Range */
-	private String range;
-	
-	/* Section */
-	private String section;
-	
-	/* 10 acre quarter section indicator */
-	private String q10;
-	
-	/* 40 acre quarter section indicator */
-	private String q40;
-	
-	/* 160 acre quarter section indicator */
-	private String q160;
-	
-	/* Distance from east/west section line (feet) */
-	private int coordsew;
-	
-	/* Direction of measurement from east/west section line */
-	private String coordsewDir;
-	
-	/* Distance from north/south section line */
-	private int coordsns;
-	
-	/* Direction of measurement from north/south section line */
-	private String coordsnsDir;
-	
-	/* The x (Easting) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum) */
-	private double utmX;
-	
-	/* The y (Northing) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum) */
-	private double utmY;
-	
-	/* Latitude in decimal degrees */
-	private double latdecdeg;
-	
-	/* Longitude in decimal degrees */
-	private double longdecdeg;
-	
-	/*Accuracy of the location */
-	private String locationAccuracy;
-	
-	/* Modified date/time */
-	private LocalDateTime modified;
-	
-	/* Getters and Setters */
-
-	public String getWdid() {
-		return wdid;
-	}
-
-	public void setWdid(String wdid) {
-		this.wdid = wdid;
-	}
-
-	public String getStructureName() {
-		return structureName;
-	}
-
-	public void setStructureName(String structureName) {
-		this.structureName = structureName;
-	}
-
+	/**
+	 * Getters and setters of defined variables
+	 */
 	public String getAssociatedAkas() {
 		return associatedAkas;
 	}
 
 	public void setAssociatedAkas(String associatedAkas) {
 		this.associatedAkas = associatedAkas;
-	}
-
-	public String getCiuCode() {
-		return ciuCode;
-	}
-
-	public void setCiuCode(String ciuCode) {
-		this.ciuCode = ciuCode;
-	}
-
-	public String getStructureType() {
-		return structureType;
-	}
-
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
-
-	public String getWaterSource() {
-		return waterSource;
-	}
-
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
-	}
-
-	public String getGnisId() {
-		return gnisId;
-	}
-
-	public void setGnisId(String gnisID) {
-		this.gnisId = gnisID;
-	}
-
-	public double getStreamMile() {
-		return streamMile;
-	}
-
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
 	}
 
 	public String getAssociatedCaseNumbers() {
@@ -198,12 +241,12 @@ public class Structure {
 		this.associatedCaseNumbers = associatedCaseNumbers;
 	}
 
-	public String getAssociatedPermits() {
-		return associatedPermits;
+	public String getAssociatedContacts() {
+		return associatedContacts;
 	}
 
-	public void setAssociatedPermits(String associatedPermits) {
-		this.associatedPermits = associatedPermits;
+	public void setAssociatedContacts(String associatedContacts) {
+		this.associatedContacts = associatedContacts;
 	}
 
 	public String getAssociatedMeters() {
@@ -213,133 +256,21 @@ public class Structure {
 	public void setAssociatedMeters(String associatedMeters) {
 		this.associatedMeters = associatedMeters;
 	}
-	
-	public String getAssociatedContacts() {
-		return associatedContacts;
+
+	public String getAssociatedPermits() {
+		return associatedPermits;
 	}
 
-	public void setAssociatedContacts(String associatedContacts) {
-		this.associatedContacts = associatedContacts;
+	public void setAssociatedPermits(String associatedPermits) {
+		this.associatedPermits = associatedPermits;
 	}
 
-	public LocalDateTime getPorStart() {
-		return porStart;
+	public String getCiuCode() {
+		return ciuCode;
 	}
 
-	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
-	}
-
-	public LocalDateTime getPorEnd() {
-		return porEnd;
-	}
-
-	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
-	}
-
-	public int getDivision() {
-		return division;
-	}
-
-	public void setDivision(int division) {
-		this.division = division;
-	}
-
-	public int getWaterDistrict() {
-		return waterDistrict;
-	}
-
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
-	}
-
-	public String getSubdistrict() {
-		return subdistrict;
-	}
-
-	public void setSubdistrict(String subdistrict) {
-		this.subdistrict = subdistrict;
-	}
-
-	public String getCounty() {
-		return county;
-	}
-
-	public void setCounty(String county) {
-		this.county = county;
-	}
-
-	public String getDesignatedBasinName() {
-		return designatedBasinName;
-	}
-
-	public void setDesignatedBasinName(String designatedBasinName) {
-		this.designatedBasinName = designatedBasinName;
-	}
-
-	public String getManagementDistrictName() {
-		return managementDistrictName;
-	}
-
-	public void setManagementDistrictName(String managementDistrictName) {
-		this.managementDistrictName = managementDistrictName;
-	}
-
-	public String getPm() {
-		return pm;
-	}
-
-	public void setPm(String pm) {
-		this.pm = pm;
-	}
-
-	public String getTownship() {
-		return township;
-	}
-
-	public void setTownship(String township) {
-		this.township = township;
-	}
-
-	public String getRange() {
-		return range;
-	}
-
-	public void setRange(String range) {
-		this.range = range;
-	}
-
-	public String getSection() {
-		return section;
-	}
-
-	public void setSection(String section) {
-		this.section = section;
-	}
-
-	public String getQ10() {
-		return q10;
-	}
-
-	public void setQ10(String q10) {
-		this.q10 = q10;
-	}
-
-	public String getQ40() {
-		return q40;
-	}
-
-	public void setQ40(String q40) {
-		this.q40 = q40;
-	}
-
-	public String getQ160() {
-		return q160;
-	}
-
-	public void setQ160(String q160) {
-		this.q160 = q160;
+	public void setCiuCode(String ciuCode) {
+		this.ciuCode = ciuCode;
 	}
 
 	public int getCoordsew() {
@@ -373,7 +304,183 @@ public class Structure {
 	public void setCoordsnsDir(String coordsnsDir) {
 		this.coordsnsDir = coordsnsDir;
 	}
-	
+
+	public String getCounty() {
+		return county;
+	}
+
+	public void setCounty(String county) {
+		this.county = county;
+	}
+
+	public String getDesignatedBasinName() {
+		return designatedBasinName;
+	}
+
+	public void setDesignatedBasinName(String designatedBasinName) {
+		this.designatedBasinName = designatedBasinName;
+	}
+
+	public int getDivision() {
+		return division;
+	}
+
+	public void setDivision(int division) {
+		this.division = division;
+	}
+
+	public String getGnisId() {
+		return gnisId;
+	}
+
+	public void setGnisId(String gnisID) {
+		this.gnisId = gnisID;
+	}
+
+	public double getLatdecdeg() {
+		return latdecdeg;
+	}
+
+	public void setLatdecdeg(double latdecdeg) {
+		this.latdecdeg = latdecdeg;
+	}
+
+	public String getLocationAccuracy() {
+		return locationAccuracy;
+	}
+
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+
+	public void setLongdecdeg(double longdecdeg) {
+		this.longdecdeg = longdecdeg;
+	}
+
+	public double getLongdecdeg() {
+		return longdecdeg;
+	}
+
+	public String getManagementDistrictName() {
+		return managementDistrictName;
+	}
+
+	public void setManagementDistrictName(String managementDistrictName) {
+		this.managementDistrictName = managementDistrictName;
+	}
+
+	public DateTime getModified() {
+		return modified;
+	}
+
+	public void setModified(String modified) {
+		this.modified = (modified == null) ? null : DateTime.parse(modified);
+	}
+
+	public String getPm() {
+		return pm;
+	}
+
+	public void setPm(String pm) {
+		this.pm = pm;
+	}
+
+	public DateTime getPorEnd() {
+		return porEnd;
+	}
+
+	public void setPorEnd(String porEnd) {
+		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
+	}
+
+	public DateTime getPorStart() {
+		return porStart;
+	}
+
+	public void setPorStart(String porStart) {
+		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
+	}
+
+	public String getQ10() {
+		return q10;
+	}
+
+	public void setQ10(String q10) {
+		this.q10 = q10;
+	}
+
+	public String getQ160() {
+		return q160;
+	}
+
+	public void setQ160(String q160) {
+		this.q160 = q160;
+	}
+
+	public String getQ40() {
+		return q40;
+	}
+
+	public void setQ40(String q40) {
+		this.q40 = q40;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public String getSection() {
+		return section;
+	}
+
+	public void setSection(String section) {
+		this.section = section;
+	}
+
+	public double getStreamMile() {
+		return streamMile;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+
+	public String getStructureName() {
+		return structureName;
+	}
+
+	public void setStructureName(String structureName) {
+		this.structureName = structureName;
+	}
+
+	public String getStructureType() {
+		return structureType;
+	}
+
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+
+	public String getSubdistrict() {
+		return subdistrict;
+	}
+
+	public void setSubdistrict(String subdistrict) {
+		this.subdistrict = subdistrict;
+	}
+
+	public String getTownship() {
+		return township;
+	}
+
+	public void setTownship(String township) {
+		this.township = township;
+	}
+
 	public double getUtmX() {
 		return utmX;
 	}
@@ -390,38 +497,35 @@ public class Structure {
 		this.utmY = utmY;
 	}
 
-	public double getLatdecdeg() {
-		return latdecdeg;
+	public int getWaterDistrict() {
+		return waterDistrict;
 	}
 
-	public void setLatdecdeg(double latdecdeg) {
-		this.latdecdeg = latdecdeg;
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
 	}
 
-	public double getLongdecdeg() {
-		return longdecdeg;
+	public String getWaterSource() {
+		return waterSource;
 	}
 
-	public void setLongdecdeg(double longdecdeg) {
-		this.longdecdeg = longdecdeg;
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 
-	public String getLocationAccuracy() {
-		return locationAccuracy;
+	public String getWdid() {
+		return wdid;
 	}
 
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
+	public void setWdid(String wdid) {
+		this.wdid = wdid;
 	}
 
-	public LocalDateTime getModified() {
-		return modified;
-	}
-
-	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
-	}
-	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "Structure: [ wdid: " + wdid + ", structureName: " + structureName + ", associatedAkas: " +

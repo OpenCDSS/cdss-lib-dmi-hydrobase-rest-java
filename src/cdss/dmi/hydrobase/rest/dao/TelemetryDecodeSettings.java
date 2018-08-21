@@ -5,132 +5,177 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
+
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrydecodesettings
+ * @author jurentie
+ *
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryDecodeSettings {
 	
 	/**
-	 *  Variables declared in order as returned
-	 *  by DWR API. For more detail see: 
-	 *  https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrydecodesettings
+	 * Variables declared in alphabetical order.
+	 * Documentation copied from web services.
 	 */
 
-	/* Abbreviation */
+	/**
+	 * Abbreviation 
+	 */
 	private String abbrev;
 	
-	/* Parameter */
+	/** 
+	 * Current Shift 
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services
+	 */
+	@JsonProperty("current_shift")
+	private int currentShift;
+
+	/**
+	 * Function 
+	 */
+	private String function;
+
+	/**
+	 * Date record last modified 
+	 */
+	private DateTime modified;
+
+	/**
+	 * Parameter 
+	 */
 	private String parameter;
 	
-	/* Function */
-	private String function;
-	
-	
-	/* Rating Table Name */
+	/**
+	 * Rating Start Date 
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services
+	 */
+	@JsonProperty("rating_start_date")
+	private DateTime ratingStartDate;
+
+	/**
+	 * Rating Table Name
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services 
+	 */
 	@JsonProperty("rating_table_name")
 	private String ratingTableName;
 	
-	/* Rating Start Date */
-	@JsonProperty("rating_start_date")
-	private LocalDateTime ratingStartDate;
-	
-	/* Shift Curve Name */
+	/** 
+	 * Shift Curve Name 
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services
+	 */
 	@JsonProperty("shift_curve_name")
 	private String shiftCurveName;
 	
-	/* Shiftcurve Start Date */
-	@JsonProperty("shiftcurve_start_date")
-	private LocalDateTime shiftcurveStartDate;
-	
-	/* Current Shift */
-	@JsonProperty("current_shift")
-	private int currentShift;
-	
-	/* Shift Start Date */
+	/** 
+	 * Shift Start Date 
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services
+	 */
 	@JsonProperty("shift_start_date")
-	private LocalDateTime shiftStartDate;
-	
-	/* Date record last modified */
-	private LocalDateTime modified;
+	private DateTime shiftStartDate;
 
+	/** 
+	 * Shiftcurve Start Date 
+	 * JsonProperty to help map a different variable name to the correct
+	 * parameter returned from web services
+	 */
+	@JsonProperty("shiftcurve_start_date")
+	private DateTime shiftcurveStartDate;
+	
+	/**
+	 * Getters and setters for defined variables.
+	 */
 	public String getAbbrev() {
 		return abbrev;
 	}
-
 	public void setAbbrev(String abbrev) {
 		this.abbrev = abbrev;
 	}
 
-	public String getParameter() {
-		return parameter;
+	public int getCurrentShift() {
+		return currentShift;
 	}
-
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
+	public void setCurrentShift(int currentShift) {
+		this.currentShift = currentShift;
 	}
 
 	public String getFunction() {
 		return function;
 	}
-
 	public void setFunction(String function) {
 		this.function = function;
+	}
+
+	public DateTime getModified() {
+		return modified;
+	}
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+
+	public String getParameter() {
+		return parameter;
+	}
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+
+	public DateTime getRatingStartDate() {
+		return ratingStartDate;
+	}
+	public void setRatingStartDate(String ratingStartDate) {
+		this.ratingStartDate = TimeToolkit.getInstance().toDateTime(ratingStartDate, true);
 	}
 
 	public String getRatingTableName() {
 		return ratingTableName;
 	}
-
 	public void setRatingTableName(String ratingTableName) {
 		this.ratingTableName = ratingTableName;
-	}
-
-	public LocalDateTime getRatingStartDate() {
-		return ratingStartDate;
-	}
-
-	public void setRatingStartDate(String ratingStartDate) {
-		this.ratingStartDate = LocalDateTime.parse(ratingStartDate);
 	}
 
 	public String getShiftCurveName() {
 		return shiftCurveName;
 	}
-
 	public void setShiftCurveName(String shiftCurveName) {
 		this.shiftCurveName = shiftCurveName;
 	}
 
-	public LocalDateTime getShiftcurveStartDate() {
-		return shiftcurveStartDate;
-	}
-
-	public void setShiftcurveStartDate(String shiftcurveStartDate) {
-		this.shiftcurveStartDate = LocalDateTime.parse(shiftcurveStartDate);
-	}
-	
-	public int getCurrentShift() {
-		return currentShift;
-	}
-
-	public void setCurrentShift(int currentShift) {
-		this.currentShift = currentShift;
-	}
-
-	public LocalDateTime getShiftStartDate() {
+	public DateTime getShiftStartDate() {
 		return shiftStartDate;
 	}
-
 	public void setShiftStartDate(String shiftStartDate) {
-		this.shiftStartDate = LocalDateTime.parse(shiftStartDate);
+		this.shiftStartDate = TimeToolkit.getInstance().toDateTime(shiftStartDate, true);
 	}
 
-	public LocalDateTime getModified() {
-		return modified;
+	public DateTime getShiftcurveStartDate() {
+		return shiftcurveStartDate;
+	}
+	public void setShiftcurveStartDate(String shiftcurveStartDate) {
+		this.shiftcurveStartDate = TimeToolkit.getInstance().toDateTime(shiftcurveStartDate, true);
 	}
 
-	public void setModified(String modified) {
-		this.modified = LocalDateTime.parse(modified);
-	}
-	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "TelemetryDecodeSettings [ abbrev: " + abbrev + ", parameter: " + parameter + ", function: " + 

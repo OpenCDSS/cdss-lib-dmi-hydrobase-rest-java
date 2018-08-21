@@ -95,7 +95,7 @@ public class DiversionByDay {
 	}
 
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = DateTime.parse(dataMeasDate);
+		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
 	}
 
 	public double getDataValue() {
@@ -127,7 +127,7 @@ public class DiversionByDay {
 	}
 
 	public void setModified(String modified) {
-		this.modified = DateTime.parse(modified);
+		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
 	}
 
 	public String getObsCode() {

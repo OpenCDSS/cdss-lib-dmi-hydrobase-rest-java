@@ -4,125 +4,211 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
+
+/**
+ * This class acts as a way to convert results from DWR web services
+ * to a plain old java object, for means of processing the data 
+ * returned.
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrystation
+ * @author jurentie
+ *
+ */
+
+/**
+ * Ignore any properties defined after defining this class.
+ * If properties are added that are necessary to data processing these can be added,
+ * but for now ignore anything that is new so as to not break the code.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TelemetryStation {
 	
 	/**
-	 *  Variables declared in order as returned
-	 *  by DWR API. For more detail see: 
-	 *  https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrystation
+	 * Variables declared in alphabetical order.
+	 * Documentation copied from web services.
 	 */
 	
-	/* DWR Water Division */
-	private int division;
-	
-	/* DWR Water District */
-	private int waterDistrict;
-	
-	/* County */
+	/** 
+	 * Abbreviation 
+	 */
+	private String abbrev;
+
+	/** 
+	 * Contributing Area 
+	 */
+	private double contrArea;
+
+	/** 
+	 * County where the well is located 
+	 */
 	private String county;
-	
-	/* Station Name */
-	private String stationName;
-	
-	/* Data Source */
+
+	/** 
+	 * Full data source description 
+	 */
+	private String dataSource;
+
+	/**
+	 * Primary source/provider of well measurement data
+	 */
 	private String dataSourceAbbrev;
 	
-	/* Full data source description */
-	private String dataSource;
+	/** 
+	 * DWR Water Division 
+	 */
+	private int division;
 	
-	/* Water Source */
-	private String waterSource;
-	
-	/* GNIS ID */
-	private String gnisId;
-	
-	/* Stream Mile */
-	private double streamMile;
-	
-	/* Abbreviation */
-	private String abbrev;
-	
-	/* USGS Station ID */
-	private String usgsStationId;
-	
-	/* Station Status */
-	private String stationStatus;
-	
-	/* Station Type */
-	private String stationType;
-	
-	/* Structure Type */
-	private String structureType;
-	
-	/* Measurement Date Time */
-	private LocalDateTime measDateTime;
-	
-	/* Parameter */
-	private String parameter;
-	
-	/* Stage */
-	private double stage;
-	
-	/* Measurement Value */
-	private double measValue;
-	
-	/* Units */
-	private String units;
-	
-	/* Flag A */
-	private String flagA;
-	
-	/* Flag B */
-	private String flagB;
-	
-	/* Contr Area */
-	private double contrArea;
-	
-	/* Drain Area */
+	/** 
+	 * Drainage Area 
+	 */
 	private double drainArea;
-	
-	/* HUC 10 */
+
+	/** 
+	 * Flag A 
+	 */
+	private String flagA;
+
+	/** 
+	 * Flag B 
+	 */
+	private String flagB;
+
+	/**
+	 * National Hydrographic Dataset stream identifier
+	 */
+	private String gnisId;
+
+	/** 
+	 * HUC 10 
+	 */
 	private String huc10;
-	
-	/* The x (Easting) component of the Universal Transverse Mercator system (Zone 12, NAD83 datum) */
-	private double utmX;
-	
-	/* The y (Northing) component of the Universal Transverse Mercator system (Zone 12, NAD83 datum) */
-	private double utmY;
-	
-	/* Latitude (decimal degrees) */
+
+	/** 
+	 * Latitude (decimal degrees) 
+	 */
 	private double latitude;
-	
-	/* Longitude (decimal degrees) */
-	private double longitude;
-	
-	/* Accuracy of location coordinates */
+
+	/** 
+	 * Accuracy of location coordinates 
+	 */
 	private String locationAccuracy;
-	
-	/* WDID */
-	private String wdid;
-	
-	/* Modified date/time */
-	private LocalDateTime modified;
-	
-	/* Hyperlink to additional details */
+
+	/** 
+	 * Longitude (decimal degrees) 
+	 */
+	private double longitude;
+
+	/** 
+	 * Measurement Date Time 
+	 */
+	private DateTime measDateTime;
+
+	/** 
+	 * Measurement Value 
+	 */
+	private double measValue;
+
+	/**
+	 * Last date time that this record was modified in the DWR database
+	 */
+	private DateTime modified;
+
+	/** 
+	 * Hyperlink to additional details 
+	 */
 	private String moreInformation;
 
-	public int getDivision() {
-		return division;
+	/** 
+	 * Parameter 
+	 */
+	private String parameter;
+
+	/** 
+	 * Recorded stage (feet) 
+	 */
+	private double stage;
+
+	/** 
+	 * Station Name 
+	 */
+	private String stationName;
+	
+	/** 
+	 * Station Status 
+	 */
+	private String stationStatus;
+
+	/** 
+	 * Station Type 
+	 */
+	private String stationType;
+
+	/**
+	 * Distance in miles to the confluence with the next downstream 
+	 * water source (or distance to state line)
+	 */
+	private double streamMile;
+
+	/** 
+	 * Type of structure 
+	 */
+	private String structureType;
+	
+	/** 
+	 * Units of measure 
+	 */
+	private String units;
+
+	/** 
+	 * USGS Station ID 
+	 */
+	private String usgsStationId;
+
+	/** 
+	 * The x (Easting) component of the Universal Transverse Mercator system 
+	 * (Zone 12, NAD83 datum) 
+	 */
+	private double utmX;
+	
+	/** 
+	 * The y (Northing) component of the Universal Transverse Mercator system 
+	 * (Zone 12, NAD83 datum) 
+	 */
+	private double utmY;
+	
+	/** 
+	 * DWR Water District 
+	 */
+	private int waterDistrict;
+
+	/** 
+	 * Water Source 
+	 */
+	private String waterSource;
+
+	/** 
+	 * DWR unique structure identifier
+	 */
+	private String wdid;
+	
+	/**
+	 * Getters and setters of defined variables.
+	 */
+	public String getAbbrev() {
+		return abbrev;
 	}
 
-	public void setDivision(int div) {
-		this.division = div;
+	public void setAbbrev(String abbrev) {
+		this.abbrev = abbrev;
 	}
 
-	public int getWaterDistrict() {
-		return waterDistrict;
+	public double getContrArea() {
+		return contrArea;
 	}
 
-	public void setWaterDistrict(int waterDistrict) {
-		this.waterDistrict = waterDistrict;
+	public void setContrArea(double contrArea) {
+		this.contrArea = contrArea;
 	}
 
 	public String getCounty() {
@@ -133,14 +219,14 @@ public class TelemetryStation {
 		this.county = county;
 	}
 
-	public String getStationName() {
-		return stationName;
+	public String getDataSource() {
+		return dataSource;
 	}
 
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
+	public void setDataSource(String dataSource) {
+		this.dataSource = dataSource;
 	}
-	
+
 	public String getDataSourceAbbrev() {
 		return dataSourceAbbrev;
 	}
@@ -149,121 +235,20 @@ public class TelemetryStation {
 		this.dataSourceAbbrev = dataSourceAbbrev;
 	}
 
-	public String getDataSource() {
-		return dataSource;
+	public int getDivision() {
+		return division;
 	}
 
-	public void setDataSource(String dataSource) {
-		this.dataSource = dataSource;
-	}
-	
-	public String getWaterSource() {
-		return waterSource;
+	public void setDivision(int div) {
+		this.division = div;
 	}
 
-	public void setWaterSource(String waterSource) {
-		this.waterSource = waterSource;
+	public double getDrainArea() {
+		return drainArea;
 	}
 
-	public String getGnisId() {
-		return gnisId;
-	}
-
-	public void setGnisId(String gnisId) {
-		this.gnisId = gnisId;
-	}
-
-	public double getStreamMile() {
-		return streamMile;
-	}
-
-	public void setStreamMile(double streamMile) {
-		this.streamMile = streamMile;
-	}
-
-	public String getAbbrev() {
-		return abbrev;
-	}
-
-	public void setAbbrev(String abbrev) {
-		this.abbrev = abbrev;
-	}
-
-	public String getUsgsStationId() {
-		return usgsStationId;
-	}
-
-	public void setUsgsStationId(String usgsStationId) {
-		this.usgsStationId = usgsStationId;
-	}
-
-	public String getStationStatus() {
-		return stationStatus;
-	}
-
-	public void setStationStatus(String stationStatus) {
-		this.stationStatus = stationStatus;
-	}
-
-	public String getStationType() {
-		return stationType;
-	}
-
-	public void setStationType(String stationType) {
-		this.stationType = stationType;
-	}
-
-	public String getStructureType() {
-		return structureType;
-	}
-
-	public void setStructureType(String structureType) {
-		this.structureType = structureType;
-	}
-
-	public LocalDateTime getMeasDateTime() {
-		return measDateTime;
-	}
-
-	public void setMeasDateTime(String measDateTime) {
-		if(measDateTime == null){
-			this.measDateTime = null;
-		}
-		int indexOf = measDateTime.lastIndexOf("-");
-		measDateTime = measDateTime.substring(0, indexOf);
-		this.measDateTime = LocalDateTime.parse(measDateTime);
-	}
-
-	public String getParameter() {
-		return parameter;
-	}
-
-	public void setParameter(String parameter) {
-		this.parameter = parameter;
-	}
-
-	public double getStage() {
-		return stage;
-	}
-
-	public void setStage(double stage) {
-		this.stage = stage;
-	}
-
-	public double getMeasValue() {
-		return measValue;
-	}
-
-	public void setMeasValue(double measValue) {
-		this.measValue = measValue;
-	}
-
-	public String getUnits() {
-		return units;
-	}
-
-	public void setUnits(String units) {
-		this.units = units;
+	public void setDrainArea(double drainArea) {
+		this.drainArea = drainArea;
 	}
 
 	public String getFlagA() {
@@ -282,20 +267,12 @@ public class TelemetryStation {
 		this.flagB = flagB;
 	}
 
-	public double getContrArea() {
-		return contrArea;
+	public String getGnisId() {
+		return gnisId;
 	}
 
-	public void setContrArea(double contrArea) {
-		this.contrArea = contrArea;
-	}
-
-	public double getDrainArea() {
-		return drainArea;
-	}
-
-	public void setDrainArea(double drainArea) {
-		this.drainArea = drainArea;
+	public void setGnisId(String gnisId) {
+		this.gnisId = gnisId;
 	}
 
 	public String getHuc10() {
@@ -304,6 +281,134 @@ public class TelemetryStation {
 
 	public void setHuc10(String huc10) {
 		this.huc10 = huc10;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getLocationAccuracy() {
+		return locationAccuracy;
+	}
+
+	public void setLocationAccuracy(String locationAccuracy) {
+		this.locationAccuracy = locationAccuracy;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public DateTime getMeasDateTime() {
+		return measDateTime;
+	}
+
+	public void setMeasDateTime(String measDateTime) {
+		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
+	}
+
+	public double getMeasValue() {
+		return measValue;
+	}
+
+	public void setMeasValue(double measValue) {
+		this.measValue = measValue;
+	}
+
+	public DateTime getModified() {
+		return modified;
+	}
+
+	public void setModified(String modified) {
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+	}
+
+	public String getMoreInformation() {
+		return moreInformation;
+	}
+
+	public void setMoreInformation(String moreInformation) {
+		this.moreInformation = moreInformation;
+	}
+
+	public String getParameter() {
+		return parameter;
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+
+	public double getStage() {
+		return stage;
+	}
+
+	public void setStage(double stage) {
+		this.stage = stage;
+	}
+
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+	
+	public String getStationStatus() {
+		return stationStatus;
+	}
+
+	public void setStationStatus(String stationStatus) {
+		this.stationStatus = stationStatus;
+	}
+
+	public String getStationType() {
+		return stationType;
+	}
+
+	public void setStationType(String stationType) {
+		this.stationType = stationType;
+	}
+
+	public double getStreamMile() {
+		return streamMile;
+	}
+
+	public void setStreamMile(double streamMile) {
+		this.streamMile = streamMile;
+	}
+
+	public String getStructureType() {
+		return structureType;
+	}
+
+	public void setStructureType(String structureType) {
+		this.structureType = structureType;
+	}
+
+	public String getUnits() {
+		return units;
+	}
+
+	public void setUnits(String units) {
+		this.units = units;
+	}
+
+	public String getUsgsStationId() {
+		return usgsStationId;
+	}
+
+	public void setUsgsStationId(String usgsStationId) {
+		this.usgsStationId = usgsStationId;
 	}
 
 	public double getUtmX() {
@@ -322,28 +427,20 @@ public class TelemetryStation {
 		this.utmY = utmY;
 	}
 
-	public double getLatitude() {
-		return latitude;
+	public int getWaterDistrict() {
+		return waterDistrict;
 	}
 
-	public void setLatitude(double latitude) {
-		this.latitude = latitude;
+	public void setWaterDistrict(int waterDistrict) {
+		this.waterDistrict = waterDistrict;
 	}
 
-	public double getLongitude() {
-		return longitude;
+	public String getWaterSource() {
+		return waterSource;
 	}
 
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
-	}
-
-	public String getLocationAccuracy() {
-		return locationAccuracy;
-	}
-
-	public void setLocationAccuracy(String locationAccuracy) {
-		this.locationAccuracy = locationAccuracy;
+	public void setWaterSource(String waterSource) {
+		this.waterSource = waterSource;
 	}
 
 	public String getWdid() {
@@ -354,27 +451,11 @@ public class TelemetryStation {
 		this.wdid = wdid;
 	}
 
-	public LocalDateTime getModified() {
-		return modified;
-	}
-
-	public void setModified(String modified) {
-		if(modified == null){
-			this.modified = null;
-		}
-		int indexOf = modified.lastIndexOf("-");
-		modified = modified.substring(0, indexOf);
-		this.modified = LocalDateTime.parse(modified);
-	}
-
-	public String getMoreInformation() {
-		return moreInformation;
-	}
-
-	public void setMoreInformation(String moreInformation) {
-		this.moreInformation = moreInformation;
-	}
-	
+	/**
+	 * To string method for testing purposes:
+	 * Variables defined in order of how they are returned in a json format from
+	 * web services
+	 */
 	@Override
 	public String toString(){
 		return "TelemetryStation: [ div: " + division + ", wd: " + waterDistrict + ", county: " + county + ", stationName: " +
