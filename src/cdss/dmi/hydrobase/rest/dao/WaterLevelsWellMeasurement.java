@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
@@ -77,7 +79,7 @@ public class WaterLevelsWellMeasurement {
 	/**
 	 * Date of measurement
 	 */
-	private LocalDateTime measurementDate;
+	private DateTime measurementDate;
 
 	/**
 	 * Height of measure point above surface (feet)
@@ -87,7 +89,7 @@ public class WaterLevelsWellMeasurement {
 	/**
 	 * Last date time that this record was modified in the DWR database
 	 */
-	private LocalDateTime modified;
+	private DateTime modified;
 
 	/**
 	 * Name of DWR Basin Summary publication in which well is included, 
@@ -125,7 +127,7 @@ public class WaterLevelsWellMeasurement {
 		return dataSource;
 	}
 	public int getDay(){
-		return measurementDate.getDayOfMonth();
+		return measurementDate.getDay();
 	}
 	public double getDelta() {
 		return delta;
@@ -148,17 +150,17 @@ public class WaterLevelsWellMeasurement {
 	public String getManagementDistrict() {
 		return managementDistrict;
 	}
-	public LocalDateTime getMeasurementDate() {
+	public DateTime getMeasurementDate() {
 		return measurementDate;
 	}
 	public double getMeasuringPointAboveLandSurface() {
 		return measuringPointAboveLandSurface;
 	}
-	public LocalDateTime getModified() {
+	public DateTime getModified() {
 		return modified;
 	}
 	public int getMonth(){
-		return measurementDate.getMonthValue();
+		return measurementDate.getMonth();
 	}
 	public String getPublication() {
 		return publication;
@@ -206,21 +208,14 @@ public class WaterLevelsWellMeasurement {
 		this.managementDistrict = managementDistrict;
 	}
 	public void setMeasurementDate(String measurementDate) {
-		int indexOf = measurementDate.lastIndexOf("-");
-		measurementDate = measurementDate.substring(0, indexOf);
-		this.measurementDate = LocalDateTime.parse(measurementDate);
+		this.measurementDate = (measurementDate == null || measurementDate == "") ? null : DateTime.parse(measurementDate);
 	}
 	public void setMeasuringPointAboveLandSurface(double measuringPointAboveLandSurface) {
 		this.measuringPointAboveLandSurface = measuringPointAboveLandSurface;
 	}
 	public void setModified(String modified) {
-		if(modified != null){
-			int indexOf = modified.lastIndexOf("-");
-			modified = modified.substring(0, indexOf);
-			this.modified = LocalDateTime.parse(modified);
-		}else{
-			this.modified = null;
-		}
+		this.modified = (modified == null || modified == "" || modified == "N/A") ?
+				null : DateTime.parse(modified);
 	}
 	public void setPublication(String publication) {
 		this.publication = publication;

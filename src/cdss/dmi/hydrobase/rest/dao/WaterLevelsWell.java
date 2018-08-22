@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
@@ -140,12 +142,12 @@ public class WaterLevelsWell {
 	/**
 	 * Date of last measurement
 	 */
-	private LocalDateTime measurementDate;
+	private DateTime measurementDate;
 
 	/**
 	 * Last date time that this record was modified in the DWR database
 	 */
-	private LocalDateTime modified;
+	private DateTime modified;
 
 	/** 
 	 * Hyperlink to additional information 
@@ -172,12 +174,12 @@ public class WaterLevelsWell {
 	/**
 	 * Date of last measurement in the well’s period of record
 	 */
-	private LocalDateTime porEnd;
+	private DateTime porEnd;
 
 	/**
 	 * Date of first measurement in the well’s period of record
 	 */
-	private LocalDateTime porStart;
+	private DateTime porStart;
 
 	/**
 	 * Name of DWR Basin Summary publication in which well is included, if applicable
@@ -351,10 +353,10 @@ public class WaterLevelsWell {
 	public String getMeasurementBy() {
 		return measurementBy;
 	}
-	public LocalDateTime getMeasurementDate() {
+	public DateTime getMeasurementDate() {
 		return measurementDate;
 	}
-	public LocalDateTime getModified() {
+	public DateTime getModified() {
 		return modified;
 	}
 	public String getMoreInformation() {
@@ -369,10 +371,10 @@ public class WaterLevelsWell {
 	public int getPorCount() {
 		return porCount;
 	}
-	public LocalDateTime getPorEnd() {
+	public DateTime getPorEnd() {
 		return porEnd;
 	}
-	public LocalDateTime getPorStart() {
+	public DateTime getPorStart() {
 		return porStart;
 	}
 	public String getPublicationName() {
@@ -499,10 +501,10 @@ public class WaterLevelsWell {
 		this.measurementBy = measurementBy;
 	}
 	public void setMeasurementDate(String measurementDate) {
-		this.measurementDate = LocalDateTime.parse(measurementDate);
+		this.measurementDate = DateTime.parse(measurementDate);
 	}
 	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
+		this.modified = (modified == null) ? null : DateTime.parse(modified);
 	}
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
@@ -517,10 +519,10 @@ public class WaterLevelsWell {
 		this.porCount = porCount;
 	}
 	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : LocalDateTime.parse(porEnd);
+		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
 	}
 	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : LocalDateTime.parse(porStart);
+		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
 	}
 	public void setPublicationName(String publicationName) {
 		this.publicationName = publicationName;

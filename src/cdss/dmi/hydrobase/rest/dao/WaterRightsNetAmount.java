@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
+
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
@@ -29,7 +32,7 @@ public class WaterRightsNetAmount {
 	 * Adjudication date is the date that the water 
 	 * right was awarded by the water court.
 	 */
-	private LocalDateTime adjudicationDate;
+	private DateTime adjudicationDate;
 	
 	/**
 	 * 	A calculated number developed by DWR to rank water rights in order of seniority. 
@@ -42,7 +45,7 @@ public class WaterRightsNetAmount {
 	 * overt act was taken at the intended point of diversion to demonstrate an intent to apply 
 	 * water for beneficial use.
 	 */
-	private LocalDateTime appropriationDate;
+	private DateTime appropriationDate;
 	
 	/**
 	 * Water court case number(s) associated with water right
@@ -108,7 +111,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Last date time that this record was modified in the DWR database
 	 */
-	private LocalDateTime lastModified;
+	private DateTime lastModified;
 	
 	/**
 	 * Latitude value in decimal degrees
@@ -170,7 +173,7 @@ public class WaterRightsNetAmount {
 	 * The previous adjudication date field allows water rights to be ordered by priority with all rights 
 	 * awarded subsequent to a previous adjudication being junior
 	 */
-	private LocalDateTime priorAdjudicationDate;
+	private DateTime priorAdjudicationDate;
 	
 	/**
 	 * An early District Courty's method to indicate a water right's seniority in water drainage
@@ -262,7 +265,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Getters and setters for defined variables
 	 */
-	public LocalDateTime getAdjudicationDate() {
+	public DateTime getAdjudicationDate() {
 		return adjudicationDate;
 	}
 
@@ -270,7 +273,7 @@ public class WaterRightsNetAmount {
 		return adminNumber;
 	}
 
-	public LocalDateTime getAppropriationDate() {
+	public DateTime getAppropriationDate() {
 		return appropriationDate;
 	}
 
@@ -318,7 +321,7 @@ public class WaterRightsNetAmount {
 		return gnisId;
 	}
 
-	public LocalDateTime getLastModified() {
+	public DateTime getLastModified() {
 		return lastModified;
 	}
 
@@ -366,7 +369,7 @@ public class WaterRightsNetAmount {
 		return pm;
 	}
 
-	public LocalDateTime getPriorAdjudicationDate() {
+	public DateTime getPriorAdjudicationDate() {
 		return priorAdjudicationDate;
 	}
 
@@ -439,10 +442,7 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setAdjudicationDate(String adjudicationDate) {
-		int len = adjudicationDate.length();
-		int lastHyphen = adjudicationDate.lastIndexOf('-');
-		adjudicationDate = adjudicationDate.substring(0, lastHyphen);
-		this.adjudicationDate = (adjudicationDate == null) ? null :  LocalDateTime.parse(adjudicationDate);
+		this.adjudicationDate = TimeToolkit.getInstance().toDateTime(adjudicationDate, true);
 	}
 
 	public void setAdminNumber(double adminNumber) {
@@ -450,10 +450,7 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setAppropriationDate(String appropriationDate) {
-		int len = appropriationDate.length();
-		int lastHyphen = appropriationDate.lastIndexOf('-');
-		appropriationDate = appropriationDate.substring(0, lastHyphen);
-		this.appropriationDate = (appropriationDate == null) ? null : LocalDateTime.parse(appropriationDate);
+		this.appropriationDate = TimeToolkit.getInstance().toDateTime(appropriationDate, true);
 	}
 
 	public void setAssociatedCaseNumbers(String associatedCaseNumbers) {
@@ -501,10 +498,7 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setLastModified(String lastModified) {
-		int len = lastModified.length();
-		int lastHyphen = lastModified.lastIndexOf('-');
-		lastModified = lastModified.substring(0, lastHyphen);
-		this.lastModified = (lastModified == null) ? null : LocalDateTime.parse(lastModified);
+		this.lastModified = TimeToolkit.getInstance().toDateTime(lastModified, true);
 	}
 
 	public void setLatitude(double latitiude) {
@@ -552,10 +546,7 @@ public class WaterRightsNetAmount {
 	}
 
 	public void setPriorAdjudicationDate(String priorAdjudicationDate) {
-		int len = priorAdjudicationDate.length();
-		int lastHyphen = priorAdjudicationDate.lastIndexOf('-');
-		priorAdjudicationDate = priorAdjudicationDate.substring(0, lastHyphen);
-		this.priorAdjudicationDate = (priorAdjudicationDate == null) ? null : LocalDateTime.parse(priorAdjudicationDate);
+		this.priorAdjudicationDate = TimeToolkit.getInstance().toDateTime(priorAdjudicationDate, true);
 	}
 
 	public void setPriorityNumber(String priorityNumber) {

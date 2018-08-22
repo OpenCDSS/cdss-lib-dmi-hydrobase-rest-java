@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
+
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
@@ -89,7 +92,7 @@ public class TelemetryStationDataTypes {
 	/**
 	 * Last date time that this record was modified in the DWR database
 	 */
-	private LocalDateTime modified;
+	private DateTime modified;
 	
 	/**
 	 * Parameter
@@ -210,7 +213,7 @@ public class TelemetryStationDataTypes {
 		return longdecdeg;
 	}
 	
-	public LocalDateTime getModified() {
+	public DateTime getModified() {
 		return modified;
 	}
 	public String getParameter() {
@@ -305,7 +308,7 @@ public class TelemetryStationDataTypes {
 		this.longdecdeg = longdecdeg;
 	}
 	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : LocalDateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
 	}
 	
 	public void setParameter(String parameter) {

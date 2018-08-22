@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Time.DateTime;
+
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
@@ -52,12 +54,12 @@ public class TelemetryTimeSeries {
 	/** 
 	 * Measurement Date Time - for hour/day 
 	 */
-	private LocalDateTime measDate;
+	private DateTime measDate;
 
 	/** 
 	 * Measurement Date Time - for raw 
 	 */
-	private LocalDateTime measDateTime;
+	private DateTime measDateTime;
 
 	/** 
 	 * Measurement Value 
@@ -67,7 +69,7 @@ public class TelemetryTimeSeries {
 	/** 
 	 * Date record last modified 
 	 */
-	private LocalDateTime modified;
+	private DateTime modified;
 
 	/** 
 	 * Parameter 
@@ -80,24 +82,23 @@ public class TelemetryTimeSeries {
 	public String getAbbrev() {
 		return abbrev;
 	}
+	
 	public int getDay(){
 		if(measDateTime != null){
-			return measDateTime.getDayOfMonth();
+			return measDateTime.getDay();
 		}else{
-			return measDate.getDayOfMonth();
+			return measDate.getDay();
 		}
 	}
-
+	
 	public String getFlagA() {
 		return flagA;
 	}
+	
 	public String getFlagB() {
 		return flagB;
 	}
-
-	/**
-	 * Added methods to get date values used in other places in the code.
-	 */
+	
 	public int getHour(){
 		if(measDateTime != null){
 			return measDateTime.getHour();
@@ -105,20 +106,23 @@ public class TelemetryTimeSeries {
 			return measDate.getHour();
 		}
 	}
+	
 	public int getMeasCount() {
 		return measCount;
 	}
-
-	public LocalDateTime getMeasDate() {
+	
+	public DateTime getMeasDate() {
 		return measDate;
 	}
-	public LocalDateTime getMeasDateTime() {
+	
+	public DateTime getMeasDateTime() {
 		return measDateTime;
 	}
 
 	public double getMeasValue() {
 		return measValue;
 	}
+	
 	public int getMinute(){
 		if(measDateTime != null){
 			return measDateTime.getMinute();
@@ -126,22 +130,24 @@ public class TelemetryTimeSeries {
 			return measDate.getMinute();
 		}
 	}
-
-	public LocalDateTime getModified() {
+	
+	public DateTime getModified() {
 		return modified;
 	}
+	
 	public int getMonth(){
 		if(measDateTime != null){
-			return measDateTime.getMonthValue();
+			return measDateTime.getMonth();
 		}else{
-			return measDate.getMonthValue();
+			return measDate.getMonth();
 		}
 		
 	}
-
+	
 	public String getParameter() {
 		return parameter;
 	}
+	
 	public int getYear(){
 		if(measDateTime != null){
 			return measDateTime.getYear();
@@ -166,11 +172,11 @@ public class TelemetryTimeSeries {
 	}
 
 	public void setMeasDate(String measDate) {
-		this.measDate = (measDate == null) ? null : LocalDateTime.parse(measDate);
+		this.measDate = (measDate == null || measDate == "") ? null : DateTime.parse(measDate);
 	}
 
 	public void setMeasDateTime(String measDateTime) {
-		this.measDateTime = (measDateTime == null) ? null : LocalDateTime.parse(measDateTime);
+		this.measDateTime = (measDateTime == null || measDateTime == "") ? null : DateTime.parse(measDateTime);
 	}
 
 	public void setMeasValue(double measValue) {
@@ -178,13 +184,8 @@ public class TelemetryTimeSeries {
 	}
 
 	public void setModified(String modified) {
-		if(modified == "N/A" || modified == null){
-			this.modified = null;
-		}else{
-			int indexOf = modified.lastIndexOf("-");
-			modified = modified.substring(0, indexOf);
-			this.modified = LocalDateTime.parse(modified);
-		}
+		this.modified = (modified == null || modified == "" || modified == "N/A") ?
+				null : DateTime.parse(modified);
 	}
 
 	public void setParameter(String parameter) {
