@@ -136,7 +136,8 @@ public class DiversionByYear {
 		this.approvalStatus = approvalStatus;
 	}
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, false);
+		this.dataMeasDate = (dataMeasDate == null | dataMeasDate == "" || dataMeasDate == "N/A") ?
+				null : DateTime.parse(dataMeasDate);
 	}
 
 	public void setDataValue(double dataValue) {

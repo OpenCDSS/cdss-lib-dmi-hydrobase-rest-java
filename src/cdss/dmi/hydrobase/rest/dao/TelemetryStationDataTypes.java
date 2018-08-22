@@ -308,7 +308,7 @@ public class TelemetryStationDataTypes {
 		this.longdecdeg = longdecdeg;
 	}
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	
 	public void setParameter(String parameter) {

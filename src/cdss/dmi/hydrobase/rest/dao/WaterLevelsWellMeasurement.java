@@ -209,7 +209,7 @@ public class WaterLevelsWellMeasurement {
 		this.managementDistrict = managementDistrict;
 	}
 	public void setMeasurementDate(String measurementDate) {
-		this.measurementDate = TimeToolkit.getInstance().toDateTime(measurementDate, false);
+		this.measurementDate = TimeToolkit.getInstance().toDateTime(measurementDate, true);
 	}
 	public void setMeasuringPointAboveLandSurface(double measuringPointAboveLandSurface) {
 		this.measuringPointAboveLandSurface = measuringPointAboveLandSurface;
