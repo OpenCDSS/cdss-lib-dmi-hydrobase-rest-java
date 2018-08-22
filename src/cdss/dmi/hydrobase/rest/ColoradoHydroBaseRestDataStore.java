@@ -1997,15 +1997,15 @@ throws MalformedURLException, Exception
 		// First Date = PorStart
 		DateTime firstDate = new DateTime(DateTime.PRECISION_DAY);
 		firstDate.setYear(well.getPorStart().getYear());
-		firstDate.setMonth(well.getPorStart().getMonthValue());
-		firstDate.setDay(well.getPorStart().getDayOfMonth());
+		firstDate.setMonth(well.getPorStart().getMonth());
+		firstDate.setDay(well.getPorStart().getDay());
 		ts.setDate1Original(firstDate);
 		
 		// Last Date = PorEnd
 		DateTime lastDate = new DateTime(DateTime.PRECISION_DAY);
 		lastDate.setYear(well.getPorEnd().getYear());
-		lastDate.setMonth(well.getPorEnd().getMonthValue());
-		lastDate.setDay(well.getPorEnd().getDayOfMonth());
+		lastDate.setMonth(well.getPorEnd().getMonth());
+		lastDate.setDay(well.getPorEnd().getDay());
 		ts.setDate2Original(lastDate);
 			
 		// Set start and end date
@@ -2041,8 +2041,8 @@ throws MalformedURLException, Exception
 				// Set Date
 				DateTime date = new DateTime(DateTime.PRECISION_DAY);
 				date.setYear(wellMeas.getMeasurementDate().getYear());
-				date.setMonth(wellMeas.getMeasurementDate().getMonthValue());
-				date.setDay(wellMeas.getMeasurementDate().getDayOfMonth());
+				date.setMonth(wellMeas.getMeasurementDate().getMonth());
+				date.setDay(wellMeas.getMeasurementDate().getDay());
 
 				// Get Data
 				// TODO @jurentie 06/26/2018 - depthToWater or depthWaterBelowLandSurface
