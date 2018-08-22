@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -501,10 +502,10 @@ public class WaterLevelsWell {
 		this.measurementBy = measurementBy;
 	}
 	public void setMeasurementDate(String measurementDate) {
-		this.measurementDate = DateTime.parse(measurementDate);
+		this.measurementDate = TimeToolkit.getInstance().toDateTime(measurementDate, false);
 	}
 	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : DateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
@@ -519,10 +520,10 @@ public class WaterLevelsWell {
 		this.porCount = porCount;
 	}
 	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
+		this.porEnd = TimeToolkit.getInstance().toDateTime(porEnd, false);
 	}
 	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
+		this.porStart = TimeToolkit.getInstance().toDateTime(porStart, false);
 	}
 	public void setPublicationName(String publicationName) {
 		this.publicationName = publicationName;

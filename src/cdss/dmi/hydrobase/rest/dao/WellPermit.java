@@ -3,6 +3,7 @@ package cdss.dmi.hydrobase.rest.dao;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -566,67 +567,25 @@ public class WellPermit {
 		this.county = county;
 	}
 	public void setDate1stBeneficialUse(String date1stBeneficialUse) {
-		if(date1stBeneficialUse != null){
-			int indexLastHyphen = date1stBeneficialUse.lastIndexOf('-');
-			date1stBeneficialUse = date1stBeneficialUse.substring(0, indexLastHyphen);
-			this.date1stBeneficialUse = DateTime.parse(date1stBeneficialUse);
-		}else{
-			this.date1stBeneficialUse = null;
-		}
+		this.date1stBeneficialUse = TimeToolkit.getInstance().toDateTime(date1stBeneficialUse, false);
 	}
 	public void setDateApplicationReceived(String dateApplicationReceived) {
-		if(dateApplicationReceived != null){
-			int indexLastHyphen = dateApplicationReceived.lastIndexOf('-');
-			dateApplicationReceived = dateApplicationReceived.substring(0, indexLastHyphen);
-			this.dateApplicationReceived = DateTime.parse(dateApplicationReceived);
-		}else{
-			this.dateApplicationReceived = null;
-		}
+		this.dateApplicationReceived = TimeToolkit.getInstance().toDateTime(dateApplicationReceived, false);
 	}
 	public void setDatePermitExpires(String datePermitExpires) {
-		if(datePermitExpires != null){
-			int indexLastHyphen = datePermitExpires.lastIndexOf('-');
-			datePermitExpires = datePermitExpires.substring(0, indexLastHyphen);
-			this.datePermitExpires = DateTime.parse(datePermitExpires);
-		}else{
-			this.datePermitExpires = null;
-		}
+		this.datePermitExpires = TimeToolkit.getInstance().toDateTime(datePermitExpires, false);
 	}
 	public void setDatePermitIssued(String datePermitIssued) {
-		if(datePermitIssued != null){
-			int indexLastHyphen = datePermitIssued.lastIndexOf('-');
-			datePermitIssued = datePermitIssued.substring(0, indexLastHyphen);
-			this.datePermitIssued = DateTime.parse(datePermitIssued);
-		}else{
-			this.datePermitIssued = null;
-		}
+		this.datePermitIssued = TimeToolkit.getInstance().toDateTime(datePermitIssued, false);
 	}
 	public void setDatePumpInstalled(String datePumpInstalled) {
-		if(datePumpInstalled != null){
-			int indexLastHyphen = datePumpInstalled.lastIndexOf('-');
-			datePumpInstalled = datePumpInstalled.substring(0, indexLastHyphen);
-			this.datePumpInstalled = DateTime.parse(datePumpInstalled);
-		}else{
-			this.datePumpInstalled = null;
-		}
+		this.datePumpInstalled = TimeToolkit.getInstance().toDateTime(datePumpInstalled, false);
 	}
 	public void setDateWellCompleted(String dateWellCompleted) {
-		if(dateWellCompleted != null){
-			int indexLastHyphen = dateWellCompleted.lastIndexOf('-');
-			dateWellCompleted = dateWellCompleted.substring(0, indexLastHyphen);
-			this.dateWellCompleted = DateTime.parse(dateWellCompleted);
-		}else{
-			this.dateWellCompleted = null;
-		}
+		this.dateWellCompleted = TimeToolkit.getInstance().toDateTime(dateWellCompleted, false);
 	}
 	public void setDateWellPlugged(String dateWellPlugged) {
-		if(dateWellPlugged != null){
-			int indexLastHyphen = dateWellPlugged.lastIndexOf('-');
-			dateWellPlugged = dateWellPlugged.substring(0, indexLastHyphen);
-			this.dateWellPlugged = DateTime.parse(dateWellPlugged);
-		}else{
-			this.dateWellPlugged = null;
-		}
+		this.dateWellPlugged = TimeToolkit.getInstance().toDateTime(dateWellPlugged, false);
 	}
 	public void setDenverBasinAquifer(String denverBasinAquifer) {
 		this.denverBasinAquifer = denverBasinAquifer;
@@ -665,13 +624,7 @@ public class WellPermit {
 		this.managementDistrictName = managementDistrictName;
 	}
 	public void setModified(String modified) {
-		if(modified != null){
-			int indexLastHyphen = modified.lastIndexOf('-');
-			modified = modified.substring(0, indexLastHyphen);
-			this.modified = DateTime.parse(modified);
-		}else{
-			this.modified = null;
-		}
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
@@ -734,13 +687,7 @@ public class WellPermit {
 		this.staticWaterLevel = staticWaterLevel;
 	}
 	public void setStaticWaterLevelDate(String staticWaterLevelDate) {
-		if(staticWaterLevelDate != null){
-			int indexLastHyphen = staticWaterLevelDate.lastIndexOf('-');
-			staticWaterLevelDate = staticWaterLevelDate.substring(0, indexLastHyphen);
-			this.staticWaterLevelDate = DateTime.parse(staticWaterLevelDate);
-		}else{
-			this.staticWaterLevelDate = null;
-		}
+		this.staticWaterLevelDate = TimeToolkit.getInstance().toDateTime(staticWaterLevelDate, false);
 	}
 	public void setTopPerforatedCasing(int topPerforatedCasing) {
 		this.topPerforatedCasing = topPerforatedCasing;

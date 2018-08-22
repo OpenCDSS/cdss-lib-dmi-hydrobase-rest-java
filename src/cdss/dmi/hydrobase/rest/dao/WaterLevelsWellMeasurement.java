@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -208,14 +209,13 @@ public class WaterLevelsWellMeasurement {
 		this.managementDistrict = managementDistrict;
 	}
 	public void setMeasurementDate(String measurementDate) {
-		this.measurementDate = (measurementDate == null || measurementDate == "") ? null : DateTime.parse(measurementDate);
+		this.measurementDate = TimeToolkit.getInstance().toDateTime(measurementDate, false);
 	}
 	public void setMeasuringPointAboveLandSurface(double measuringPointAboveLandSurface) {
 		this.measuringPointAboveLandSurface = measuringPointAboveLandSurface;
 	}
 	public void setModified(String modified) {
-		this.modified = (modified == null || modified == "" || modified == "N/A") ?
-				null : DateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setPublication(String publication) {
 		this.publication = publication;

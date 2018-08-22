@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -168,7 +169,7 @@ public class ParcelUseTimeSeries {
 	}
 
 	public void setModified(String modified) {
-		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 
 	public void setParcelId(int parcelId) {

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -446,7 +447,7 @@ public class Structure {
 	}
 
 	public void setModified(String modified) {
-		this.modified = (modified == null) ? null : DateTime.parse(modified);
+		this.modified = (modified == null) ? null : TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 
 	public void setPm(String pm) {
@@ -454,11 +455,11 @@ public class Structure {
 	}
 
 	public void setPorEnd(String porEnd) {
-		this.porEnd = (porEnd == null) ? null : DateTime.parse(porEnd);
+		this.porEnd = (porEnd == null) ? null : TimeToolkit.getInstance().toDateTime(porEnd, false);
 	}
 
 	public void setPorStart(String porStart) {
-		this.porStart = (porStart == null) ? null : DateTime.parse(porStart);
+		this.porStart = (porStart == null) ? null : TimeToolkit.getInstance().toDateTime(porStart, false);
 	}
 
 	public void setQ10(String q10) {

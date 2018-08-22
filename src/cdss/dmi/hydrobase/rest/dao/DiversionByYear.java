@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
+import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -135,7 +136,7 @@ public class DiversionByYear {
 		this.approvalStatus = approvalStatus;
 	}
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
+		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, false);
 	}
 
 	public void setDataValue(double dataValue) {
@@ -153,7 +154,7 @@ public class DiversionByYear {
 	}
 
 	public void setModified(String modified) {
-		this.modified = DateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setObsCode(String obsCode) {
 		this.obsCode = obsCode;

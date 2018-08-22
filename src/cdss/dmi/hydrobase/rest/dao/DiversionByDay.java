@@ -142,7 +142,7 @@ public class DiversionByDay {
 	}
 
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = (dataMeasDate == null || dataMeasDate == "") ? null : DateTime.parse(dataMeasDate);
+		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, false);
 	}
 
 	public void setDataValue(double dataValue) {
@@ -158,7 +158,7 @@ public class DiversionByDay {
 	}
 
 	public void setModified(String modified) {
-		this.modified = (modified == null || modified == "") ? null : DateTime.parse(modified);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 
 	public void setObsCode(String obsCode) {

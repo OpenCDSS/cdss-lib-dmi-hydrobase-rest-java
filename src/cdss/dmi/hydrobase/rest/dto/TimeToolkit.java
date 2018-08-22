@@ -27,7 +27,7 @@ public class TimeToolkit {
 	
 	//TODO @jurentie not handling time zone
 	public DateTime toDateTime(String s, boolean zoned){
-		if(s == null || s == "") return null;
+		if(s == null || s == "" || s == "N/A") return null;
 		LocalDateTime ldt;
 		if(zoned) ldt = timeZonedToLocalDateTime(s);
 		else ldt = toLocalDateTime(s);
