@@ -1,6 +1,7 @@
 package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class acts as a way to convert results from DWR web services
@@ -66,9 +67,11 @@ public class TelemetryShift {
 	public void setShiftCurveName(String shiftCurveName) {
 		this.shiftCurveName = shiftCurveName;
 	}
+	@JsonProperty("X")
 	public void setX(double x) {
 		X = x;
 	}
+	@JsonProperty("Y")
 	public void setY(double y) {
 		Y = y;
 	}
@@ -80,7 +83,7 @@ public class TelemetryShift {
 	 */
 	@Override 
 	public String toString(){
-		if(!ratingTableName.isEmpty()){
+		if(ratingTableName != null && !ratingTableName.isEmpty()){
 			return "TelemetryShiftAdjustedRatingTable: [ ratingTableName: " + ratingTableName + ", X: " + 
 					X + ", Y: " + Y;
 		}else{
