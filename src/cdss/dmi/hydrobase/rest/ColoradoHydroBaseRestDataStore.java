@@ -44,6 +44,7 @@ import cdss.dmi.hydrobase.rest.dao.DiversionByDay;
 import cdss.dmi.hydrobase.rest.dao.DiversionByMonth;
 import cdss.dmi.hydrobase.rest.dao.DiversionByYear;
 import cdss.dmi.hydrobase.rest.dao.DiversionComments;
+import cdss.dmi.hydrobase.rest.dao.DiversionStageVolume;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
@@ -60,12 +61,18 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 import cdss.dmi.hydrobase.rest.dao.Station;
 import cdss.dmi.hydrobase.rest.dao.Structure;
+import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
+import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
+import cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable;
+import cdss.dmi.hydrobase.rest.dao.TelemetryShift;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStation;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 import cdss.dmi.hydrobase.rest.dao.TelemetryTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
+import cdss.dmi.hydrobase.rest.dao.WaterRightsTransaction;
+import cdss.dmi.hydrobase.rest.dao.WellPermit;
 import cdss.dmi.hydrobase.rest.dto.JacksonToolkit;
 
 /**
@@ -2607,12 +2614,92 @@ where ID is the station.
 }*/
 
 // NEW CODE IN PROGRESS:
-public AdministrativeCalls getAdministrativeCallsActive(String callId){
+public AdministrativeCalls getAdministrativeCalls(String callId){
 	String request = getServiceRootURI() + "/administrativecalls/" + callId + "?format=json";
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
-	AdministrativeCalls aca = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
-	return aca;
+	AdministrativeCalls ac = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
+	return ac;
 }
+
+//TODO @jurentie NOT SURE HOW TO DEAL WITH ANALYSIS SERVICES
+
+public DiversionStageVolume getDiversionStageVolume(String wdid){
+	String request = getServiceRootURI() + "/structures/divrec/stagevolume" + wdid + "?format=json";
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0); //TODO @jurentie get(0) ?
+	DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results, DiversionStageVolume.class);
+	return divStageVol;
+}
+
+public TelemetryDecodeSettings getTelemetryDecodeSettings(String abbrev){
+	String request = getServiceRootURI() + "/telemetrystations/telemetrydecodesettings/?format=json" + "&abbrev=" + abbrev;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	TelemetryDecodeSettings telDecSettings = (TelemetryDecodeSettings)JacksonToolkit.getInstance().treeToValue(results, TelemetryDecodeSettings.class);
+	return telDecSettings;
+}
+
+public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev){
+	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json" + "&abbrev=" + abbrev;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryDischargeMeasurement> telDischargeMeasurementsList = new ArrayList<TelemetryDischargeMeasurement>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryDischargeMeasurement tdm = (TelemetryDischargeMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryDischargeMeasurement.class);
+		telDischargeMeasurementsList.add(tdm);
+	}
+	return telDischargeMeasurementsList;
+}
+
+
+public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json" + "&ratingTableName=" + ratingTableName;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	List<TelemetryRatingTable> telRatingTableList = new ArrayList<TelemetryRatingTable>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryRatingTable trt = (TelemetryRatingTable)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryRatingTable.class);
+		telRatingTableList.add(trt);
+	}
+	return telRatingTableList;
+}
+
+public List<TelemetryShift> getTelemetryShiftCurve(String shiftCurveName){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftcurve/" + "?format=json" + "&shiftCurveName=" + shiftCurveName;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
+		telShiftList.add(ts);
+	}
+	return telShiftList;
+}
+
+public List<TelemetryShift> getTelemetryShiftAdjustedRatingTable(String abbrev, String parameter){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftadjustedratingtable/" + "?format=json" + "&abbrev=" + abbrev + "&parameter=" + parameter;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
+		telShiftList.add(ts);
+	}
+	return telShiftList;
+}
+
+public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
+	String request = getServiceRootURI() + "/waterrights/transaction/" + "?format=json" + "&wdid=" + wdid;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<WaterRightsTransaction> waterRightsTransList = new ArrayList<WaterRightsTransaction>();
+	for(int i = 0; i < results.size(); i++){
+		WaterRightsTransaction wrt = (WaterRightsTransaction)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterRightsTransaction.class);
+		waterRightsTransList.add(wrt);
+	}
+	return waterRightsTransList;
+}
+
+//TODO @jurentie work out parameters here
+/*public WellPermit getWellPermit(String receipt){
+	String request = getServiceRootURI() + "/wellpermits/wellpermit/" + "?format=json" + "&receipt=" + receipt;
+	return null;
+}*/
+
+//TODO @jurentie wellPermitHistory()
 
 /**
  * Inserting main method for testing purposes:
@@ -2621,16 +2708,16 @@ public AdministrativeCalls getAdministrativeCallsActive(String callId){
  */
 public static void main(String[] args) throws URISyntaxException, IOException{
 
-	/*String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
+	String request = "https://dnrweb.state.co.us/DWR/DwrApiService/api/v2/waterrights/netamount/?format=jsonprettyprint&apiKey=ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==&wdid=2000511&pageSize=2";
 	JsonNode json = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	
 	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 
 	ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
-	System.out.println(chrds.getAdministrativeCallsActive("22501"));*/
+	System.out.println();
 	
-	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 	
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
@@ -2653,7 +2740,7 @@ public static void main(String[] args) throws URISyntaxException, IOException{
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
+	}*/
 }
 
 }
