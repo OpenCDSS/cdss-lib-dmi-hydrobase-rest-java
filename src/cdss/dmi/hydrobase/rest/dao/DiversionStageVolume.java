@@ -88,11 +88,11 @@ public class DiversionStageVolume {
 		this.approvalStatus = approvalStatus;
 	}
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, true);
+		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, false);
 	}
 
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setStage(double stage) {
 		this.stage = stage;
