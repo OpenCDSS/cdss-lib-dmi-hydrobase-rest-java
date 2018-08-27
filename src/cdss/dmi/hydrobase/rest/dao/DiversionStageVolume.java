@@ -88,11 +88,11 @@ public class DiversionStageVolume {
 		this.approvalStatus = approvalStatus;
 	}
 	public void setDataMeasDate(String dataMeasDate) {
-		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, true);
+		this.dataMeasDate = TimeToolkit.getInstance().toDateTime(dataMeasDate, false);
 	}
 
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
+		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
 	public void setStage(double stage) {
 		this.stage = stage;
@@ -105,6 +105,17 @@ public class DiversionStageVolume {
 		this.wdid = wdid;
 	}
 	
+	public int getYear(){
+		return dataMeasDate.getYear();
+	}
+	
+	public int getMonth(){
+		return dataMeasDate.getMonth();
+	}
+	
+	public int getDay(){
+		return dataMeasDate.getDay();
+	}
 	/**
 	 * To string method for testing purposes:
 	 * Variables defined in order of how they are returned in a json format from
