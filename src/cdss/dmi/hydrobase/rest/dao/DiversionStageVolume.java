@@ -105,6 +105,17 @@ public class DiversionStageVolume {
 		this.wdid = wdid;
 	}
 	
+	public int getYear(){
+		return dataMeasDate.getYear();
+	}
+	
+	public int getMonth(){
+		return dataMeasDate.getMonth();
+	}
+	
+	public int getDay(){
+		return dataMeasDate.getDay();
+	}
 	/**
 	 * To string method for testing purposes:
 	 * Variables defined in order of how they are returned in a json format from
