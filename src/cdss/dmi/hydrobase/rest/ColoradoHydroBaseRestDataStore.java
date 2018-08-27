@@ -87,7 +87,7 @@ public class ColoradoHydroBaseRestDataStore extends AbstractWebServiceDataStore
 The web service API version, critical for forming the request URL and parsing the results.
 */
 private int __apiVersion = 2; // Default
-    
+	
 /**
 Indicates whether global data store properties have been initialized, set by initialize().
 */
@@ -121,115 +121,6 @@ private List<ReferenceTablesWaterDistrict> waterDistrictList = null;
 private List<ReferenceTablesWaterDivision> waterDivisionList = null;
 
 private List<ParcelUseTimeSeries> parcelUseTSList = null;
-
-/**
-Constructor for web service.
-Important, properties other than the default values passed as parameters may be set with a subsequent
-call to setProperties().  Consequently, initialization should occur from public called methods to ensure
-that information is available for initialization.
-*/
-public ColoradoHydroBaseRestDataStore ( String name, String description, URI serviceRootURI, String apiKey )
-throws URISyntaxException, IOException
-{
-    setName ( name );
-    setDescription ( description );
-    setServiceRootURI ( serviceRootURI );
-    setApiKey(apiKey);
-    // Determine the web service version
-    determineAPIVersion();
-    // OK to initialize since no properties other than the main properties impact anything
-    initialize();
-    // Set up local objects to be cached
-    readGlobalData();
-}
-
-/**
-Factory method to construct a data store connection from a properties file.
-@param filename name of file containing property strings
-*/
-public static ColoradoHydroBaseRestDataStore createFromFile ( String filename )
-throws IOException, Exception
-{
-    // Read the properties from the file
-    PropList props = new PropList ("");
-    props.setPersistentName ( filename );
-    props.readPersistent ( false );
-    String name = IOUtil.expandPropertyForEnvironment("Name",props.getValue("Name"));
-    String description = IOUtil.expandPropertyForEnvironment("Description",props.getValue("Description"));
-    String serviceRootURI = IOUtil.expandPropertyForEnvironment("ServiceRootURI",props.getValue("ServiceRootURI"));
-    String apiKey = IOUtil.expandPropertyForEnvironment("apiKey",props.getValue("apiKey"));
-    
-    // Get the properties and create an instance
-
-    ColoradoHydroBaseRestDataStore ds = new ColoradoHydroBaseRestDataStore( name, description, new URI(serviceRootURI), apiKey);
-    ds.setProperties(props);
-    return ds;
-}
-
-/**
- * Determine the web service API version. This will set 
- * __apiVersion to be the integer of the API service version number 
- * found at the end of the service request URI. 
- * For example: 
- * https://dnrweb.state.co.us/DWR/DwrApiService/api/v2 
- * will return 2.
- */
-private void determineAPIVersion()
-{   
-	String routine = "ColoradoHydroBaseRestDataStore.determineAPIVersion";
-	String uriString = getServiceRootURI().toString();
-	int indexOf = uriString.lastIndexOf("/");
-	int version = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
-	Message.printStatus(2, routine, "DWR REST services API version = " + version);
-	__apiVersion = version;
-}
-
-/**
- * Initialize APIKey from properties list 
- * @return apiKey
- */
-private String getApiKeyString(){
-	return (getApiKey() == null || getApiKey() == "") ? "" : "&apiKey=" + getApiKey();
-}
-
-/**
-Return the service API version as determined from determineAPIVersion().
-@return the API version
-*/
-public int getAPIVersion ()
-{
-    return __apiVersion;
-}
-
-/**
- * Get the list of counties from global variable
- * @return list of counties
- * @throws MalformedURLException 
- */
-public List<ReferenceTablesCounty> getCounties() throws MalformedURLException{
-	if(countyList == null){
-		readCounties();
-	}
-	return countyList;
-}
-
-public List<DiversionComments> getDivComments(String wdid){
-	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
-	List<DiversionComments> divComments = new ArrayList<>();
-	ObjectMapper mapper = new ObjectMapper();
-	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + "?apiKey=" + getApiKey();
-	try{
-		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-		for(int i = 0; i < results.size(); i++){
-			DiversionComments divComment = (DiversionComments)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionComments.class);
-			divComments.add(divComment);
-		}
-	}catch(Exception e){
-		return null;
-	}
-	
-	return divComments;
-}
 
 /**
  * Returns a JsonNode using the ObjectMapper from the Jackson package given a URL
@@ -323,6 +214,573 @@ public static JsonNode getJsonNodeResultsFromURLStringMultiplePages(String url, 
 	return (JsonNode)results;
 }*/
 
+/*private List<ParcelUseTimeSeries> getParcelUseTSList(int cal_year, int div, int parcel_id,
+		String land_use, String irrig_type){	
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
+	//Create ObjectMapper for Jackson
+	ObjectMapper mapper = new ObjectMapper();
+	String apiKeyString = ( apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
+	if(land_use != null){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {land use} is not supported by DWR web services.");
+	}
+	if(irrig_type != null){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {irrig_type} is not supported by DWR web services.");
+	}
+	if(div > 0){
+		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {div} is not supported by DWR web services.");
+	}
+	
+	return null;
+
+}*/
+
+/**
+Form the station ID string part of the time series request, something like "Type:ID" (e.g., "GHCN:USC00016643"),
+where ID is the station.
+@param tsidLocationType the location type part of a time series identifier (station ID network abbreviation).
+@param tsidLocation the location part of a time series identifier (station ID).
+*/
+/*private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType, String tsidLocation )
+{
+    if ( tsidLocationType.length() == 0 ) {
+        throw new InvalidParameterException ( "Station location type abbreviation is not specified." );
+    }
+    try {
+    	/* TODO smalers 2018-06-09 comment out
+        RccAcisStationType stationType = lookupStationTypeFromType(tsidLocationType.trim());
+        if ( stationType == null ) {
+            throw new InvalidParameterException ( "Station code from \"" + tsidLocation +
+                "\" cannot be determined." );
+        }
+        else if ( stationType.getCode() == 0 ) {
+            // No station type code is expected since the ACIS type, just pass ACIS ID
+            return tsidLocation.trim();
+        }
+        else {
+            // Station ID followed by the station type code
+            return tsidLocation.trim() + " " + stationType.getCode();
+        }
+        
+    	return "";
+    }
+    catch ( NumberFormatException e ) {
+        throw new InvalidParameterException ( "Station location \"" + tsidLocation +
+        "\" is invalid (should be Type:ID)" );
+    }
+}*/
+
+//Unused Code:
+/**
+Return the unique list of data interval strings available for a data type, returning values that
+are consistent with TSTool ("Day", rather than "daily").
+@param dataType data type string of form "N" or "N - name" or "name", where N is the major number.
+*/
+/*public List<String> getDataIntervalStringsForDataType ( String dataType )
+{   List<String> dataIntervalStrings = new ArrayList<String>();
+  // For now a data type should only have one interval because of the uniqueness of the data type.
+  //RccAcisVariableTableRecord variable = lookupVariable(dataType);
+  //String interval = translateAcisIntervalToInternal(variable.getReportInterval());
+  //if ( interval != null ) {
+  //    dataIntervalStrings.add(interval);
+  //}
+  return dataIntervalStrings;
+}*/
+
+/**
+Return the list of data types that are available.  Currently this returns the major number and optionally
+the name.  Duplicates in the table are ignored.
+TODO SAM 2011-01-07 It would be good to have the option of using data type abbreviations - work with Bill Noon
+on this.
+@param includeName whether to include the name
+@param includeInterval whether to include the interval as (daily), etc.
+*/
+/*public List<String> getDataTypeStrings ( boolean includeName, boolean includeInterval )
+{   try {
+      initialize();
+  }
+  catch ( Exception e ) {
+      ; // Ignore.
+  }
+  int version = getAPIVersion();
+  List<String> typeList = new Vector<String>();
+	/* TODO smalers comment
+  RccAcisVariableTableRecord recPrev = null;
+  String nameString = "";
+  String intervalString = "";
+  for ( RccAcisVariableTableRecord rec: __variableTableRecordList ) {
+      if ( (typeList.size() > 0) && (rec.getMajor() == recPrev.getMajor()) ) {
+          // Same information as previous record so don't add again
+          continue;
+      }
+      nameString = "";
+      intervalString = "";
+      if ( includeName ) {
+          nameString = " - " + rec.getName();
+      }
+      if ( includeInterval ) {
+          intervalString = " (" + rec.getReportInterval() + ")";
+      }
+      if ( version == 1 ) {
+          // Perhaps mistakenly was using the var major for user-facing choices but the
+          // abbreviation is used in the REST API so it should be OK to use (do so in version 2+)
+          typeList.add( "" + rec.getMajor() + nameString + intervalString );
+      }
+      else {
+          typeList.add( rec.getElem() + nameString + intervalString );
+      }
+      recPrev = rec;
+  }
+  
+  return typeList;
+}*/
+
+/**
+Look up the station type given the station code (return null if not found).
+@param code station code (e.g., 2 for COOP).
+*/
+/* TODO smalers
+public RccAcisStationType lookupStationTypeFromCode ( int code )
+{
+  for ( RccAcisStationType stationType: __stationTypeList ) {
+      if ( stationType.getCode() == code ) {
+          return stationType;
+      }
+  }
+  return null;
+}
+*/
+
+/**
+Look up the station type given the station type string (return null if not found).
+@param type station type (e.g., "COOP").
+*/
+/* TODO smalers
+public RccAcisStationType lookupStationTypeFromType ( String type )
+{   try {
+      initialize();
+  }
+  catch ( Exception e ) {
+      // Should not happen
+  }
+  for ( RccAcisStationType stationType: __stationTypeList ) {
+      if ( stationType.getType().equalsIgnoreCase(type) ) {
+          return stationType;
+      }
+  }
+  return null;
+}
+*/
+
+/**
+Look up the variable information given the data type, which is a string of the form
+"N" or "N - Name" or "Name" where N is the "major" (if an integer, for version 1 API in TSTool) or "elem" if a string
+(version 2+ API in TSTool).
+@param dataType data type to match in variable data.
+@return the ACIS variable that matches the data type.
+*/
+/* TODO smalers
+public RccAcisVariableTableRecord lookupVariable ( String dataType )
+{   String elemString = null;
+  String name = null;
+  int pos = dataType.indexOf("-");
+  if ( pos > 0) {
+      // Assume that the elem or major variable is specified and also the name
+      elemString = dataType.substring(0,pos).trim();
+      name = dataType.substring(pos + 1).trim();
+  }
+  else {
+      // Only one piece of information specified, such as the data type from a TSID.
+      if ( StringUtil.isInteger(dataType) ) {
+          // Actually the varMajor
+          elemString = dataType.trim();
+      }
+      else {
+          elemString = dataType.trim();
+          name = elemString;
+      }
+  }
+  if ( elemString != null ) {
+      if ( StringUtil.isInteger(elemString) ) {
+          // Use the major number to look up the variable
+          int majorInt = -1;
+          try {
+              majorInt = Integer.parseInt(elemString);
+          }
+          catch ( NumberFormatException e ) {
+              throw new InvalidParameterException("Data type \"" + dataType + "\" major number is invalid." );
+          }
+          for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
+              if ( variable.getMajor() == majorInt ) {
+                  return variable;
+              }
+          }
+      }
+      else {
+          // Use the element to look up the variable
+          for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
+              if ( variable.getElem().equalsIgnoreCase(elemString) ) {
+                  return variable;
+              }
+          }
+      }
+  }
+  else if ( name != null ){
+      // Use the variable name to look up the variable
+      for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
+          if ( variable.getName().equalsIgnoreCase(name) ) {
+              return variable;
+          }
+      }
+  }
+  // No match...
+  return null;
+}
+*/
+
+/**
+Read a list of MultiStn data records.
+*/
+/* TODO smalers
+public List<RccAcisStationTimeSeriesMetadata> readStationTimeSeriesMetadataList(
+  String dataType, String timeStep, InputFilter_JPanel ifp )
+throws IOException, MalformedURLException, URISyntaxException
+{   String routine = getClass().getName() + ".readStationTimeSeriesMetadataList";
+  // Make sure data store is initialized
+  initialize();
+  // Look up the metadata for the data types
+  RccAcisVariableTableRecord variable = lookupVariable ( dataType );
+  int apiVersion = getAPIVersion();
+  if ( apiVersion == 1 ) {
+      return readStationTimeSeriesMetadataListVersion1 ( dataType, timeStep, ifp );
+  }
+  // Else, use the current version 2 API, which uses the StnMeta call instead of version 1 MultiStnData call
+  // Form the URL - ask for as much metadata as possible
+  StringBuffer urlString = new StringBuffer("" + getServiceRootURI() +
+      "/StnMeta?meta=sIds,uid,name,state,county,basin,climdiv,cwa,ll,elev,valid_daterange" );
+  // Specify constraints from input filter
+  // Element being read (currently only one data type per call)...
+  urlString.append("&elems="+variable.getElem());
+  // Bounding box...
+  List<String> bboxList = ifp.getInput(null, "bbox", true, null);
+  if ( bboxList.size() > 1 ) {
+      throw new IOException ( "<= 1 bounding box filters can be specified." );
+  }
+  else if ( bboxList.size() == 1 ) {
+      String bbox = bboxList.get(0).trim();
+      urlString.append("&bbox="+URLEncoder.encode(bbox,"UTF-8"));
+  }
+  // Climate division (always use newest syntax in filter)...
+  List<String> climdivList = ifp.getInput(null, "climdiv", true, null);
+  if ( climdivList.size() > 1 ) {
+      throw new IOException ( "<= 1 climate division filters can be specified." );
+  }
+  else if ( climdivList.size() == 1 ) {
+      String climdiv = climdivList.get(0).split("-")[0].trim();
+      urlString.append("&climdiv="+URLEncoder.encode(climdiv,"UTF-8"));
+  }
+  // FIPS county...
+  List<String> countyList = ifp.getInput(null, "county", true, null);
+  if ( countyList.size() > 1 ) {
+      throw new IOException ( "<= 1 FIPS county filters can be specified." );
+  }
+  else if ( countyList.size() == 1 ) {
+      String county = countyList.get(0).split("-")[0].trim();
+      urlString.append("&county="+URLEncoder.encode(county,"UTF-8"));
+  }
+  // NWS CWA...
+  List<String> cwaList = ifp.getInput(null, "cwa", true, null);
+  if ( cwaList.size() > 1 ) {
+      throw new IOException ( "<= 1 NWS CWA county filters can be specified." );
+  }
+  else if ( cwaList.size() == 1 ) {
+      String cwa = cwaList.get(0).trim();
+      urlString.append("&cwa="+URLEncoder.encode(cwa,"UTF-8"));
+  }
+  // Drainage basin (HUC)...
+  List<String> basinList = ifp.getInput(null, "basin", true, null);
+  if ( basinList.size() > 1 ) {
+      throw new IOException ( "<= 1 basin filters can be specified." );
+  }
+  else if ( basinList.size() == 1 ) {
+      String basin = basinList.get(0).trim();
+      urlString.append("&basin="+URLEncoder.encode(basin,"UTF-8"));
+  }
+  // State code...
+  List<String> stateList = ifp.getInput(null, "state", true, null);
+  if ( stateList.size() > 1 ) {
+      throw new IOException ( "<= 1 state code filters can be specified." );
+  }
+  else if ( stateList.size() == 1 ) {
+      String state = stateList.get(0).split("-")[0].trim();
+      urlString.append("&state="+URLEncoder.encode(state,"UTF-8"));
+  }
+  // Always want JSON results...
+  urlString.append("&output=json");
+  Message.printStatus(2, routine, "Performing the following request:  " + urlString );
+  String resultString = IOUtil.readFromURL(urlString.toString() );
+  if ( Message.isDebugOn ) {
+      Message.printDebug(1,routine,"Returned data="+resultString);
+  }
+  // Check for error in response string...
+  if ( resultString.indexOf("error") >= 0 ) {
+      throw new IOException ( "Error retrieving data for URL \"" + urlString + "\":  " + resultString );
+  }
+  else {
+      // Parse the JSON
+      Gson gson = new Gson();
+      RccAcisStationTimeSeriesMetadataList metadataListObject =
+          gson.fromJson(resultString, RccAcisStationTimeSeriesMetadataList.class);
+      if ( metadataListObject != null ) {
+          for ( RccAcisStationTimeSeriesMetadata metadata: metadataListObject.getMeta() ) {
+              //Message.printStatus(2,routine,metadata.getName());
+              metadata.setVariable(variable);
+              metadata.setDataStore ( this );
+              // TODO SAM 2011-01-07 Some metadata like HUC do not return so may need to set based
+              // on whether the information was entered in the filter
+          }
+          // Remove records that have no period
+          try {
+              metadataListObject.cleanupData();
+          }
+          catch ( Exception e ) {
+              Message.printWarning(3, routine, e);
+          }
+          return metadataListObject.getMeta();
+      }
+      else {
+          // Return an empty list
+          List<RccAcisStationTimeSeriesMetadata> data = new Vector<RccAcisStationTimeSeriesMetadata>();
+          return data;
+      }
+  }
+}
+*/
+
+/**
+Constructor for web service.
+Important, properties other than the default values passed as parameters may be set with a subsequent
+call to setProperties().  Consequently, initialization should occur from public called methods to ensure
+that information is available for initialization.
+*/
+public ColoradoHydroBaseRestDataStore ( String name, String description, URI serviceRootURI, String apiKey )
+throws URISyntaxException, IOException
+{
+    setName ( name );
+    setDescription ( description );
+    setServiceRootURI ( serviceRootURI );
+    setApiKey(apiKey);
+    // Determine the web service version
+    determineAPIVersion();
+    // OK to initialize since no properties other than the main properties impact anything
+    initialize();
+    // Set up local objects to be cached
+    readGlobalData();
+}
+
+/**
+Factory method to construct a data store connection from a properties file.
+@param filename name of file containing property strings
+*/
+public static ColoradoHydroBaseRestDataStore createFromFile ( String filename )
+throws IOException, Exception
+{
+    // Read the properties from the file
+    PropList props = new PropList ("");
+    props.setPersistentName ( filename );
+    props.readPersistent ( false );
+    String name = IOUtil.expandPropertyForEnvironment("Name",props.getValue("Name"));
+    String description = IOUtil.expandPropertyForEnvironment("Description",props.getValue("Description"));
+    String serviceRootURI = IOUtil.expandPropertyForEnvironment("ServiceRootURI",props.getValue("ServiceRootURI"));
+    String apiKey = IOUtil.expandPropertyForEnvironment("apiKey",props.getValue("apiKey"));
+    
+    // Get the properties and create an instance
+
+    ColoradoHydroBaseRestDataStore ds = new ColoradoHydroBaseRestDataStore( name, description, new URI(serviceRootURI), apiKey);
+    ds.setProperties(props);
+    return ds;
+}
+
+/**
+ * Determine the web service API version. This will set 
+ * __apiVersion to be the integer of the API service version number 
+ * found at the end of the service request URI. 
+ * For example: 
+ * https://dnrweb.state.co.us/DWR/DwrApiService/api/v2 
+ * will return 2.
+ */
+private void determineAPIVersion()
+{   
+	String routine = "ColoradoHydroBaseRestDataStore.determineAPIVersion";
+	String uriString = getServiceRootURI().toString();
+	int indexOf = uriString.lastIndexOf("/");
+	int version = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
+	Message.printStatus(2, routine, "DWR REST services API version = " + version);
+	__apiVersion = version;
+}
+
+// NEW CODE IN PROGRESS:
+public AdministrativeCalls getAdministrativeCalls(String callId){
+	String request = getServiceRootURI() + "/administrativecalls/" + callId + "?format=json";
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	AdministrativeCalls ac = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
+	return ac;
+}
+
+/**
+ * Initialize APIKey from properties list 
+ * @return apiKey
+ */
+private String getApiKeyString(){
+	return (getApiKey() == null || getApiKey() == "") ? "" : "&apiKey=" + getApiKey();
+}
+
+/**
+Return the service API version as determined from determineAPIVersion().
+@return the API version
+*/
+public int getAPIVersion ()
+{
+    return __apiVersion;
+}
+
+/**
+ * Get the list of counties from global variable
+ * @return list of counties
+ */
+public List<ReferenceTablesCounty> getCounties(){
+	if(countyList == null){
+		readCounties();
+	}
+	return countyList;
+}
+
+public List<ReferenceTablesCurrentInUseCodes> getCurrentInUseCodes(){
+	if(currentInUseCodeList == null){
+		readCurrentInUseCodes();
+	}
+	return currentInUseCodeList;
+}
+
+public List<ReferenceTablesDesignatedBasin> getDesignatedBasin(){
+	if(designatedBasinList == null){
+		readDesignatedBasins();
+	}
+	return designatedBasinList;
+}
+
+public List<DiversionComments> getDivComments(String wdid, String modified, int irrYear){
+	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
+	List<DiversionComments> divComments = new ArrayList<DiversionComments>();
+	String request = getServiceRootURI() + "/structures/divrec/comments/" + wdid + "?apiKey=" + getApiKey();
+	if(!(modified == null || modified == "")){
+		request += "&modified=" + modified;
+	}
+	if(irrYear > -1){
+		request += "&irrYear=" + Integer.toString(irrYear);
+	}
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	for(int i = 0; i < results.size(); i++){
+		DiversionComments divComment = (DiversionComments)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionComments.class);
+		divComments.add(divComment);
+	}
+	return divComments;
+}
+
+public List<ReferenceTablesDiversionNotUsedCodes> getDiversionNotUsedCodes(){
+	if(diversionNotUsedCodeList == null){
+		readDiversionNotUsedCodes();
+	}
+	return diversionNotUsedCodeList;
+}
+
+public List<DiversionStageVolume> getDiversionStageVolume(String wdid, String dataMeasDate, String modified){
+	List<DiversionStageVolume> divStageVolList = new ArrayList<DiversionStageVolume>();
+	String request = getServiceRootURI() + "/structures/divrec/stagevolume/" + wdid + "?format=json";
+	if(!(modified == null || modified == "")){
+		request += "&modified=" + modified;
+	}
+	if(!(dataMeasDate == null || dataMeasDate == "")){
+		try {
+			request +="&dataMeasDate=" + URLEncoder.encode(dataMeasDate, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	for(int i = 0; i < results.size(); i++){
+		DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionStageVolume.class);
+		divStageVolList.add(divStageVol);
+	}
+	return divStageVolList;
+}
+
+public List<ReferenceTablesDivRecObservationCodes> getDivRecObservationCodes(){
+	if(divRecObservationCodeList == null){
+		readDivRecObservationCodes();
+	}
+	return divRecObservationCodeList;
+}
+
+public List<ReferenceTablesDivRecTypes> getDivRecTypes(){
+	if(divRecTypeList == null){
+		readDivRecTypes();
+	}
+	return divRecTypeList;
+}
+
+public List<ReferenceTablesGroundwaterPublication> getGroundwaterPublication(){
+	if(groundwaterPublicationList == null){
+		readGroundwaterPublication();
+	}
+	return groundwaterPublicationList;
+}
+
+public List<ReferenceTablesManagementDistrict> getManagementDistrict(){
+	if(managementDistrictList == null){
+		readManagementDistrict();
+	}
+	return managementDistrictList;
+}
+
+public void getParcelUseTSList(String wdid){	
+	String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
+	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid + "?apiKey=" + getApiKey();
+	JsonNode parcelUseResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(parcelUseRequest);
+	int div = getWaterDivisionFromWaterDistricts(wdid);
+	for(int i = 0; i < parcelUseResult.size(); i++){
+		ParcelUseTimeSeries parcelUseTS = (ParcelUseTimeSeries)JacksonToolkit.getInstance().treeToValue(parcelUseResult.get(i), ParcelUseTimeSeries.class);
+		// Add div to parcelUseTS
+		parcelUseTS.setDiv(div);
+		parcelUseTSList.add(parcelUseTS);
+	}
+	Collections.sort(parcelUseTSList, new ColoradoHydroBaseRest_ParcelUseTimeSeries_DivParcelIdCalYear());
+	this.parcelUseTSList = parcelUseTSList;
+}
+
+
+public List<ParcelUseTimeSeries> getParcelUseTSListFromParcelId(String wdid, int parcel_id){
+	if(parcelUseTSList == null){
+		getParcelUseTSList(wdid);
+	}
+	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>();
+	for(int i = 0; i < this.parcelUseTSList.size(); i++){
+		ParcelUseTimeSeries parcelUseTS = this.parcelUseTSList.get(i);
+		if(parcelUseTS.getParcelId() == parcel_id){
+			parcelUseTSList.add(parcelUseTS);
+		}
+	}
+	return parcelUseTSList;
+}
+
+public List<ReferenceTablesPermitActionName> getPermitActionName(){
+	if(permitActionNameList == null){
+		readPermitActionName();
+	}
+	return permitActionNameList;
+}
+
 /**
  * Helper method for methods that generate request strings from
  * input filter. This method takes the operator and the value and
@@ -345,54 +803,6 @@ private String getRequestStringHelperMatches(String operator, String value){
 					break;
 	}
 	return ret;
-}
-
-/*private List<ParcelUseTimeSeries> getParcelUseTSList(int cal_year, int div, int parcel_id,
-		String land_use, String irrig_type){	
-	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
-	//Create ObjectMapper for Jackson
-	ObjectMapper mapper = new ObjectMapper();
-	String apiKeyString = ( apiKey == null || apiKey.isEmpty()) ? "" : "&apiKey=" + apiKey;
-	if(land_use != null){
-		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {land use} is not supported by DWR web services.");
-	}
-	if(irrig_type != null){
-		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {irrig_type} is not supported by DWR web services.");
-	}
-	if(div > 0){
-		System.out.println("[ColoradoHydroBaseRestDataStore.getParcelUseTSList:344] Currently querying by {div} is not supported by DWR web services.");
-	}
-	
-	return null;
-
-}*/
-
-public void getParcelUseTSList(String wdid){	
-	String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
-	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
-	//Create ObjectMapper for Jackson
-	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid + "?apiKey=" + getApiKey();
-	JsonNode parcelUseResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(parcelUseRequest);
-	int div = getWaterDivisionFromWaterDistricts(wdid);
-	for(int i = 0; i < parcelUseResult.size(); i++){
-		ParcelUseTimeSeries parcelUseTS = (ParcelUseTimeSeries)JacksonToolkit.getInstance().treeToValue(parcelUseResult.get(i), ParcelUseTimeSeries.class);
-		// Add div to parcelUseTS
-		parcelUseTS.setDiv(div);
-		parcelUseTSList.add(parcelUseTS);
-	}
-	Collections.sort(parcelUseTSList, new ColoradoHydroBaseRest_ParcelUseTimeSeries_DivParcelIdCalYear());
-	this.parcelUseTSList = parcelUseTSList;
-}
-
-public List<ParcelUseTimeSeries> getParcelUseTSList(String wdid, int parcel_id){
-	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>();
-	for(int i = 0; i < this.parcelUseTSList.size(); i++){
-		ParcelUseTimeSeries parcelUseTS = this.parcelUseTSList.get(i);
-		if(parcelUseTS.getParcelId() == parcel_id){
-			parcelUseTSList.add(parcelUseTS);
-		}
-	}
-	return parcelUseTSList;
 }
 
 /**
@@ -514,6 +924,36 @@ public List<Station> getStationTimeSeriesCatalog ( String dataType, String inter
 public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
 	List<Structure> structureList = new ArrayList<Structure>();
 	return structureList;
+}
+
+/**
+ * Using the telemetry data types request string this method gets
+ * a list of telemetryStationDataTypes from DWR web services.
+ * @param dataType - any of the data types that can be returned from 
+ * getTelemetryDataTypesFromWebServices()
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return List<TelemeteryStationDataTypes>
+ */
+public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, String interval, List<String[]> listOfTriplets) {
+	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryParams";
+	List<TelemetryStationDataTypes> telemetryParams = new ArrayList<>();
+	// Create request string
+	String tdRequestString = getTelemetryDataTypesRequestString(dataType, listOfTriplets);
+	
+	JsonNode telemetryParamsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(tdRequestString);
+	
+	//System.out.println(tdRequestString);
+	Message.printStatus(1, routine, "Retrieve telemetry params from url request: " + tdRequestString);
+	
+	for(int i = 0; i < telemetryParamsNode.size(); i++){
+		TelemetryStationDataTypes telemetryParam;
+		telemetryParam = (TelemetryStationDataTypes) JacksonToolkit.getInstance().treeToValue(telemetryParamsNode.get(i), TelemetryStationDataTypes.class);
+		telemetryParam.setTimeStep(interval);
+		telemetryParams.add(telemetryParam);
+	}
+	System.out.println("[ColoradoHydrBaseRestDataStore.getTelemetryDataTypes:955] telemetryParams: " + telemetryParams);
+	return telemetryParams;
 }
 
 /**
@@ -644,35 +1084,64 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 	
 }
 
-/**
- * Using the telemetry data types request string this method gets
- * a list of telemetryStationDataTypes from DWR web services.
- * @param dataType - any of the data types that can be returned from 
- * getTelemetryDataTypesFromWebServices()
- * @param listOfTriplets - input filter values such as 
- * ['County', 'MA', 'mesa'], [argument, operator, value].
- * @return List<TelemeteryStationDataTypes>
- */
-public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, String interval, List<String[]> listOfTriplets) {
-	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryParams";
-	List<TelemetryStationDataTypes> telemetryParams = new ArrayList<>();
-	// Create request string
-	String tdRequestString = getTelemetryDataTypesRequestString(dataType, listOfTriplets);
-	
-	JsonNode telemetryParamsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(tdRequestString);
-	
-	//System.out.println(tdRequestString);
-	Message.printStatus(1, routine, "Retrieve telemetry params from url request: " + tdRequestString);
-	
-	for(int i = 0; i < telemetryParamsNode.size(); i++){
-		TelemetryStationDataTypes telemetryParam;
-		telemetryParam = (TelemetryStationDataTypes) JacksonToolkit.getInstance().treeToValue(telemetryParamsNode.get(i), TelemetryStationDataTypes.class);
-		telemetryParam.setTimeStep(interval);
-		telemetryParams.add(telemetryParam);
-	}
-	
-	return telemetryParams;
+public TelemetryDecodeSettings getTelemetryDecodeSettings(String abbrev){
+	String request = getServiceRootURI() + "/telemetrystations/telemetrydecodesettings/?format=json" + "&abbrev=" + abbrev;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	TelemetryDecodeSettings telDecSettings = (TelemetryDecodeSettings)JacksonToolkit.getInstance().treeToValue(results, TelemetryDecodeSettings.class);
+	return telDecSettings;
 }
+
+public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev){
+	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json" + "&abbrev=" + abbrev;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryDischargeMeasurement> telDischargeMeasurementsList = new ArrayList<TelemetryDischargeMeasurement>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryDischargeMeasurement tdm = (TelemetryDischargeMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryDischargeMeasurement.class);
+		telDischargeMeasurementsList.add(tdm);
+	}
+	return telDischargeMeasurementsList;
+}
+
+public List<ReferenceTablesTelemetryParams> getTelemetryParams(){
+	if(telemetryParamsList == null){
+		readTelemetryParams();
+	}
+	return telemetryParamsList;
+}
+
+public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json" + "&ratingTableName=" + ratingTableName;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	List<TelemetryRatingTable> telRatingTableList = new ArrayList<TelemetryRatingTable>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryRatingTable trt = (TelemetryRatingTable)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryRatingTable.class);
+		telRatingTableList.add(trt);
+	}
+	return telRatingTableList;
+}
+
+public List<TelemetryShift> getTelemetryShiftAdjustedRatingTable(String abbrev, String parameter){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftadjustedratingtable/" + "?format=json" + "&abbrev=" + abbrev + "&parameter=" + parameter;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
+		telShiftList.add(ts);
+	}
+	return telShiftList;
+}
+
+public List<TelemetryShift> getTelemetryShiftCurve(String shiftCurveName){
+	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftcurve/" + "?format=json" + "&shiftCurveName=" + shiftCurveName;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
+	for(int i = 0; i < results.size(); i++){
+		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
+		telShiftList.add(ts);
+	}
+	return telShiftList;
+}
+
 
 // TODO smalers 2018-06-19 the following should return something like TelemetryStationTimeSeriesCatalog
 // but go with Station for now.
@@ -1004,28 +1473,22 @@ throws Exception {
 	return waterRightsList;
 }
 
+public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
+	String request = getServiceRootURI() + "/waterrights/transaction/" + "?format=json" + "&wdid=" + wdid;
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	List<WaterRightsTransaction> waterRightsTransList = new ArrayList<WaterRightsTransaction>();
+	for(int i = 0; i < results.size(); i++){
+		WaterRightsTransaction wrt = (WaterRightsTransaction)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterRightsTransaction.class);
+		waterRightsTransList.add(wrt);
+	}
+	return waterRightsTransList;
+}
+
 //
 private String getWCIdentStringFromDataType(String dataType){
 	int indexOf = dataType.indexOf("-");
 	return (dataType.charAt(dataType.length()  - 1) == ("'").charAt(0)) ? dataType.substring(indexOf + 1, dataType.length() - 1) : 
 						dataType.substring(indexOf + 1, dataType.length());
-}
-
-//
-public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
-	String routine = "ColoradoHydroBaseRestDataStore.getWells";
-	List<WaterLevelsWell> waterclasses = new ArrayList<>();
-	// Create request string
-	JsonNode wellsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(getWellRequestString(listOfTriplets));
-	Message.printStatus(1, routine, "Request Url: " + getWellRequestString(listOfTriplets));
-	for(int i = 0; i < wellsNode.size(); i++){
-		WaterLevelsWell well = (WaterLevelsWell) JacksonToolkit.getInstance().treeToValue(wellsNode.get(i), WaterLevelsWell.class);
-		well.setDataType(dataType);
-		well.setTimeStep(interval);
-		waterclasses.add(well);
-	}
-	
-	return waterclasses;
 }
 
 public String getWellRequestString(List<String[]> listOfTriplets){
@@ -1145,6 +1608,23 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 	return wellRequestString;
 }
 
+//
+public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
+	String routine = "ColoradoHydroBaseRestDataStore.getWells";
+	List<WaterLevelsWell> waterclasses = new ArrayList<>();
+	// Create request string
+	JsonNode wellsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(getWellRequestString(listOfTriplets));
+	Message.printStatus(1, routine, "Request Url: " + getWellRequestString(listOfTriplets));
+	for(int i = 0; i < wellsNode.size(); i++){
+		WaterLevelsWell well = (WaterLevelsWell) JacksonToolkit.getInstance().treeToValue(wellsNode.get(i), WaterLevelsWell.class);
+		well.setDataType(dataType);
+		well.setTimeStep(interval);
+		waterclasses.add(well);
+	}
+	
+	return waterclasses;
+}
+
 // TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
 // but go with Station for now.
 /**
@@ -1177,7 +1657,6 @@ public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String 
 	wellsList = getWells(dataType, interval, listOfTriplets);
 	return wellsList;
 }
-
 
 /**
 Initialize internal data store data.
@@ -1321,7 +1800,7 @@ private void readCounties(){
 	for(int i = 0; i < resultList.size(); i++){
 		countyList.add((ReferenceTablesCounty)JacksonToolkit.getInstance().treeToValue(resultList.get(i), ReferenceTablesCounty.class));
 	}
-}
+} 
 
 /**
  * Read current in use codes from web services
@@ -1384,6 +1863,25 @@ private void readDivRecTypes(){
 }
 
 /**
+ * Read in data and store in global variables for caching purposes
+ * @throws MalformedURLException 
+ */
+private void readGlobalData() throws MalformedURLException{
+	readCounties();
+	readCurrentInUseCodes();
+	readDiversionNotUsedCodes();
+	readDivRecObservationCodes();
+	readDivRecTypes();
+	readGroundwaterPublication();
+	readDesignatedBasins();
+	readManagementDistrict();
+	readPermitActionName();
+	readTelemetryParams();
+	readWaterDistricts();
+	readWaterDivisions();
+}
+
+/**
  * Read groundwater publications from web services
  */
 private void readGroundwaterPublication(){
@@ -1394,6 +1892,8 @@ private void readGroundwaterPublication(){
 		groundwaterPublicationList.add((ReferenceTablesGroundwaterPublication)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesGroundwaterPublication.class));
 	}
 }
+
+//TODO @jurentie NOT SURE HOW TO DEAL WITH ANALYSIS SERVICES
 
 /**
  * Read management districts from web services
@@ -1432,50 +1932,6 @@ private void readTelemetryParams(){
 	}
 }
 
-/**
- * Read districts from web services
- * @throws MalformedURLException 
- */
-private void readWaterDistricts(){
-	String districtRequest = getServiceRootURI() + "/referencetables/waterdistrict/?format=json" + getApiKeyString();
-	waterDistrictList = new ArrayList<ReferenceTablesWaterDistrict>();
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(districtRequest);
-	for(int i = 0; i < results.size(); i++){
-		waterDistrictList.add((ReferenceTablesWaterDistrict)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDistrict.class));
-	}
-}
-
-/**
- * Read divisions from web services
- * @throws MalformedURLException 
- */
-private void readWaterDivisions(){
-	String divisionRequest = getServiceRootURI() + "/referencetables/waterdivision/?format=json" + getApiKeyString();
-	waterDivisionList = new ArrayList<ReferenceTablesWaterDivision>();
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divisionRequest);
-	for(int i = 0; i < results.size(); i++){
-		waterDivisionList.add((ReferenceTablesWaterDivision)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
-	}
-}
-
-/**
- * Read in data and store in global variables for caching purposes
- * @throws MalformedURLException 
- */
-private void readGlobalData() throws MalformedURLException{
-	readCounties();
-	readCurrentInUseCodes();
-	readDiversionNotUsedCodes();
-	readDivRecObservationCodes();
-	readDivRecTypes();
-	readGroundwaterPublication();
-	readDesignatedBasins();
-	readManagementDistrict();
-	readPermitActionName();
-	readTelemetryParams();
-	readWaterDistricts();
-	readWaterDivisions();
-}
 
 /**
 Read a time series.  Only one element type is read.
@@ -1744,7 +2200,7 @@ throws MalformedURLException, Exception
 			// Diversion Comments
 			boolean hasComments = waterclassHasComments(wdid);
 			if(hasComments){
-				List<DiversionComments> divComments = getDivComments(wdid);
+				List<DiversionComments> divComments = getDivComments(wdid, null, -1);
 				if(divComments != null){
 					TSData it;
 					for(int i = 0; i < divComments.size(); i++){
@@ -1908,7 +2364,7 @@ throws MalformedURLException, Exception
 			// Diversion Comments
 			boolean hasComments = waterclassHasComments(wdid);
 			if(hasComments){
-				List<DiversionComments> divComments = getDivComments(wdid);
+				List<DiversionComments> divComments = getDivComments(wdid, null, -1);
 				if(divComments != null){
 					TSData it;
 					for(int i = 0; i < divComments.size(); i++){
@@ -2258,6 +2714,40 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 	return waterClass;
 }
 
+/**
+ * Read districts from web services
+ * @throws MalformedURLException 
+ */
+private void readWaterDistricts(){
+	String districtRequest = getServiceRootURI() + "/referencetables/waterdistrict/?format=json" + getApiKeyString();
+	waterDistrictList = new ArrayList<ReferenceTablesWaterDistrict>();
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(districtRequest);
+	for(int i = 0; i < results.size(); i++){
+		waterDistrictList.add((ReferenceTablesWaterDistrict)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDistrict.class));
+	}
+}
+
+/**
+ * Read divisions from web services
+ * @throws MalformedURLException 
+ */
+private void readWaterDivisions(){
+	String divisionRequest = getServiceRootURI() + "/referencetables/waterdivision/?format=json" + getApiKeyString();
+	waterDivisionList = new ArrayList<ReferenceTablesWaterDivision>();
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divisionRequest);
+	for(int i = 0; i < results.size(); i++){
+		waterDivisionList.add((ReferenceTablesWaterDivision)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
+	}
+}
+
+//TODO @jurentie work out parameters here
+/*public WellPermit getWellPermit(String receipt){
+	String request = getServiceRootURI() + "/wellpermits/wellpermit/" + "?format=json" + "&receipt=" + receipt;
+	return null;
+}*/
+
+//TODO @jurentie wellPermitHistory()
+
 public static void setCommentsStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
@@ -2272,7 +2762,7 @@ public static void setCommentsStructure ( TS ts, Structure struct )
 	ts.addToComments("Located in water div, district  = " + struct.getDivision() + ", " + struct.getWaterDistrict());
 	ts.addToComments("Located in county               = " + struct.getCounty());
 	ts.addToComments("Latitude, Longitude             = " + struct.getLatdecdeg() + ", " + struct.getLongdecdeg());
-} 
+}
 
 public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
 {
@@ -2449,416 +2939,6 @@ public boolean waterclassHasComments(String wdid){
 	return hasComments;
 }
 
-//Unused Code:
-/**
-Return the unique list of data interval strings available for a data type, returning values that
-are consistent with TSTool ("Day", rather than "daily").
-@param dataType data type string of form "N" or "N - name" or "name", where N is the major number.
-*/
-/*public List<String> getDataIntervalStringsForDataType ( String dataType )
-{   List<String> dataIntervalStrings = new ArrayList<String>();
-    // For now a data type should only have one interval because of the uniqueness of the data type.
-    //RccAcisVariableTableRecord variable = lookupVariable(dataType);
-    //String interval = translateAcisIntervalToInternal(variable.getReportInterval());
-    //if ( interval != null ) {
-    //    dataIntervalStrings.add(interval);
-    //}
-    return dataIntervalStrings;
-}*/
-
-/**
-Return the list of data types that are available.  Currently this returns the major number and optionally
-the name.  Duplicates in the table are ignored.
-TODO SAM 2011-01-07 It would be good to have the option of using data type abbreviations - work with Bill Noon
-on this.
-@param includeName whether to include the name
-@param includeInterval whether to include the interval as (daily), etc.
-*/
-/*public List<String> getDataTypeStrings ( boolean includeName, boolean includeInterval )
-{   try {
-        initialize();
-    }
-    catch ( Exception e ) {
-        ; // Ignore.
-    }
-    int version = getAPIVersion();
-    List<String> typeList = new Vector<String>();
-	/* TODO smalers comment
-    RccAcisVariableTableRecord recPrev = null;
-    String nameString = "";
-    String intervalString = "";
-    for ( RccAcisVariableTableRecord rec: __variableTableRecordList ) {
-        if ( (typeList.size() > 0) && (rec.getMajor() == recPrev.getMajor()) ) {
-            // Same information as previous record so don't add again
-            continue;
-        }
-        nameString = "";
-        intervalString = "";
-        if ( includeName ) {
-            nameString = " - " + rec.getName();
-        }
-        if ( includeInterval ) {
-            intervalString = " (" + rec.getReportInterval() + ")";
-        }
-        if ( version == 1 ) {
-            // Perhaps mistakenly was using the var major for user-facing choices but the
-            // abbreviation is used in the REST API so it should be OK to use (do so in version 2+)
-            typeList.add( "" + rec.getMajor() + nameString + intervalString );
-        }
-        else {
-            typeList.add( rec.getElem() + nameString + intervalString );
-        }
-        recPrev = rec;
-    }
-    
-    return typeList;
-}*/
-
-/**
-Look up the station type given the station code (return null if not found).
-@param code station code (e.g., 2 for COOP).
-*/
-/* TODO smalers
-public RccAcisStationType lookupStationTypeFromCode ( int code )
-{
-    for ( RccAcisStationType stationType: __stationTypeList ) {
-        if ( stationType.getCode() == code ) {
-            return stationType;
-        }
-    }
-    return null;
-}
-*/
-
-/**
-Look up the station type given the station type string (return null if not found).
-@param type station type (e.g., "COOP").
-*/
-/* TODO smalers
-public RccAcisStationType lookupStationTypeFromType ( String type )
-{   try {
-        initialize();
-    }
-    catch ( Exception e ) {
-        // Should not happen
-    }
-    for ( RccAcisStationType stationType: __stationTypeList ) {
-        if ( stationType.getType().equalsIgnoreCase(type) ) {
-            return stationType;
-        }
-    }
-    return null;
-}
-*/
-
-/**
-Look up the variable information given the data type, which is a string of the form
-"N" or "N - Name" or "Name" where N is the "major" (if an integer, for version 1 API in TSTool) or "elem" if a string
-(version 2+ API in TSTool).
-@param dataType data type to match in variable data.
-@return the ACIS variable that matches the data type.
-*/
-/* TODO smalers
-public RccAcisVariableTableRecord lookupVariable ( String dataType )
-{   String elemString = null;
-    String name = null;
-    int pos = dataType.indexOf("-");
-    if ( pos > 0) {
-        // Assume that the elem or major variable is specified and also the name
-        elemString = dataType.substring(0,pos).trim();
-        name = dataType.substring(pos + 1).trim();
-    }
-    else {
-        // Only one piece of information specified, such as the data type from a TSID.
-        if ( StringUtil.isInteger(dataType) ) {
-            // Actually the varMajor
-            elemString = dataType.trim();
-        }
-        else {
-            elemString = dataType.trim();
-            name = elemString;
-        }
-    }
-    if ( elemString != null ) {
-        if ( StringUtil.isInteger(elemString) ) {
-            // Use the major number to look up the variable
-            int majorInt = -1;
-            try {
-                majorInt = Integer.parseInt(elemString);
-            }
-            catch ( NumberFormatException e ) {
-                throw new InvalidParameterException("Data type \"" + dataType + "\" major number is invalid." );
-            }
-            for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
-                if ( variable.getMajor() == majorInt ) {
-                    return variable;
-                }
-            }
-        }
-        else {
-            // Use the element to look up the variable
-            for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
-                if ( variable.getElem().equalsIgnoreCase(elemString) ) {
-                    return variable;
-                }
-            }
-        }
-    }
-    else if ( name != null ){
-        // Use the variable name to look up the variable
-        for ( RccAcisVariableTableRecord variable: __variableTableRecordList ) {
-            if ( variable.getName().equalsIgnoreCase(name) ) {
-                return variable;
-            }
-        }
-    }
-    // No match...
-    return null;
-}
-*/
-
-/**
-Read a list of MultiStn data records.
-*/
-/* TODO smalers
-public List<RccAcisStationTimeSeriesMetadata> readStationTimeSeriesMetadataList(
-    String dataType, String timeStep, InputFilter_JPanel ifp )
-throws IOException, MalformedURLException, URISyntaxException
-{   String routine = getClass().getName() + ".readStationTimeSeriesMetadataList";
-    // Make sure data store is initialized
-    initialize();
-    // Look up the metadata for the data types
-    RccAcisVariableTableRecord variable = lookupVariable ( dataType );
-    int apiVersion = getAPIVersion();
-    if ( apiVersion == 1 ) {
-        return readStationTimeSeriesMetadataListVersion1 ( dataType, timeStep, ifp );
-    }
-    // Else, use the current version 2 API, which uses the StnMeta call instead of version 1 MultiStnData call
-    // Form the URL - ask for as much metadata as possible
-    StringBuffer urlString = new StringBuffer("" + getServiceRootURI() +
-        "/StnMeta?meta=sIds,uid,name,state,county,basin,climdiv,cwa,ll,elev,valid_daterange" );
-    // Specify constraints from input filter
-    // Element being read (currently only one data type per call)...
-    urlString.append("&elems="+variable.getElem());
-    // Bounding box...
-    List<String> bboxList = ifp.getInput(null, "bbox", true, null);
-    if ( bboxList.size() > 1 ) {
-        throw new IOException ( "<= 1 bounding box filters can be specified." );
-    }
-    else if ( bboxList.size() == 1 ) {
-        String bbox = bboxList.get(0).trim();
-        urlString.append("&bbox="+URLEncoder.encode(bbox,"UTF-8"));
-    }
-    // Climate division (always use newest syntax in filter)...
-    List<String> climdivList = ifp.getInput(null, "climdiv", true, null);
-    if ( climdivList.size() > 1 ) {
-        throw new IOException ( "<= 1 climate division filters can be specified." );
-    }
-    else if ( climdivList.size() == 1 ) {
-        String climdiv = climdivList.get(0).split("-")[0].trim();
-        urlString.append("&climdiv="+URLEncoder.encode(climdiv,"UTF-8"));
-    }
-    // FIPS county...
-    List<String> countyList = ifp.getInput(null, "county", true, null);
-    if ( countyList.size() > 1 ) {
-        throw new IOException ( "<= 1 FIPS county filters can be specified." );
-    }
-    else if ( countyList.size() == 1 ) {
-        String county = countyList.get(0).split("-")[0].trim();
-        urlString.append("&county="+URLEncoder.encode(county,"UTF-8"));
-    }
-    // NWS CWA...
-    List<String> cwaList = ifp.getInput(null, "cwa", true, null);
-    if ( cwaList.size() > 1 ) {
-        throw new IOException ( "<= 1 NWS CWA county filters can be specified." );
-    }
-    else if ( cwaList.size() == 1 ) {
-        String cwa = cwaList.get(0).trim();
-        urlString.append("&cwa="+URLEncoder.encode(cwa,"UTF-8"));
-    }
-    // Drainage basin (HUC)...
-    List<String> basinList = ifp.getInput(null, "basin", true, null);
-    if ( basinList.size() > 1 ) {
-        throw new IOException ( "<= 1 basin filters can be specified." );
-    }
-    else if ( basinList.size() == 1 ) {
-        String basin = basinList.get(0).trim();
-        urlString.append("&basin="+URLEncoder.encode(basin,"UTF-8"));
-    }
-    // State code...
-    List<String> stateList = ifp.getInput(null, "state", true, null);
-    if ( stateList.size() > 1 ) {
-        throw new IOException ( "<= 1 state code filters can be specified." );
-    }
-    else if ( stateList.size() == 1 ) {
-        String state = stateList.get(0).split("-")[0].trim();
-        urlString.append("&state="+URLEncoder.encode(state,"UTF-8"));
-    }
-    // Always want JSON results...
-    urlString.append("&output=json");
-    Message.printStatus(2, routine, "Performing the following request:  " + urlString );
-    String resultString = IOUtil.readFromURL(urlString.toString() );
-    if ( Message.isDebugOn ) {
-        Message.printDebug(1,routine,"Returned data="+resultString);
-    }
-    // Check for error in response string...
-    if ( resultString.indexOf("error") >= 0 ) {
-        throw new IOException ( "Error retrieving data for URL \"" + urlString + "\":  " + resultString );
-    }
-    else {
-        // Parse the JSON
-        Gson gson = new Gson();
-        RccAcisStationTimeSeriesMetadataList metadataListObject =
-            gson.fromJson(resultString, RccAcisStationTimeSeriesMetadataList.class);
-        if ( metadataListObject != null ) {
-            for ( RccAcisStationTimeSeriesMetadata metadata: metadataListObject.getMeta() ) {
-                //Message.printStatus(2,routine,metadata.getName());
-                metadata.setVariable(variable);
-                metadata.setDataStore ( this );
-                // TODO SAM 2011-01-07 Some metadata like HUC do not return so may need to set based
-                // on whether the information was entered in the filter
-            }
-            // Remove records that have no period
-            try {
-                metadataListObject.cleanupData();
-            }
-            catch ( Exception e ) {
-                Message.printWarning(3, routine, e);
-            }
-            return metadataListObject.getMeta();
-        }
-        else {
-            // Return an empty list
-            List<RccAcisStationTimeSeriesMetadata> data = new Vector<RccAcisStationTimeSeriesMetadata>();
-            return data;
-        }
-    }
-}
-*/
-
-/**
-Form the station ID string part of the time series request, something like "Type:ID" (e.g., "GHCN:USC00016643"),
-where ID is the station.
-@param tsidLocationType the location type part of a time series identifier (station ID network abbreviation).
-@param tsidLocation the location part of a time series identifier (station ID).
-*/
-/*private String readTimeSeries_FormHttpRequestStationID ( String tsidLocationType, String tsidLocation )
-{
-    if ( tsidLocationType.length() == 0 ) {
-        throw new InvalidParameterException ( "Station location type abbreviation is not specified." );
-    }
-    try {
-    	/* TODO smalers 2018-06-09 comment out
-        RccAcisStationType stationType = lookupStationTypeFromType(tsidLocationType.trim());
-        if ( stationType == null ) {
-            throw new InvalidParameterException ( "Station code from \"" + tsidLocation +
-                "\" cannot be determined." );
-        }
-        else if ( stationType.getCode() == 0 ) {
-            // No station type code is expected since the ACIS type, just pass ACIS ID
-            return tsidLocation.trim();
-        }
-        else {
-            // Station ID followed by the station type code
-            return tsidLocation.trim() + " " + stationType.getCode();
-        }
-        
-    	return "";
-    }
-    catch ( NumberFormatException e ) {
-        throw new InvalidParameterException ( "Station location \"" + tsidLocation +
-        "\" is invalid (should be Type:ID)" );
-    }
-}*/
-
-// NEW CODE IN PROGRESS:
-public AdministrativeCalls getAdministrativeCalls(String callId){
-	String request = getServiceRootURI() + "/administrativecalls/" + callId + "?format=json";
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
-	AdministrativeCalls ac = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
-	return ac;
-}
-
-//TODO @jurentie NOT SURE HOW TO DEAL WITH ANALYSIS SERVICES
-
-public DiversionStageVolume getDiversionStageVolume(String wdid){
-	String request = getServiceRootURI() + "/structures/divrec/stagevolume" + wdid + "?format=json";
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0); //TODO @jurentie get(0) ?
-	DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results, DiversionStageVolume.class);
-	return divStageVol;
-}
-
-public TelemetryDecodeSettings getTelemetryDecodeSettings(String abbrev){
-	String request = getServiceRootURI() + "/telemetrystations/telemetrydecodesettings/?format=json" + "&abbrev=" + abbrev;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
-	TelemetryDecodeSettings telDecSettings = (TelemetryDecodeSettings)JacksonToolkit.getInstance().treeToValue(results, TelemetryDecodeSettings.class);
-	return telDecSettings;
-}
-
-public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev){
-	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json" + "&abbrev=" + abbrev;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-	List<TelemetryDischargeMeasurement> telDischargeMeasurementsList = new ArrayList<TelemetryDischargeMeasurement>();
-	for(int i = 0; i < results.size(); i++){
-		TelemetryDischargeMeasurement tdm = (TelemetryDischargeMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryDischargeMeasurement.class);
-		telDischargeMeasurementsList.add(tdm);
-	}
-	return telDischargeMeasurementsList;
-}
-
-
-public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName){
-	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json" + "&ratingTableName=" + ratingTableName;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
-	List<TelemetryRatingTable> telRatingTableList = new ArrayList<TelemetryRatingTable>();
-	for(int i = 0; i < results.size(); i++){
-		TelemetryRatingTable trt = (TelemetryRatingTable)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryRatingTable.class);
-		telRatingTableList.add(trt);
-	}
-	return telRatingTableList;
-}
-
-public List<TelemetryShift> getTelemetryShiftCurve(String shiftCurveName){
-	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftcurve/" + "?format=json" + "&shiftCurveName=" + shiftCurveName;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
-	for(int i = 0; i < results.size(); i++){
-		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
-		telShiftList.add(ts);
-	}
-	return telShiftList;
-}
-
-public List<TelemetryShift> getTelemetryShiftAdjustedRatingTable(String abbrev, String parameter){
-	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftadjustedratingtable/" + "?format=json" + "&abbrev=" + abbrev + "&parameter=" + parameter;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
-	for(int i = 0; i < results.size(); i++){
-		TelemetryShift ts = (TelemetryShift)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryShift.class);
-		telShiftList.add(ts);
-	}
-	return telShiftList;
-}
-
-public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
-	String request = getServiceRootURI() + "/waterrights/transaction/" + "?format=json" + "&wdid=" + wdid;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-	List<WaterRightsTransaction> waterRightsTransList = new ArrayList<WaterRightsTransaction>();
-	for(int i = 0; i < results.size(); i++){
-		WaterRightsTransaction wrt = (WaterRightsTransaction)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterRightsTransaction.class);
-		waterRightsTransList.add(wrt);
-	}
-	return waterRightsTransList;
-}
-
-//TODO @jurentie work out parameters here
-/*public WellPermit getWellPermit(String receipt){
-	String request = getServiceRootURI() + "/wellpermits/wellpermit/" + "?format=json" + "&receipt=" + receipt;
-	return null;
-}*/
-
-//TODO @jurentie wellPermitHistory()
-
 /**
  * Inserting main method for testing purposes:
  * @throws URISyntaxException 
@@ -2874,8 +2954,9 @@ public static void main(String[] args) throws URISyntaxException, IOException{
 	ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
 
 	System.out.println();*/
+
 	
-	URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
+	/*URI uri = new URI("http://dnrweb.state.co.us/DWR/DwrApiService/api/v2");
 	
 	try {
 		ColoradoHydroBaseRestDataStore chrds = new ColoradoHydroBaseRestDataStore("DWR", "Colorado Division of Water Resources Hydrobase", uri, "ulF7gMR2Wcx9dWm6QeltbJbcwih3/vP4HXqYDO7YVhXNQry7/P1Zww==");
@@ -2889,7 +2970,7 @@ public static void main(String[] args) throws URISyntaxException, IOException{
 		DateTime date2 = new DateTime(DateTime.PRECISION_DAY);
 		date2.setYear(2005);
 		date2.setMonth(12);
-		date2.setDay(14);*/
+		date2.setDay(14);
 		
 		chrds.readTimeSeries("wdid:8003550.DWR.ResMeasStage.Day~ColoradoHydroBaseRest", null, null, true);
 	} catch (MalformedURLException e) {
@@ -2898,7 +2979,7 @@ public static void main(String[] args) throws URISyntaxException, IOException{
 	} catch (Exception e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
-	}
+	}*/
 }
 
 }
