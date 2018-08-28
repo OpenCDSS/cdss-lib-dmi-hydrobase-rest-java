@@ -540,7 +540,7 @@ public class Structure {
 				", q10: " + q10 + ", q40: " + q40 + ", q160:  " + q160 + ", coordsew: " + coordsew + ", coordsewDir: " +
 				coordsewDir + ", coordsns: " + coordsns + ", coordsnsDir: " + coordsnsDir + ", utmX: " + utmX + ", utmY: " +
 				utmY + ", latdecdeg: " + latdecdeg + ", longdecdeg: " + longdecdeg + ", locationAccuracy: " 
-				+ locationAccuracy + ", modified: " + modified + " ]";
+				+ locationAccuracy + ", modified: " + modified + " ]\n";
 				
 	}
 	

@@ -682,7 +682,7 @@ public class WaterRightsTransaction {
 				", maxDecreedRate: " + maxDecreedRate + ", totalVolumetricLimit: " + totalVolumetricLimit + 
 				", seasonalLimitation: " + seasonalLimitation + ", associatedWdid: " + associatedWdid + 
 				", planType: " + planType + ", planWdid: " + planWdid + ", comments: " + comments + ", lastModified: " +
-				lastModified + ", moreInformation: " + moreInformation + " ]";
+				lastModified + ", moreInformation: " + moreInformation + " ]\n";
 	}
 
 }

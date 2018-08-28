@@ -182,7 +182,7 @@ public class TelemetryDecodeSettings {
 				function + ", ratingTableName: " + ratingTableName + ", ratingStartDate: " + ratingStartDate + 
 				", shiftCurveName: " + shiftCurveName + ", shiftcurveStartDate: " + shiftcurveStartDate + 
 				", currentShift: " + currentShift + ", shiftStartDate: " + shiftStartDate + ", modified: " + 
-				modified + " ]";
+				modified + " ]\n";
 	}
 
 }

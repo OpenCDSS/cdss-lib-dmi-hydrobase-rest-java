@@ -638,6 +638,6 @@ public class WaterRightsNetAmount {
 				associatedCaseNumbers + ", decreedUses: " + decreedUses + ", netAbsolute: " + netAbsolute + 
 				", netConditional: " + netConditional + ", netApexAbsolute: " + netApexAbsolute + ", decreedUnits: " +
 				decreedUnits + ", seasonalLimitation: " + seasonalLimitation + ", comments: " + comments + 
-				", lastModified: " + ", permit: " + permit + ", moreInformation: " + moreInformation + " ]";
+				", lastModified: " + ", permit: " + permit + ", moreInformation: " + moreInformation + " ]\n";
 	}
 }

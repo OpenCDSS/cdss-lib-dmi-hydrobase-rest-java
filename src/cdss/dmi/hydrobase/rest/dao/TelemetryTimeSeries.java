@@ -201,7 +201,7 @@ public class TelemetryTimeSeries {
 	public String toString(){
 		return "TelemetryTimeSeriesRaw: [ abbrev: " + abbrev + ", parameter: " + parameter + 
 				", measDateTime: " + measDateTime + ", measValue: " + measValue + ", flagA: " + 
-				flagA + ", flagB: " + flagB + ", measCount: " + measCount + ", modified: " + modified + " ]";
+				flagA + ", flagB: " + flagB + ", measCount: " + measCount + ", modified: " + modified + " ]\n";
 	}
 
 }

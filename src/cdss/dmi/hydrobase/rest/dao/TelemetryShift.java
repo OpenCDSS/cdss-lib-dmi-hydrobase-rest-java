@@ -85,9 +85,9 @@ public class TelemetryShift {
 	public String toString(){
 		if(ratingTableName != null && !ratingTableName.isEmpty()){
 			return "TelemetryShiftAdjustedRatingTable: [ ratingTableName: " + ratingTableName + ", X: " + 
-					X + ", Y: " + Y;
+					X + ", Y: " + Y + " ]\n";
 		}else{
-			return "TelemetryShiftCurve: [ shiftCurveName: " + shiftCurveName + ", X: " + X + ", Y: " + Y;
+			return "TelemetryShiftCurve: [ shiftCurveName: " + shiftCurveName + ", X: " + X + ", Y: " + Y + " ]\n";
 		}
 	}
 	

@@ -733,7 +733,7 @@ public class WellPermit {
 				bottomPerforatedCasing + ", pumpTestYield: " + pumpTestYield + ", staticWaterLevel: " + staticWaterLevel + 
 				", staticWaterLevelDate: " + staticWaterLevelDate + ", wdid: " + wdid + ", associatedCaseNumbers: " + associatedCaseNumbers + 
 				", modified: " + modified + ", moreInformation: " + moreInformation + ", dateApplicationReceived: " + dateApplicationReceived +
-				", drillerLic: " + drillerLic + ", driller: "+ driller + ", pumpLic: " + pumpLic + ", pumpInstaller: " + pumpInstaller + " ]";
+				", drillerLic: " + drillerLic + ", driller: "+ driller + ", pumpLic: " + pumpLic + ", pumpInstaller: " + pumpInstaller + " ]\n";
 	}
 
 }

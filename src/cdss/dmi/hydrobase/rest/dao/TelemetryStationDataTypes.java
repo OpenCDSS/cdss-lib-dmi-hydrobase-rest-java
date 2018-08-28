@@ -375,7 +375,7 @@ public class TelemetryStationDataTypes {
 				", streamMile: " + streamMile + ", structureType: " + structureType + ", parameter: " + parameter + 
 				", parameterUnit: " + parameterUnit + ", contrArea: " + contrArea + ", drainArea: " + drainArea + 
 				", huc10: " + huc10 + ", utmX: " + utmX + ", utmY: " + ", latdecdeg: " + latdecdeg + ", longdecdeg: " + 
-				longdecdeg + ", locationAccuracy: " + locationAccuracy + ", modified: " + modified + " ]";
+				longdecdeg + ", locationAccuracy: " + locationAccuracy + ", modified: " + modified + " ]\n";
 	}
 
 }

@@ -608,6 +608,6 @@ public class WaterLevelsWell {
 				", coordinatesNsDir: " + coordinatesNsDir + ", utmX: " + utmX + ", utmY: " + utmY + ", latitude: " +
 				latitude + ", longitude: " + longitude + ", locationAccuracy: " + locationAccuracy + ", dataSource: " + 
 				dataSource + ", modified: " + modified + ", moreInformation: " + moreInformation + ", timestep: " +
-				timeStep + ", datatype: " + dataType + " ]"; 
+				timeStep + ", datatype: " + dataType + " ]\n"; 
 	}
 }

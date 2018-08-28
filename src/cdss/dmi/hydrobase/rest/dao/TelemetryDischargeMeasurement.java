@@ -319,7 +319,7 @@ public class TelemetryDischargeMeasurement {
 				discharge + ", shiftAdjustment: " + shiftAdjustment + ", percentDifference: " + percentDifference +
 				", measMethod: " + measMethod + ", measSections: " + measSections + ", gageHeightChange: " + 
 				gageHeightChange + ", measDuration: " + measDuration + ", meterNo: " + meterNo + ", measRemarks" +
-				measRemarks + ", modified: " + modified + " ]";
+				measRemarks + ", modified: " + modified + " ]\n";
 	}
 
 }

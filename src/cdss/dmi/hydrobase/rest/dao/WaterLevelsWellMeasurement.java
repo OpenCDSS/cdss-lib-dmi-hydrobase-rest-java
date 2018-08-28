@@ -249,7 +249,7 @@ public class WaterLevelsWellMeasurement {
 				measurementDate + ", depthToWater: " + depthToWater + ", measuringPointAboveLandSurface: " +
 				measuringPointAboveLandSurface + ", depthWaterBelowLandSurface: " + depthWaterBelowLandSurface + 
 				", elevationOfWater: " + elevationOfWater + ", delta: " + delta + ", dataSource: " + 
-				dataSource + ", published: " + published + ", modified: " + modified;
+				dataSource + ", published: " + published + ", modified: " + modified + " ]\n";
 	}
 
 }

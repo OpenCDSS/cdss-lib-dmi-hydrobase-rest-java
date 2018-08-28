@@ -466,7 +466,7 @@ public class TelemetryStation {
 				flagA + ", flagB: " + flagB + ", contrArea: " + contrArea + ", drainArea: " + drainArea + 
 				", huc10: " + huc10 + ", utmX: " + utmX + ", utmY: " + utmY + ", latitude: " + latitude + 
 				", longitude: " + longitude + ", locationAccuracy: " + locationAccuracy + ", wdid: " + wdid + 
-				", modified: " + modified + ", moreInformation: " + moreInformation + " ]";
+				", modified: " + modified + ", moreInformation: " + moreInformation + " ]\n";
 	}
 
 
