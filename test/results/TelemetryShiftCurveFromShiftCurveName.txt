@@ -1,0 +1,5 @@
+[[TelemetryShiftCurve: [ shiftCurveName: BOUBYPCOVST17-A, X: 0.2, Y: 0.0 ]
+, TelemetryShiftCurve: [ shiftCurveName: BOUBYPCOVST17-A, X: 0.34, Y: 0.02 ]
+, TelemetryShiftCurve: [ shiftCurveName: BOUBYPCOVST17-A, X: 0.59, Y: 0.0 ]
+, TelemetryShiftCurve: [ shiftCurveName: BOUBYPCOVST17-A, X: 0.8, Y: 0.0 ]
+]]
