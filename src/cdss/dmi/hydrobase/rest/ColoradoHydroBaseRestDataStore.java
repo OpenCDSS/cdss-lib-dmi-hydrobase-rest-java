@@ -951,7 +951,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
 	JsonNode telemetryParamsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(tdRequestString);
 	
 	//System.out.println(tdRequestString);
-	Message.printStatus(1, routine, "Retrieve telemetry params from url request: " + tdRequestString);
+	Message.printStatus(2, routine, "Retrieve telemetry params from url request: " + tdRequestString);
 	
 	for(int i = 0; i < telemetryParamsNode.size(); i++){
 		TelemetryStationDataTypes telemetryParam;
@@ -1102,11 +1102,14 @@ public List<TelemetryDecodeSettings> getTelemetryDecodeSettings(String abbrev){
 }
 
 public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev, String county, int waterDivision, int waterDistrict){
-	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json" + "&abbrev=" + abbrev;
+	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json";
+	if(!(abbrev == null || abbrev == "")){
+		request += "&abbrev=" + abbrev;
+	}
 	if(!(county == null || county == "")){
 		request += "&county=" + county;
 	}
-	if(waterDistrict > -1){
+	if(waterDivision > -1){
 		request += "&division=" + waterDivision;
 	}
 	if(waterDistrict > -1){
@@ -1130,7 +1133,7 @@ public List<ReferenceTablesTelemetryParams> getTelemetryParams(){
 
 public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName){
 	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json" + "&ratingTableName=" + ratingTableName;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	List<TelemetryRatingTable> telRatingTableList = new ArrayList<TelemetryRatingTable>();
 	for(int i = 0; i < results.size(); i++){
 		TelemetryRatingTable trt = (TelemetryRatingTable)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryRatingTable.class);
@@ -1208,9 +1211,9 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 	List<String> dataTypes = new ArrayList<String>();
 	if(group){
 		dataTypes.add("Structure - DivTotal");
-		dataTypes.add("Structure - ResMeasStage");
-		dataTypes.add("Structure - ResMeasVolume");
 		dataTypes.add("Structure - RelTotal");
+		dataTypes.add("Structure - Stage");
+		dataTypes.add("Structure - Volume");
 		dataTypes.add("Structure - WaterClass");
 		// Get list of telemetry data types
 		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
@@ -1222,6 +1225,8 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 	}else{
 		dataTypes.add("DivTotal");
 		dataTypes.add("RelTotal");
+		dataTypes.add("Stage");
+		dataTypes.add("Volume");
 		dataTypes.add("WaterClass");
 		// Get list of telemetry data types
 		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
@@ -1251,8 +1256,8 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	}
 	else if(selectedDataType.equalsIgnoreCase("WaterLevelDepth") ||
 			selectedDataType.equalsIgnoreCase("WaterLevelElev") ||
-			selectedDataType.equalsIgnoreCase("ResMeasStage") ||
-			selectedDataType.equalsIgnoreCase("ResMeasVolume")){
+			selectedDataType.equalsIgnoreCase("Stage") ||
+			selectedDataType.equalsIgnoreCase("Volume")){
 		timeSteps.add("Day");
 	}
 	// Will be Telemetry
@@ -1283,16 +1288,26 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 	JsonNode waterclassesNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	
 	//System.out.println(request);
-	Message.printStatus(1, routine, "Get water classes from URL request: " + request);
+	Message.printStatus(2, routine, "Get water classes from URL request: " + request);
 	
 	for(int i = 0; i < waterclassesNode.size(); i++){
 		DiversionWaterClass waterclass;
 		waterclass = (DiversionWaterClass) JacksonToolkit.getInstance().treeToValue(waterclassesNode.get(i), DiversionWaterClass.class);
 		waterclass.setTimeStep(interval);
+		waterclass.setDivrectype(dataType);
 		waterclasses.add(waterclass);
 	}
 	
 	return waterclasses;
+}
+
+private String lookUpDataType(String dataType){
+	if(dataType.equalsIgnoreCase("STAGE") || dataType.equalsIgnoreCase("VOLUME")){
+		return "StageVolume";
+	}
+	else{
+		return dataType;
+	}
 }
 
 /**
@@ -1307,6 +1322,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
  * @return a formatted request string for retrieving water class data.
  */
 public String getWaterClassesRequestString(String dataType, String interval, List<String []> listOfTriplets){
+	dataType = lookUpDataType(dataType);
 	String wcRequestString = getServiceRootURI() + "/structures/divrec/waterclasses/?format=json&divrectype=" + dataType + "&timestep=" + interval;
 	int newVal;
 	// Step through all Triplets
@@ -1439,7 +1455,7 @@ public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataT
  * @return list of districts
  * @throws MalformedURLException
  */
-public List<ReferenceTablesWaterDistrict> getWaterDistricts() throws MalformedURLException{
+public List<ReferenceTablesWaterDistrict> getWaterDistricts(){
 	if(waterDistrictList == null){
 		readWaterDistricts();
 	}
@@ -1450,18 +1466,13 @@ public int getWaterDivisionFromWaterDistricts(String wdid){
 	String wd = wdid.substring(0, 2);
 	List<ReferenceTablesWaterDistrict> waterDistricts;
 	int div = 0;
-	try {
-		waterDistricts = getWaterDistricts();
-		for(int i = 0; i < waterDistricts.size(); i++){
-			ReferenceTablesWaterDistrict waterDistrict = waterDistricts.get(i);
-			int wdFromList = waterDistrict.getWaterDistrict();
-			if(Integer.parseInt(wd) == wdFromList){
-				div = waterDistrict.getDivision();
-			}
+	waterDistricts = getWaterDistricts();
+	for(int i = 0; i < waterDistricts.size(); i++){
+		ReferenceTablesWaterDistrict waterDistrict = waterDistricts.get(i);
+		int wdFromList = waterDistrict.getWaterDistrict();
+		if(Integer.parseInt(wd) == wdFromList){
+			div = waterDistrict.getDivision();
 		}
-	} catch (MalformedURLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
 	}
 	return div;
 }
@@ -1469,9 +1480,8 @@ public int getWaterDivisionFromWaterDistricts(String wdid){
 /**
  * Get list of divisions from global variable
  * @return list of divisions
- * @throws MalformedURLException
  */
-public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedURLException{
+public List<ReferenceTablesWaterDivision> getWaterDivisions(){
 	if(waterDivisionList == null){
 		readWaterDivisions();
 	}
@@ -1479,8 +1489,7 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions() throws MalformedUR
 }
 
 //
-public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid)
-throws Exception {
+public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
 	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
 	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid + getApiKeyString();
 	JsonNode structResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(netAmtsRequest);
@@ -1768,7 +1777,7 @@ public boolean isStationTimeSeriesDataType ( String dataType ) {
  * @return true if data type is for a structure, false otherwise
  */
 public boolean isStructureTimeSeriesDataType ( String dataType ) {
-	String [] dataTypes = { "DIVTOTAL", "RELTOTAL", "WATERCLASS"};
+	String [] dataTypes = { "DIVTOTAL", "RELTOTAL", "STAGE", "VOLUME", "WATERCLASS"};
 	// Compare the first part of the data type, because water classes data type will be followed by the class string
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
@@ -2021,7 +2030,7 @@ throws MalformedURLException, Exception
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 		}
-		if(data_type.equalsIgnoreCase("RelTotal")){
+		else if(data_type.equalsIgnoreCase("RelTotal")){
 			// Release records - total through release
 			// locid is the WDID in this case
 			boolean divTotalReq = false;
@@ -2032,7 +2041,7 @@ throws MalformedURLException, Exception
 			DiversionWaterClass waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,divTotalReq,relTotalReq);
 			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 		}
-		if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
+		else if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
 			// Release records - total through release
 			// locid is the WDID in this case
 			boolean divTotalReq = false;
@@ -2279,7 +2288,7 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(data_type.equalsIgnoreCase("ResMeasStage") || data_type.equalsIgnoreCase("ResMeasVolume")){
+	else if(data_type.equalsIgnoreCase("Stage") || data_type.equalsIgnoreCase("Volume")){
 		String wdid = locid;
 		
 		// Get Structure
@@ -2371,10 +2380,10 @@ throws MalformedURLException, Exception
 					
 				//Get Data
 				double value = 0.0;
-				if(data_type.equalsIgnoreCase("ResMeasStage")){
+				if(data_type.equalsIgnoreCase("Stage")){
 					value = divStageVol.getStage();
 				}
-				else{
+				else if(data_type.equalsIgnoreCase("Volume")){
 					value = divStageVol.getVolume();
 				}
 				
