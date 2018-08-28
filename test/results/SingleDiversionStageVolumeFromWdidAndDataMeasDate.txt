@@ -1,0 +1,1 @@
+[[stageVolume : [ wdid: 8003550, dataMeasDate: 1999-09-30 00:00:00, stage: 194.41, volume: 64595.0, approvalStatus: Approved, modified: 2001-08-14 11:47:18]]

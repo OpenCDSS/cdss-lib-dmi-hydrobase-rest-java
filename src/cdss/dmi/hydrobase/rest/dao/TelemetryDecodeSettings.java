@@ -41,7 +41,7 @@ public class TelemetryDecodeSettings {
 	 * parameter returned from web services
 	 */
 	@JsonProperty("current_shift")
-	private int currentShift;
+	private double currentShift;
 
 	/**
 	 * Function 
@@ -104,7 +104,7 @@ public class TelemetryDecodeSettings {
 	public String getAbbrev() {
 		return abbrev;
 	}
-	public int getCurrentShift() {
+	public double getCurrentShift() {
 		return currentShift;
 	}
 
@@ -139,7 +139,7 @@ public class TelemetryDecodeSettings {
 	public void setAbbrev(String abbrev) {
 		this.abbrev = abbrev;
 	}
-	public void setCurrentShift(int currentShift) {
+	public void setCurrentShift(double currentShift) {
 		this.currentShift = currentShift;
 	}
 

@@ -1,0 +1,1 @@
+[[TelemetryDecodeSettings [ abbrev: ABCLATCO, parameter: DISCHRG1, function: GH1, ratingTableName: ABCLATCO02, ratingStartDate: 2010-01-29 13:41:05, shiftCurveName: null, shiftcurveStartDate: null, currentShift: 0.0, shiftStartDate: 2018-08-09 09:10:38, modified: 2018-08-09 09:10:38 ]]]
