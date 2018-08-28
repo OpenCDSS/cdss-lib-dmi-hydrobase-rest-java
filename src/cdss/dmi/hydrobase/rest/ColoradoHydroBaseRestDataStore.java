@@ -9,6 +9,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -952,7 +953,6 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
 		telemetryParam.setTimeStep(interval);
 		telemetryParams.add(telemetryParam);
 	}
-	System.out.println("[ColoradoHydrBaseRestDataStore.getTelemetryDataTypes:955] telemetryParams: " + telemetryParams);
 	return telemetryParams;
 }
 
@@ -961,7 +961,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
  * api/v2/referencetables/telemetryparams
  * @return a list of telemetry parameters
  */
-private String[] getTelemetryDataTypesFromWebServices(){	
+public String[] getTelemetryDataTypeParametersFromWebServices(){	
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
 	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/?apiKey=" + getApiKey();
 	JsonNode telemetryDataTypes = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telParametersRequest);
@@ -1070,7 +1070,7 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 								break;
 						}
 						break;
-				case "WDID":
+				case "STR_NAME":
 						tpRequestString += "&wdid=" + URLEncoder.encode(value, "UTF-8");
 						break;
 			}
@@ -1079,20 +1079,33 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 			e.printStackTrace();
 		}
 	}
-	tpRequestString += "&apiKey=" + getApiKeyString();
+	tpRequestString += getApiKeyString();
 	return tpRequestString;
 	
 }
 
-public TelemetryDecodeSettings getTelemetryDecodeSettings(String abbrev){
+public List<TelemetryDecodeSettings> getTelemetryDecodeSettings(String abbrev){
+	List<TelemetryDecodeSettings> telDecSettings = new ArrayList<TelemetryDecodeSettings>();
 	String request = getServiceRootURI() + "/telemetrystations/telemetrydecodesettings/?format=json" + "&abbrev=" + abbrev;
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
-	TelemetryDecodeSettings telDecSettings = (TelemetryDecodeSettings)JacksonToolkit.getInstance().treeToValue(results, TelemetryDecodeSettings.class);
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	for(int i = 0; i < results.size(); i++){
+		telDecSettings.add((TelemetryDecodeSettings)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryDecodeSettings.class));
+
+	}
 	return telDecSettings;
 }
 
-public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev){
+public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev, String county, int waterDivision, int waterDistrict){
 	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json" + "&abbrev=" + abbrev;
+	if(!(county == null || county == "")){
+		request += "&county=" + county;
+	}
+	if(waterDistrict > -1){
+		request += "&division=" + waterDivision;
+	}
+	if(waterDistrict > -1){
+		request += "&waterDistrict=" + waterDistrict;
+	}
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	List<TelemetryDischargeMeasurement> telDischargeMeasurementsList = new ArrayList<TelemetryDischargeMeasurement>();
 	for(int i = 0; i < results.size(); i++){
@@ -1194,7 +1207,7 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 		dataTypes.add("Structure - RelTotal");
 		dataTypes.add("Structure - WaterClass");
 		// Get list of telemetry data types
-		String[] telDataTypes = getTelemetryDataTypesFromWebServices();
+		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
 		for(int i = 0; i < telDataTypes.length; i++){
 			dataTypes.add("Telemetry Station - " + telDataTypes[i]);
 		}
@@ -1205,7 +1218,7 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 		dataTypes.add("RelTotal");
 		dataTypes.add("WaterClass");
 		// Get list of telemetry data types
-		String[] telDataTypes = getTelemetryDataTypesFromWebServices();
+		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
 		for(int i = 0; i < telDataTypes.length; i++){
 			dataTypes.add(telDataTypes[i]);
 		}
@@ -1765,7 +1778,7 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
-	String[] dataTypes = getTelemetryDataTypesFromWebServices();
+	String[] dataTypes = getTelemetryDataTypeParametersFromWebServices();
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
 			return true;
