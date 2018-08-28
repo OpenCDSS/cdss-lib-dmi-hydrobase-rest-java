@@ -22,6 +22,7 @@ import org.junit.Test;
 import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
 import cdss.dmi.hydrobase.rest.dao.DiversionComments;
 import cdss.dmi.hydrobase.rest.dao.DiversionStageVolume;
+import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
 import cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCurrentInUseCodes;
@@ -31,9 +32,15 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecTypes;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesGroundwaterPublication;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesManagementDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesPermitActionName;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesTelemetryParams;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
+import cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable;
+import cdss.dmi.hydrobase.rest.dao.TelemetryShift;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
+import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 
 /**
  * In general, tests are created for methods using web services where there 
@@ -81,11 +88,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readCounties().
 	 */
 	@Test
-	public void getCountiesLength(){
+	public void testLengthOfGetCountiesList(){
 		int expectedLength = 65;
 		
 		List<ReferenceTablesCounty> counties = chrds.getCounties();
 		int resultLength = counties.size();
+		
+		writeToFile("results/CountiesList.txt", Arrays.asList(counties).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -96,11 +105,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readCurrentInUseCodes().
 	 */
 	@Test
-	public void getCurrentInUseCodesLength(){
+	public void testLengthOfGetCurrentInUseCodesList(){
 		int expectedLength = 9;
 		
 		List<ReferenceTablesCurrentInUseCodes> currentInUseCodes = chrds.getCurrentInUseCodes();
 		int resultLength = currentInUseCodes.size();
+		
+		writeToFile("results/CurrentInUseCodesList.txt", Arrays.asList(currentInUseCodes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -111,11 +122,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readDesignatedBasins()
 	 */
 	@Test
-	public void getDesignatedBasinLength(){
+	public void testLengthOfGetDesignatedBasinList(){
 		int expectedLength = 8;
 		
 		List<ReferenceTablesDesignatedBasin> desBasin = chrds.getDesignatedBasin();
 		int resultLength = desBasin.size();
+		
+		writeToFile("results/DesignatedBasinList.txt", Arrays.asList(desBasin).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -125,7 +138,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * compares it to the expected result specified below.
 	 */
 	@Test
-	public void getSingleDivCommentFromWdidAndIrrYear() {
+	public void testDeserializationOfGetSingleDivCommentFromWdidAndIrrYear() {
 		// Create expected result for a single div comment.
 		DiversionComments divComment = new DiversionComments();
 		divComment.setApprovalStatus("Approved");
@@ -154,7 +167,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	}
 	
 	@Test
-	public void getSingleDiversionStageVolumeFromWdidAndDataMeasDate(){
+	public void testDeserializationOfGetSingleDiversionStageVolumeFromWdidAndDataMeasDate(){
 		//Create expected result for a single div stage volume
 		DiversionStageVolume divStageVol = new DiversionStageVolume();
 		divStageVol.setApprovalStatus("Approved");
@@ -186,11 +199,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readDivRecObservationCodes().
 	 */
 	@Test 
-	public void getDivRecObservationCodesLength(){
+	public void testLengthOfGetDivRecObservationCodesList(){
 		int expectedLength = 9;
 		
 		List<ReferenceTablesDivRecObservationCodes> divRecObsCodes = chrds.getDivRecObservationCodes();
 		int resultLength = divRecObsCodes.size();
+		
+		writeToFile("results/DivRecObservationCodesList.txt", Arrays.asList(divRecObsCodes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -201,11 +216,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readDivRecTypes().
 	 */
 	@Test
-	public void getDivRecTypesLength(){
+	public void testLengthOfGetDivRecTypesList(){
 		int expectedLength = 6;
 		
 		List<ReferenceTablesDivRecTypes> divRecTypes = chrds.getDivRecTypes();
 		int resultLength = divRecTypes.size();
+		
+		writeToFile("results/DivRecTypesList.txt", Arrays.asList(divRecTypes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -216,11 +233,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readGroundwaterPublication().
 	 */
 	@Test
-	public void getGroundwaterPublicationLength(){
+	public void testLengthOfGetGroundwaterPublicationList(){
 		int expectedLength = 17;
 		
-		List<ReferenceTablesGroundwaterPublication> grndwaterPublication = chrds.getGroundwaterPublication();
-		int resultLength = grndwaterPublication.size();
+		List<ReferenceTablesGroundwaterPublication> groundwaterPublication = chrds.getGroundwaterPublication();
+		int resultLength = groundwaterPublication.size();
+		
+		writeToFile("results/GroundwaterPublicationList.txt", Arrays.asList(groundwaterPublication).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -231,11 +250,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readManagmentDistrict().
 	 */
 	@Test
-	public void getManagementDistrictLength(){
+	public void testLengthOfGetManagementDistrictList(){
 		int expectedLength = 14;
 		
 		List<ReferenceTablesManagementDistrict> managementDistrict = chrds.getManagementDistrict();
 		int resultLength = managementDistrict.size();
+		
+		writeToFile("results/ManagementDistrictList.txt", Arrays.asList(managementDistrict).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -245,7 +266,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * compares 1 result from web services
 	 */
 	@Test
-	public void parcelUseTSListFromParcelId(){
+	public void testDeserializationOfParcelUseTSListFromParcelId(){
 		ParcelUseTimeSeries parcelUseTS = new ParcelUseTimeSeries();
 		parcelUseTS.setWdid("2000505");
 		parcelUseTS.setDiv(3);
@@ -280,11 +301,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Also verifies readPermitActionName().
 	 */
 	@Test
-	public void getPemitActionNameLength(){
+	public void testLengthOfGetPemitActionNameList(){
 		int expectedLength = 54;
 		
 		List<ReferenceTablesPermitActionName> permitActionName = chrds.getPermitActionName();
 		int resultLength = permitActionName.size();
+		
+		writeToFile("results/PermitActionName.txt", Arrays.asList(permitActionName).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -294,7 +317,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * a wdid.
 	 */
 	@Test
-	public void getSingleTelemetryStationDataTypeFromWdid(){
+	public void testDeserializationOfGetSingleTelemetryStationDataTypeFromWdid(){
 		
 		TelemetryStationDataTypes telStationDataType = new TelemetryStationDataTypes();
 		telStationDataType.setDivision(7);
@@ -345,11 +368,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * by testing the length of the results
 	 */
 	@Test
-	public void getTelemetryDataTypeParametersFromWebServicesLength(){
+	public void testLengthOfGetTelemetryDataTypeParametersFromWebServicesList(){
 		int expectedLength = 40;
 		
 		String[] telParams = chrds.getTelemetryDataTypeParametersFromWebServices();
 		int resultLength = telParams.length;
+		
+		writeToFile("results/TelemetryDataTypeParametersList.txt", telParams.toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -358,7 +383,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * Test getting a single 
 	 */
 	@Test
-	public void getSingleTelemetryDecodeSettingsFromAbbrev(){
+	public void testDeserializationOfGetSingleTelemetryDecodeSettingsFromAbbrev(){
 		TelemetryDecodeSettings telDecodeSetting = new TelemetryDecodeSettings();
 		telDecodeSetting.setAbbrev("ABCLATCO");
 		telDecodeSetting.setParameter("DISCHRG1");
@@ -387,7 +412,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 * telemetry discharge measurement from the abbreviation.
 	 */
 	@Test
-	public void getSingleTelemetryDischargeMeasurementFromAbbrev(){
+	public void testDeserializationOfGetSingleTelemetryDischargeMeasurementFromAbbrev(){
 		TelemetryDischargeMeasurement telDisMeas = new TelemetryDischargeMeasurement();
 		telDisMeas.setDivision(7);
 		telDisMeas.setWaterDistrict(29);
@@ -415,12 +440,239 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		expectedResultsList.add(telDisMeas);
 		writeToFile("expectedResults/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(expectedResultsList).toString());
 		
-		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement("2900686A", null, -1, -1);
+		String abbrev = "2900686A";
+		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(abbrev, null, -1, -1);
 		writeToFile("results/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(resultsList).toString());
 
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}
 	
+	/**
+	 * The above tests that data is properly being deserialized from web services
+	 * The following tests querying by other parameters and checking the length
+	 * of the results.
+	 */
+	@Test
+	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromCountyList(){
+		int expectedLength = 704;
+		
+		String county = "MESA";
+		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, county, -1, -1);
+		int resultsLength = resultsList.size();
+				
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
 	
+	@Test
+	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDivisionList(){
+		int expectedLength = 2303;
+		
+		int waterDivision = 5;
+		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, waterDivision, -1);
+		int resultsLength = resultsList.size();
+				
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	@Test
+	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDistrictList(){
+		int expectedLength = 2349;
+		
+		int waterDistrict = 4;
+		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, -1, waterDistrict);
+		int resultsLength = resultsList.size();
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	/**
+	 * Test that telemetry params list is correct by checking 
+	 * the length of results.
+	 * Also tests readTelemetryParams().
+	 */
+	@Test
+	public void testLengthOfGetTelemetryParamsList(){
+		int expectedLength = 40;
+		
+		List<ReferenceTablesTelemetryParams> resultsList = chrds.getTelemetryParams();
+		int resultsLength = resultsList.size();
+		
+		writeToFile("results/TelemetryParamsList.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	/**
+	 * Test that telemetry rating table list is correct by checking length
+	 * of results.
+	 */
+	@Test
+	public void testLengthOfGetTelemetryRatingTableFromRatingTableName(){
+		int expectedLength = 311;
+		
+		String ratingTableName = "ABCLATCO02";
+		List<TelemetryRatingTable> resultsList = chrds.getTelemetryRatingTable(ratingTableName);
+		int resultsLength = resultsList.size();
+		
+		writeToFile("results/TelemetryRatingTableListFromRatingTableName.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	//TODO @jurentie ADD TEST FOR TELEMETRY SHIFT CURVE
+	
+	@Test
+	public void testLengthOfGetTelemetryShiftCurveFromShiftCurveName(){
+		int expectedLength = 4;
+		
+		String shiftCurveName = "BOUBYPCOVST17-A";
+		List<TelemetryShift> resultsList = chrds.getTelemetryShiftCurve(shiftCurveName);
+		int resultsLength = resultsList.size();
+		
+		writeToFile("results/TelemetryShiftCurveFromShiftCurveName.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	@Test
+	public void testDeserializationOfGetWaterClassesFromWdid(){
+		DiversionWaterClass waterClass = new DiversionWaterClass();
+		waterClass.setDivrectype("WaterClass");
+		waterClass.setWaterclassNum(78969);
+		waterClass.setWcIdentifier("1300529 S:1 F: U:1 T: G: To:");
+		waterClass.setWdid("1300529");
+		waterClass.setWdidAcctId(0);
+		waterClass.setStructureName("MONITOR DITCH");
+		waterClass.setWdidAcctName(0);
+		waterClass.setSourceCode("1");
+		waterClass.setSourceDescr("Natural Stream flow");
+		waterClass.setFromWdidAcctId(0);
+		waterClass.setFromWdidAcctName(0);
+		waterClass.setUseCode("1");
+		waterClass.setUseDescr("Irrigation");
+		waterClass.setToWdidAcctId(0);
+		waterClass.setToWdidAcctName(0);
+		waterClass.setPorStart("1912-06-02T00:00:00");
+		waterClass.setPorEnd("1975-07-09T00:00:00");
+		waterClass.setPorLastModified("2004-06-09T12:53:00");
+		waterClass.setDivision(2);
+		waterClass.setWaterDistrict(13);
+		waterClass.setCounty("CUSTER");
+		waterClass.setModified("2011-06-02T09:14:25.23");
+		waterClass.setAvailableTimesteps("Day,Month,Year");
+		waterClass.setWaterSource("NORTH COLONY CREEK");
+		waterClass.setStreamMile(0.63);
+		waterClass.setStructureType("DITCH");
+		waterClass.setGnisId("00192422");
+		waterClass.setCiuCode("I");
+		waterClass.setCiuCodeLong("Inactive structure which physically exist, but no diversion records are maintained");
+		waterClass.setPm("S");
+		waterClass.setTownship("23.0 S");
+		waterClass.setRange("72.0 W");
+		waterClass.setSection("16");
+		waterClass.setQ40("SW");
+		waterClass.setQ160("SE");
+		waterClass.setCoordsew(0);
+		waterClass.setCoordsns(0);
+		waterClass.setUtmX(461329.0);
+		waterClass.setUtmY(4210892.5);
+		waterClass.setLatdecdeg(38.044937);
+		waterClass.setLongdecdeg(-105.440726);
+		
+		List<DiversionWaterClass> expectedResultsList = new ArrayList<DiversionWaterClass>();
+		expectedResultsList.add(waterClass);
+		writeToFile("expectedResults/GetWaterClassesFromWdid.txt", Arrays.asList(expectedResultsList).toString());
+		
+		String[] inputFilters = {"WDID", "MA", "1300529"};
+		List<String[]> listOfTriplets = new ArrayList<String[]>();
+		listOfTriplets.add(inputFilters);
+		
+		List<DiversionWaterClass> resultsList = chrds.getWaterClasses("WaterClass", "Month", listOfTriplets);
+		writeToFile("results/GetWaterClassesFromWdid.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+	}
+	
+	/**
+	 * Test that water districts list is correct by checking
+	 * length of results.
+	 * Also tests readWaterDistricts().
+	 */
+	@Test
+	public void testLengthOfGetWaterDistrictsList(){
+		int expectedLength = 78;
+		
+		List<ReferenceTablesWaterDistrict> resultsList = chrds.getWaterDistricts();
+		int resultsLength = resultsList.size();
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
+	
+	/**
+	 * Test that water divisions list is correct by checking 
+	 * length of results.
+	 * Also tests readWaterDivisions().
+	 */
+	@Test
+	public void testLengthOfGetWaterDivisionsList(){
+		int expectedLength = 7;
+		
+		List<ReferenceTablesWaterDivision> expectedList = chrds.getWaterDivisions();
+		int resultsLength = expectedList.size();
+		
+		assertThat(expectedLength, equalTo(resultsLength));
+	}
 
+	@Test
+	public void testDeserializationOfGetWaterRightsNetAmount(){
+		WaterRightsNetAmount wrNetAmt = new WaterRightsNetAmount();
+		wrNetAmt.setWaterRightNetAmtNum(476781);
+		wrNetAmt.setWdid("3600501");
+		wrNetAmt.setStructureName("ABBETT AND BENNETT DITCH");
+		wrNetAmt.setStructureType("Ditch");
+		wrNetAmt.setWaterSource("SPRUCE CREEK");
+		wrNetAmt.setGnisId("00175604");
+		wrNetAmt.setStreamMile(4.04);
+		wrNetAmt.setDivision(5);
+		wrNetAmt.setWaterDistrict(36);
+		wrNetAmt.setCounty("SUMMIT");
+		wrNetAmt.setQ40("NW");
+		wrNetAmt.setQ160("SE");
+		wrNetAmt.setSection("2");
+		wrNetAmt.setTownship("2.0 S");
+		wrNetAmt.setRange("81.0 W");
+		wrNetAmt.setPm("S");
+		wrNetAmt.setUtmX(378567.0);
+		wrNetAmt.setUtmY(4419574.0);
+		wrNetAmt.setLatitude(39.917564);
+		wrNetAmt.setLongitude(-106.420870);
+		wrNetAmt.setLocationAccuracy("Digitized");
+		wrNetAmt.setAdjudicationDate("1910-03-02T00:00:00-07:00");
+		wrNetAmt.setPriorAdjudicationDate("0001-01-01T00:00:00-07:00");
+		wrNetAmt.setAppropriationDate("1883-04-24T00:00:00-06:00");
+		wrNetAmt.setAdminNumber(12167.00000);
+		wrNetAmt.setOrderNumber(0);
+		wrNetAmt.setPriorityNumber("14");
+		wrNetAmt.setAssociatedCaseNumbers("CA1277");
+		wrNetAmt.setDecreedUses("1");
+		wrNetAmt.setNetAbsolute(3.5000);
+		wrNetAmt.setNetConditional(0.0000);
+		wrNetAmt.setNetApexAbsolute(0.0000);
+		wrNetAmt.setNetApexConditional(0.0000);
+		wrNetAmt.setDecreedUnits("C");
+		wrNetAmt.setSeasonalLimitation("No");
+		wrNetAmt.setComments("LEGAL CORRECTED IN 81-194. AP AT HOAGLAND CANAL");
+		wrNetAmt.setLastModified("2008-06-04T09:50:10-06:00");
+		wrNetAmt.setMoreInformation("https://dnrweb.state.co.us/cdss/WaterRights/NetAmounts/476781");
+		
+		List<WaterRightsNetAmount> expectedResultsList = new ArrayList<WaterRightsNetAmount>();
+		expectedResultsList.add(wrNetAmt);
+		writeToFile("expectedResults/GetWaterRightsNetAmount.txt", Arrays.asList(expectedResultsList).toString());
+
+		String wdid = "3600501";
+		List<WaterRightsNetAmount> resultsList = chrds.getWaterRightsNetAmount(wdid);
+		writeToFile("results/GetWaterRightsNetAmount.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+	}
 }
