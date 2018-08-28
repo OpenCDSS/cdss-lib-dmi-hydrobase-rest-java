@@ -47,7 +47,7 @@ public class ReferenceTablesManagementDistrict {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesManagementDistrict [ managementDistrictName: " + managementDistrictName + " ]";
+		return "ReferenceTablesManagementDistrict [ managementDistrictName: " + managementDistrictName + " ]\n";
 	}
 	
 }

@@ -60,7 +60,7 @@ public class ReferenceTablesPermitActionName {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesPermitActionName [ actionName: " + actionName + ", actionDescr: " + actionDescr + " ]";
+		return "ReferenceTablesPermitActionName [ actionName: " + actionName + ", actionDescr: " + actionDescr + " ]\n";
 	}
 
 }

@@ -44,7 +44,7 @@ public class ReferenceTablesDesignatedBasin {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesDesignatedBasin [ designatedBasinName: " + designatedBasinName + " ]";
+		return "ReferenceTablesDesignatedBasin [ designatedBasinName: " + designatedBasinName + " ]\n";
 	}
 
 }

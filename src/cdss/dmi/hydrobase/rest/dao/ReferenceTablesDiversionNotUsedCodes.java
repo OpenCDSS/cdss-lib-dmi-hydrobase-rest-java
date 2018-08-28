@@ -57,7 +57,7 @@ public class ReferenceTablesDiversionNotUsedCodes {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesDiversionNotUsedCodes: [ notUsedCode: " + notUsedCode + ", notUsedCodeDescr: " + notUsedCodeDescr + "]";
+		return "ReferenceTablesDiversionNotUsedCodes: [ notUsedCode: " + notUsedCode + ", notUsedCodeDescr: " + notUsedCodeDescr + "]\n";
 	}
 
 }

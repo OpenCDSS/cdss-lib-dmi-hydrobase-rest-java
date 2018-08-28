@@ -57,7 +57,7 @@ public class ReferenceTablesCurrentInUseCodes {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesCurrentInUse: [ciuCode: " + ciuCode + ", ciuCodeLong: " + ciuCodeLong + "]";
+		return "ReferenceTablesCurrentInUse: [ciuCode: " + ciuCode + ", ciuCodeLong: " + ciuCodeLong + "]\n";
 	}
 
 }

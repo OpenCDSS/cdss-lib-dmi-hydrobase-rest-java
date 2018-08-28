@@ -57,7 +57,7 @@ public class ReferenceTablesDivRecTypes {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesDivRecTypes: [ divRecType: " + divRecType + ", divRecTypeLong: " + divRecTypeLong + " ]";
+		return "ReferenceTablesDivRecTypes: [ divRecType: " + divRecType + ", divRecTypeLong: " + divRecTypeLong + " ]\n";
 	}
 
 }

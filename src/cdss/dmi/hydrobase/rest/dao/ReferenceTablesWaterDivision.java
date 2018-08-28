@@ -60,7 +60,7 @@ public class ReferenceTablesWaterDivision {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesWaterDivision [ div: " + division + ", divName: " + divisionName + " ]"; 
+		return "ReferenceTablesWaterDivision [ div: " + division + ", divName: " + divisionName + " ]\n"; 
 	}
 
 }

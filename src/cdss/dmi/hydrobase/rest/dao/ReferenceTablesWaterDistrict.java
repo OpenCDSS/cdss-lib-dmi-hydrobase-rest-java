@@ -73,7 +73,7 @@ public class ReferenceTablesWaterDistrict {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesWaterDistrict [ div: " + division + ", wd: " + waterDistrict + ", wdName: " + waterDistrictName + " ]";
+		return "ReferenceTablesWaterDistrict [ div: " + division + ", wd: " + waterDistrict + ", wdName: " + waterDistrictName + " ]\n";
 	}
 
 }

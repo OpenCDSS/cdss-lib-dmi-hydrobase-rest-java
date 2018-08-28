@@ -44,7 +44,7 @@ public class ReferenceTablesCounty {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesCounty: [ county: " + county + " ]";
+		return "ReferenceTablesCounty: [ county: " + county + " ]\n";
 	}
 
 }

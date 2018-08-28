@@ -91,7 +91,7 @@ public class ReferenceTablesDivRecObservationCodes {
 	@Override
 	public String toString(){
 		return "ReferenceTablesDivRecObservationCodes: [obsCode: " + obsCode + ", startIyr: " + startIyr + ", endIyr: " + endIyr + 
-				", obsCodeLong: " + obsCodeLong + ", obsDescr: " + obsDescr + "]";
+				", obsCodeLong: " + obsCodeLong + ", obsDescr: " + obsDescr + "]\n";
 	}
 
 }

@@ -47,7 +47,7 @@ public class ReferenceTablesGroundwaterPublication {
 	 */
 	@Override
 	public String toString(){
-		return "ReferenceTablesGroundwaterPublicationName [ publicationName: " + publicationName + " ]";
+		return "ReferenceTablesGroundwaterPublicationName [ publicationName: " + publicationName + " ]\n";
 	}
 
 }
