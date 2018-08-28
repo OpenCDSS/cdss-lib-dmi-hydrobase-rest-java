@@ -3,6 +3,9 @@ package cdss.dmi.hydrobase.rest;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
@@ -28,6 +31,8 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecTypes;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesGroundwaterPublication;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesManagementDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesPermitActionName;
+import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
+import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 
 /**
@@ -42,6 +47,21 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 public class ColoradoHydroBaseRestDataStoreTest {
 	
 	private static ColoradoHydroBaseRestDataStore chrds;
+	
+	public void writeToFile(String fileName, String contents){
+		String folder = System.getProperty("user.dir") + "/test/";
+		BufferedWriter writer;
+		File file;
+		try {
+			file = new File(folder + fileName);
+			writer = new BufferedWriter(new FileWriter(file));
+			writer.write(contents);
+
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Initialize Colorado HydroBase Rest Datastore
@@ -121,11 +141,14 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<DiversionComments> expectedResultsList = new ArrayList<DiversionComments>();
 		expectedResultsList.add(divComment);
 		
+		//writeToFile("expectedResults/SingleDivCommentFromWdidAndIrrYear.txt", Arrays.asList(expectedResultsList).toString());
 		
 		// Test one irrigation year and one WDID to limit the test data
 		String wdid = "0300915";
 		int irrYear = 1999;
 		List<DiversionComments> resultsList = chrds.getDivComments(wdid, null, irrYear);
+		
+		writeToFile("results/SingleDivCommentFromWdidAndIrrYear.txt", Arrays.asList(expectedResultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}
@@ -145,10 +168,14 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<DiversionStageVolume> expectedResultsList = new ArrayList<DiversionStageVolume>();
 		expectedResultsList.add(divStageVol);
 		
+		//writeToFile("expectedResults/SingleDiversionStageVolumeFromWdidAndDataMeasDate.txt", Arrays.asList(expectedResultsList).toString());
+		
 		//Test one data meas date year and one wdid to limit the test data
 		String wdid = "8003550";
 		String dataMeasDate = "09/30/1999";
 		List<DiversionStageVolume> resultsList = chrds.getDiversionStageVolume(wdid, dataMeasDate, null);
+		
+		writeToFile("results/SingleDiversionStageVolumeFromWdidAndDataMeasDate.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}
@@ -236,9 +263,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ParcelUseTimeSeries> expectedResultsList = new ArrayList<ParcelUseTimeSeries>();
 		expectedResultsList.add(parcelUseTS);
 		
+		//writeToFile("expectedResults/ParcelUseTSListFromParcelId.txt", Arrays.asList(expectedResultsList).toString());
+		
 		String wdid = "2000505";
 		int parcelId = 32004373;
 		List<ParcelUseTimeSeries> resultsList = chrds.getParcelUseTSListFromParcelId(wdid, parcelId);
+		
+		writeToFile("results/ParcelUseTSListFromParcelId.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}
@@ -258,11 +289,138 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		assertThat(expectedLength, equalTo(resultLength));
 	}
 	
+	/**
+	 * Tests retrieving a single telemetry station data type using 
+	 * a wdid.
+	 */
 	@Test
 	public void getSingleTelemetryStationDataTypeFromWdid(){
 		
-		/*List<String> array = {"WDID", "MA", "4200935"};
-		List<TelemetryStationDataTypes> telStationDataTypes = chrds.getTelemetryDataTypes("AIRTEMP", "15min", array);*/
+		TelemetryStationDataTypes telStationDataType = new TelemetryStationDataTypes();
+		telStationDataType.setDivision(7);
+		telStationDataType.setWaterDistrict(33);
+		telStationDataType.setCounty("LA PLATA");
+		telStationDataType.setStationName("LA PLATA RIVER AT THE COLORADO-NEW MEXICO STATELINE");
+		telStationDataType.setDataSourceAbbrev("DWR");
+		telStationDataType.setDataSource("Co. Division of Water Resources");
+		telStationDataType.setAbbrev("LAPMEXCO");
+		telStationDataType.setWdid("3302204");
+		telStationDataType.setUsgsStationId("09366500");
+		telStationDataType.setStationStatus("Active");
+		telStationDataType.setStationType("Stream Gage");
+		telStationDataType.setWaterSource("LA PLATA RIVER");
+		telStationDataType.setGnisId("00897392");
+		telStationDataType.setStreamMile(0.01);
+		telStationDataType.setStructureType("Stream Gage");
+		telStationDataType.setParameter("AIRTEMP");
+		telStationDataType.setParameterUnit("DEG F");
+		telStationDataType.setContrArea(0.0);
+		telStationDataType.setDrainArea(0.0);
+		telStationDataType.setHuc10("14080105");
+		telStationDataType.setUtmX(216243.1);
+		telStationDataType.setUtmY(4099593.1);
+		telStationDataType.setLatdecdeg(36.999694);
+		telStationDataType.setLongdecdeg(-108.188667);
+		telStationDataType.setLocationAccuracy(null);
+		telStationDataType.setModified("2016-01-13T09:45:58.277");
+		
+		List<TelemetryStationDataTypes> expectedResultsList = new ArrayList<TelemetryStationDataTypes>();
+		expectedResultsList.add(telStationDataType);
+		
+		//writeToFile("expectedResults/SingleTelemetryStationDataTypeFromWdid.txt", Arrays.asList(expectedResults).toString());
+	
+		String[] inputFilters = {"str_name", "MA", "3302204"};
+		List<String[]> listOfTriplets = new ArrayList<String[]>();
+		listOfTriplets.add(inputFilters);
+		List<TelemetryStationDataTypes> resultsList = chrds.getTelemetryDataTypes("AIRTEMP", "15min", listOfTriplets);
+		
+		writeToFile("results/SingleTelemetryStationDataTypeFromWdid.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+		
 	}
+	
+	/**
+	 * Test that telemetry data type parameters string list is correct
+	 * by testing the length of the results
+	 */
+	@Test
+	public void getTelemetryDataTypeParametersFromWebServicesLength(){
+		int expectedLength = 40;
+		
+		String[] telParams = chrds.getTelemetryDataTypeParametersFromWebServices();
+		int resultLength = telParams.length;
+		
+		assertThat(expectedLength, equalTo(resultLength));
+	}
+	
+	/**
+	 * Test getting a single 
+	 */
+	@Test
+	public void getSingleTelemetryDecodeSettingsFromAbbrev(){
+		TelemetryDecodeSettings telDecodeSetting = new TelemetryDecodeSettings();
+		telDecodeSetting.setAbbrev("ABCLATCO");
+		telDecodeSetting.setParameter("DISCHRG1");
+		telDecodeSetting.setFunction("GH1");
+		telDecodeSetting.setRatingTableName("ABCLATCO02");
+		telDecodeSetting.setRatingStartDate("2010-01-29T13:41:05.45-07:00");
+		telDecodeSetting.setShiftCurveName(null);
+		telDecodeSetting.setShiftcurveStartDate(null);
+		telDecodeSetting.setCurrentShift(0.0);
+		telDecodeSetting.setShiftStartDate("2018-08-09T09:10:38.63-06:00");
+		telDecodeSetting.setModified("2018-08-09T09:10:38.63-06:00");
+		
+		List<TelemetryDecodeSettings> expectedResultsList = new ArrayList<TelemetryDecodeSettings>();
+		expectedResultsList.add(telDecodeSetting);
+		writeToFile("expectedResults/SingleTelemetryDecodeSettings.txt", Arrays.asList(expectedResultsList).toString());
+
+		List<TelemetryDecodeSettings> resultsList = chrds.getTelemetryDecodeSettings("ABCLATCO");
+		writeToFile("results/SingleTelemetryDecodeSettings.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+		
+	}
+	
+	/**
+	 * Test that Jackson deserialization is working correctly by querying a single
+	 * telemetry discharge measurement from the abbreviation.
+	 */
+	@Test
+	public void getSingleTelemetryDischargeMeasurementFromAbbrev(){
+		TelemetryDischargeMeasurement telDisMeas = new TelemetryDischargeMeasurement();
+		telDisMeas.setDivision(7);
+		telDisMeas.setWaterDistrict(29);
+		telDisMeas.setCounty(null);
+		telDisMeas.setAbbrev("2900686A");
+		telDisMeas.setMeasNo("1");
+		telDisMeas.setMeasDateTime("2011-08-09T17:28:00-06:00");
+		telDisMeas.setMeasMadeBy("BKB");
+		telDisMeas.setChannelWidth(10.1);
+		telDisMeas.setSectionArea(17.5);
+		telDisMeas.setMeanVelocity(1.75);
+		telDisMeas.setGageHeight(1.18);
+		telDisMeas.setDischarge(30.7);
+		telDisMeas.setShiftAdjustment(0.0);
+		telDisMeas.setPercentDifference(-1.6);
+		telDisMeas.setMeasMethod(".6");
+		telDisMeas.setMeasSections(21);
+		telDisMeas.setGageHeightChange(-0.01);
+		telDisMeas.setMeasDuration(0.35);
+		telDisMeas.setMeterNo("A99170");
+		telDisMeas.setMeasRemarks("Found very good measurement section");
+		telDisMeas.setModified("2013-05-22T16:22:29.663-06:00");
+		
+		List<TelemetryDischargeMeasurement> expectedResultsList = new ArrayList<TelemetryDischargeMeasurement>();
+		expectedResultsList.add(telDisMeas);
+		writeToFile("expectedResults/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(expectedResultsList).toString());
+		
+		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement("2900686A", null, -1, -1);
+		writeToFile("results/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(resultsList).toString());
+
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+	}
+	
+	
 
 }
