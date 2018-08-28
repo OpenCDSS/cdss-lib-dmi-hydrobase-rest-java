@@ -125,7 +125,7 @@ public class DiversionStageVolume {
 	public String toString(){
 		return "stageVolume : [ wdid: " + wdid + ", dataMeasDate: " + dataMeasDate + ", stage: " + 
 				stage + ", volume: " + volume + ", approvalStatus: " + approvalStatus + ", modified: " +
-				modified;
+				modified + " ]\n";
 	}
 
 }

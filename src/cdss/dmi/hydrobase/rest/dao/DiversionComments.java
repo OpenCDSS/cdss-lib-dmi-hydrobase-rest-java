@@ -137,7 +137,7 @@ public class DiversionComments {
 	public String toString(){
 		return "DiversionComment: [ wdid: " + wdid + ", commentType: " + commentType + ", irrYear: " + 
 				irrYear + ", notUsed: " + notUsed + ", notUsedDescr: " + notUsedDescr + ", comment: " + 
-				comment + ", approvalStatus: " + approvalStatus + ", modified: " + modified + " ]";
+				comment + ", approvalStatus: " + approvalStatus + ", modified: " + modified + " ]\n";
 	}
 	
 }

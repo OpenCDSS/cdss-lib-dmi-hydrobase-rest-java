@@ -322,7 +322,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 				priorityWdid + ", priorityStructure: " + priorityStructure + ", priorityAdminNo: " + priorityAdminNo + 
 				", priorityOrderNo: " + priorityOrderNo + ", priorityDate: " + priorityDate + ", priorityNo: " + 
 				priorityNo + ", boundingWdid: " + boundingWdid + ", boundingStructureName: " + boundingStructureName + 
-				", setComments: " + setComments + ", releaseComment: " + releaseComment + " ]";
+				", setComments: " + setComments + ", releaseComment: " + releaseComment + " ]\n";
 	}
 
 }

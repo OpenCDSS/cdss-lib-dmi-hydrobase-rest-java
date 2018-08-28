@@ -145,7 +145,7 @@ public class AnalysisServicesWaterSourceRouteFramework {
 		return "AnalysisServicesWaterSourceRouteFramework: [ division: " + division + ", waterDistrict: " + waterDistrict + 
 				", gnisId: " + gnisId + ", streamLength: " + streamLength + ", tributaryToLevel: " + tributaryToLevel + 
 				", TributaryToGnisId: " + TributaryToGnisId + ", tribGnisName: " + tribGnisName + ", tributaryToStreamMile: " +
-				tributaryToStreamMile + " ]";
+				tributaryToStreamMile + " ]\n";
 	}
 
 }

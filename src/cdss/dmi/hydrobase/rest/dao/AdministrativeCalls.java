@@ -353,7 +353,7 @@ public class AdministrativeCalls {
 				", setComments: " + setComments + ", releaseComment: " + releaseComment + ", division: " + division + 
 				", locationStructureLatitude: " + locationStructureLatitude + ", locationStructureLongitude: " + locationStructureLongitude +
 				", boundingStructureLatitude: " + boundingStructureLatitude + ", boundingStructureLongitude: " + boundingStructureLongitude + 
-				", modified: " + modified + ", moreInformation: " + moreInformation + " ]";
+				", modified: " + modified + ", moreInformation: " + moreInformation + " ]\n";
 	}
 
 }

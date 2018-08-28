@@ -334,7 +334,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 				", priorityWdid: " + priorityWdid + ", priorityStructure: " + priorityStructure + ", priorityAdminNo: " + priorityAdminNo + 
 				", priorityOrderNo: " + priorityOrderNo + ", priorityDate: " + priorityDate + ", priorityNo: " + priorityNo + 
 				", boundingWdid: " + boundingWdid + ", boundingStructureName: " + boundingStructureName + ", setComments: " + 
-				", releaseComment: " + releaseComment + ", analysisOutOfPriorityPercentOfDay: " + analysisOutOfPriorityPercentOfDay + " ]";
+				", releaseComment: " + releaseComment + ", analysisOutOfPriorityPercentOfDay: " + analysisOutOfPriorityPercentOfDay + " ]\n";
 	}
 
 }

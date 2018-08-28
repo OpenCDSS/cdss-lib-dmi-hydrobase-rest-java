@@ -103,7 +103,7 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	@Override
 	public String toString(){
 		return "AnalysisServicesWaterSourceRouteAnalysis: [ featureType: " + featureType + ", gnisId: " + ", streamMile: " + streamMile +
-				", structureName: " + structureName + ", structureType: " + structureType + ", wdid: " + wdid + " ]";
+				", structureName: " + structureName + ", structureType: " + structureType + ", wdid: " + wdid + " ]\n";
 	}
 
 }

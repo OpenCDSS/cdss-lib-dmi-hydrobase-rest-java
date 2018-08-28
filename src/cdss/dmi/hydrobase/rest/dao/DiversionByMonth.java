@@ -187,6 +187,6 @@ public class DiversionByMonth {
 		return "DiversionByDate: [ wdid: " + wdid + ", waterClassNum: " + waterClassNum + ", wcIdentifier: " +
 				wcIdentifier + ", measInterval: " + measInterval + ", measCount: " + measCount + ", dataMeasDate: " + dataMeasDate +
 				", dataValue: " + dataValue + ", measUnits: " + measUnits + ", obsCode: " + obsCode + 
-				", approvalStatus: " + approvalStatus + ", modified: " + modified + " ]";
+				", approvalStatus: " + approvalStatus + ", modified: " + modified + " ]\n";
 	}
 }

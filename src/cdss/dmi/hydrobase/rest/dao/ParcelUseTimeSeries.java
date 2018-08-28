@@ -194,7 +194,7 @@ public class ParcelUseTimeSeries {
 		return "ParcelUseTimeSeries: [ wdid: " + wdid + ", div " + div + ", structureName: " + structureName + ", calYear: " + 
 				calYear + ", parcelId:  " + parcelId + ", landUse: " + landUse + ", irrigType: " + irrigType +
 				", acresProrated: " + acresProrated + ", acresTotal: " + acresTotal + ", assocSwWdid: " +
-				assocSwWdid + ", assocGwWdid: " + assocGwWdid + ", modified: " + modified + " ]";
+				assocSwWdid + ", assocGwWdid: " + assocGwWdid + ", modified: " + modified + " ]\n";
 	}
 
 }

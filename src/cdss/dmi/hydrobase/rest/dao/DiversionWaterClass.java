@@ -740,7 +740,7 @@ public class DiversionWaterClass {
 				toWdidAcctId + ", toStructureName: " + toStructureName + ", toWdidAcctName: " + toWdidAcctName +
 				", wcDescr: " + wcDescr + ", porStart: " + porStart + ", porEnd: " + porEnd + ", porLastModified: " +
 				porLastModified + ", division: " + division + ", waterDistrict: " + waterDistrict + ", county: " +
-				county + ", modified: " + modified + " ]";
+				county + ", modified: " + modified + " ]\n";
 	}
 	
 }
