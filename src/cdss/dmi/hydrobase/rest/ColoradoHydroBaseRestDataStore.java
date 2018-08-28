@@ -88,6 +88,8 @@ public class ColoradoHydroBaseRestDataStore extends AbstractWebServiceDataStore
 The web service API version, critical for forming the request URL and parsing the results.
 */
 private int __apiVersion = 2; // Default
+
+private String __apiKey = "";
 	
 /**
 Indicates whether global data store properties have been initialized, set by initialize().
@@ -625,6 +627,10 @@ public AdministrativeCalls getAdministrativeCalls(String callId){
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
 	AdministrativeCalls ac = (AdministrativeCalls)JacksonToolkit.getInstance().treeToValue(results, AdministrativeCalls.class);
 	return ac;
+}
+
+private String getApiKey(){
+	return __apiKey;
 }
 
 /**
@@ -2751,6 +2757,10 @@ private void readWaterDivisions(){
 	for(int i = 0; i < results.size(); i++){
 		waterDivisionList.add((ReferenceTablesWaterDivision)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
 	}
+}
+
+public void setApiKey(String apiKey){
+	__apiKey = apiKey;
 }
 
 //TODO @jurentie work out parameters here
