@@ -24,8 +24,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import riverside.datastore.AbstractWebServiceDataStore;
 import RTi.DMI.DMISelectStatement;
 import RTi.DMI.DMIUtil;
+import RTi.TS.DayTS;
 import RTi.TS.TS;
 import RTi.TS.TSData;
+import RTi.TS.TSDataFlagMetadata;
 import RTi.TS.TSIdent;
 import RTi.TS.TSIterator;
 import RTi.TS.TSUtil;
@@ -2224,61 +2226,91 @@ throws MalformedURLException, Exception
 					ts.setDataValue(date, value);
 				}
 			}
-
-			// Diversion Comments
-			boolean hasComments = waterclassHasComments(wdid);
-			if(hasComments){
-				List<DiversionComments> divComments = getDivComments(wdid, null, -1);
-				if(divComments != null){
-					TSData it;
-					for(int i = 0; i < divComments.size(); i++){
-						DiversionComments divComment = divComments.get(i);
-						int irrYear = divComment.getIrrYear();
-						if(irrYear >= ts.getDate1().getYear() &&
-								irrYear <= ts.getDate2().getYear()){
-							DateTime start;
-							DateTime end;
-							if(interval_base == TimeInterval.DAY){
-								start = new DateTime(DateTime.PRECISION_DAY);
-								start.setYear(irrYear);
-								start.setMonth(11);
-								start.setDay(01);
-								end = new DateTime(DateTime.PRECISION_DAY);
-								end.setYear(irrYear + 1);
-								end.setMonth(10);
-								end.setDay(30);
-								iterator.setBeginTime(start);
-								iterator.setEndTime(end);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+			
+			/**
+			 * If any data is set within the irrigation year then fill the rest of the data
+			 * forward or fill empty data with 0.0
+			 */
+			if(interval_base == TimeInterval.DAY){
+				String FillDailyDiv = null;
+				if((FillDailyDiv == null) || FillDailyDiv.equals("")){
+					FillDailyDiv = "true";
+				}
+				if(FillDailyDiv.equalsIgnoreCase("true")){
+					String FillDailyDivFlag = null;
+					if((FillDailyDivFlag == null) || FillDailyDivFlag.equals("")){
+						FillDailyDivFlag = "c";
+					}
+					fillTSIrrigationYearCarryForward((DayTS)ts, FillDailyDivFlag);
+				}
+			}
+			
+			/**
+			 * Fill years with diversion comments. Currently defaults to not fill.
+			 */
+			if(interval_base == TimeInterval.DAY ||
+				interval_base == TimeInterval.MONTH || 
+				interval_base == TimeInterval.YEAR ){
+				String FillUsingDivComments = null;
+				if((FillUsingDivComments == null) || FillUsingDivComments.equals("")){
+					FillUsingDivComments = "false"; //Default is NOT to fill.
+				}
+				if(FillUsingDivComments.equalsIgnoreCase("true")){
+					boolean hasComments = waterclassHasComments(wdid);
+					if(hasComments){
+						List<DiversionComments> divComments = getDivComments(wdid, null, -1);
+						if(divComments != null){
+							TSData it;
+							for(int i = 0; i < divComments.size(); i++){
+								DiversionComments divComment = divComments.get(i);
+								int irrYear = divComment.getIrrYear();
+								if(irrYear >= ts.getDate1().getYear() &&
+										irrYear <= ts.getDate2().getYear()){
+									DateTime start;
+									DateTime end;
+									if(interval_base == TimeInterval.DAY){
+										start = new DateTime(DateTime.PRECISION_DAY);
+										start.setYear(irrYear);
+										start.setMonth(11);
+										start.setDay(01);
+										end = new DateTime(DateTime.PRECISION_DAY);
+										end.setYear(irrYear + 1);
+										end.setMonth(10);
+										end.setDay(31);
+										iterator.setBeginTime(start);
+										iterator.setEndTime(end);
+										while(iterator.hasNext()){
+											it = iterator.next();
+											if(ts.isDataMissing(it.getDataValue())){
+												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+											}
+										}
 									}
-								}
-							}
-							if(interval_base == TimeInterval.MONTH){
-								start = new DateTime(DateTime.PRECISION_MONTH);
-								start.setYear(irrYear);
-								start.setMonth(11);
-								end = new DateTime(DateTime.PRECISION_MONTH);
-								end.setYear(irrYear);
-								end.setMonth(10);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+									if(interval_base == TimeInterval.MONTH){
+										start = new DateTime(DateTime.PRECISION_MONTH);
+										start.setYear(irrYear);
+										start.setMonth(11);
+										end = new DateTime(DateTime.PRECISION_MONTH);
+										end.setYear(irrYear);
+										end.setMonth(10);
+										while(iterator.hasNext()){
+											it = iterator.next();
+											if(ts.isDataMissing(it.getDataValue())){
+												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+											}
+										}
 									}
-								}
-							}
-							if(interval_base == TimeInterval.YEAR){
-								start = new DateTime(DateTime.PRECISION_YEAR);
-								start.setYear(irrYear);
-								end = new DateTime(DateTime.PRECISION_YEAR);
-								end.setYear(irrYear);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+									if(interval_base == TimeInterval.YEAR){
+										start = new DateTime(DateTime.PRECISION_YEAR);
+										start.setYear(irrYear);
+										end = new DateTime(DateTime.PRECISION_YEAR);
+										end.setYear(irrYear);
+										while(iterator.hasNext()){
+											it = iterator.next();
+											if(ts.isDataMissing(it.getDataValue())){
+												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+											}
+										}
 									}
 								}
 							}
@@ -2389,67 +2421,6 @@ throws MalformedURLException, Exception
 				
 				ts.setDataValue(date, value);
 			}
-			// Diversion Comments
-			boolean hasComments = waterclassHasComments(wdid);
-			if(hasComments){
-				List<DiversionComments> divComments = getDivComments(wdid, null, -1);
-				if(divComments != null){
-					TSData it;
-					for(int i = 0; i < divComments.size(); i++){
-						DiversionComments divComment = divComments.get(i);
-						int irrYear = divComment.getIrrYear();
-						if(irrYear >= ts.getDate1().getYear() &&
-								irrYear <= ts.getDate2().getYear()){
-							DateTime start;
-							DateTime end;
-							if(interval_base == TimeInterval.DAY){
-								start = new DateTime(DateTime.PRECISION_DAY);
-								start.setYear(irrYear);
-								start.setMonth(11);
-								start.setDay(01);
-								end = new DateTime(DateTime.PRECISION_DAY);
-								end.setYear(irrYear + 1);
-								end.setMonth(10);
-								end.setDay(30);
-								iterator.setBeginTime(start);
-								iterator.setEndTime(end);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
-									}
-								}
-							}
-							if(interval_base == TimeInterval.MONTH){
-								start = new DateTime(DateTime.PRECISION_MONTH);
-								start.setYear(irrYear);
-								start.setMonth(11);
-								end = new DateTime(DateTime.PRECISION_MONTH);
-								end.setYear(irrYear);
-								end.setMonth(10);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
-									}
-								}
-							}
-						if(interval_base == TimeInterval.YEAR){
-								start = new DateTime(DateTime.PRECISION_YEAR);
-								start.setYear(irrYear);
-								end = new DateTime(DateTime.PRECISION_YEAR);
-								end.setYear(irrYear);
-								while(iterator.hasNext()){
-									it = iterator.next();
-									if(ts.isDataMissing(it.getDataValue())){
-										ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
-									}
-								}
-							}
-						}
-					}
-				}
-			}			
 		}
 	}
 	else if(isTelemetryStationTimeSeriesDataType(data_type)){
@@ -2717,6 +2688,166 @@ throws MalformedURLException, Exception
 	
 	// Return Time Series Object
     return ts;
+}
+
+public void fillTSUsingDiversionComments(ColoradoHydroBaseRestDataStore chrds, TS ts, DateTime date1, DateTime date2, 
+		String fillflag, String fillFlagDesc, boolean extend_period){
+	String routine = "ColoradoHydroBaseRestDataStore.fillTSUsingDiversionComments";
+	
+	if( ts == null ){
+		//Nothing to fill
+		return;
+	}
+	
+	TS divcomts = null;
+	int interval_base = ts.getDataIntervalBase();
+	int interval_mult = ts.getDataIntervalMult();
+	try{
+		//Get the diversion comments as a time series, where the year in the time series is irrigation year.
+		if(ts.getDataType().equalsIgnoreCase("DivTotal") || 
+				ts.getDataType().startsWith("WaterClass") || ts.getDataType().startsWith("'WaterClass")){
+			// Diversion comments...
+			System.out.println("Hello World!");
+		}
+	}
+	/*catch ( NoDataFoundException e ) {
+		// This is OK.  There just aren't any diversion comments in the database for this structure.
+		divcomts = null;
+	}*/
+	catch(Exception e) {
+		String message = "Error getting diversion comments for " +
+		ts.getLocation() + ".  HydroBase/software compatibility issue?";
+		Message.printWarning(2, routine, message );
+		Message.printWarning ( 3, routine, e );
+		//throw new HydroBaseException ( message ); 
+	}
+}
+
+public void fillTSIrrigationYearCarryForward(DayTS ts, String fillDailyDivFlag){
+	String routine = "ColoradoHydroBaseRestDataStore.fillTSIrrigationYearCarryForward";
+	if( ts == null ){
+		return;
+	}
+	if( !(ts instanceof DayTS) ){
+		return;
+	}
+	
+	DateTime FillStart_DateTime = new DateTime(ts.getDate1());
+	DateTime FillEnd_DateTime = new DateTime(ts.getDate2());
+	
+	boolean FillDailyDivFlag_boolean = false;
+	if((fillDailyDivFlag != null) && (fillDailyDivFlag.length() > 0)){
+		FillDailyDivFlag_boolean = true;
+	}
+	
+	// Loop through the period in blocks of irrigation years.
+	FillStart_DateTime.setMonth(11);
+	FillStart_DateTime.setDay(1);
+	if( FillStart_DateTime.greaterThan(ts.getDate1())){
+		//Subtract a year to get the full irrigation year
+		FillStart_DateTime.addYear(-1);
+	}
+	
+	List<String> messages = new ArrayList<String>();
+	DateTime date = new DateTime(FillStart_DateTime);
+	DateTime yearstart_DateTime = null; // Fill dates for one year
+	DateTime yearend_DateTime = null;
+	int found_count = 0; // Count of non-missing values in year
+	int missing_count = 0; // Count of missing values in a year
+	double value = 0.0; // Time series data value
+	double fill_value = 0.0; // Value to be used to fill data
+	TSData tsdata = new TSData(); // Needed to retrieve time series data with flags
+	for(; date.lessThanOrEqualTo(FillEnd_DateTime); date.addDay(1)){
+		// Start of a new irrigation year.
+		/**
+		 * First go through the whole year to determine if any
+		 * non-missing values exist. If not, then skip the entire year
+		 * (leave the entire year missing).
+		 */
+		yearstart_DateTime = new DateTime(date);
+		yearend_DateTime = new DateTime(date);
+		yearend_DateTime.addYear(1);
+		yearend_DateTime.setMonth(10);
+		yearend_DateTime.setDay(31);
+		if( Message.isDebugOn ){
+			Message.printDebug(2, routine, 
+					"Checking for data in " + yearstart_DateTime + " to " + yearend_DateTime );
+		}
+		found_count = 0;
+		if( Message.isDebugOn ){
+			Message.printDebug ( 2, routine, "Processing irrigation year starting at " + date );
+		}
+		for(; date.lessThanOrEqualTo(yearend_DateTime); date.addDay(1)){
+			value = ts.getDataValue(date);
+			if(!ts.isDataMissing(value)){
+				//Have an observation...
+				if(Message.isDebugOn && (found_count == 0)){
+					Message.printDebug ( 2, routine, "Found first non-missing value at at " + date );
+				}
+				++found_count;
+			}
+		}
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( 2, routine, "Found " + found_count + " days of observations." );
+		}
+		
+		if(found_count == 0){
+			//Just continue and process the next...
+			/**
+			 * Reset the date to the end of the irrigation year so
+			 * that an increment will cause a new irrigation year to be processed...
+			 */
+			date = new DateTime(yearend_DateTime);
+			continue;
+		}
+		//Else, will repeat the year that was just checked to fill it in.
+		date = new DateTime(yearstart_DateTime);
+		fill_value = 0.0;
+		missing_count = 0;
+		for(; date.lessThanOrEqualTo(yearend_DateTime); date.addDay(1)){
+			value = ts.getDataValue(date);
+			if(ts.isDataMissing(value)){
+				++missing_count;
+				if(FillDailyDivFlag_boolean){
+					//Set the data flag, appending to the old value..
+					tsdata = ts.getDataPoint(date, tsdata);
+					ts.setDataValue(date, fill_value, (tsdata.getDataFlag().trim() + fillDailyDivFlag), 1);
+				}
+				else{
+					//No data flag..
+					ts.setDataValue(date, fill_value);
+				}
+			}
+		}
+		if(missing_count > 0){
+			messages.add (
+				"Nov 1, " + yearstart_DateTime.getYear() + " to Oct 31, " + yearend_DateTime.getYear() +
+				" filled " + missing_count + " values by carrying forward observation, flagged with 'c'." );
+		}
+		/**
+		 * Reset the date to the end of the irrigation year so 
+		 * that an increment will cause a new irrigation year to be processed...
+		 */
+		date = new DateTime(yearend_DateTime);
+	}
+	
+	//Add to the genesis...
+	
+	if(messages.size() > 0){
+		ts.addToGenesis("Filled " + ts.getDate1() + " to " +
+		ts.getDate2() + " using carry forward within irrigation year because HydroBase daily data omit empty months." );
+		if ( Message.isDebugOn ) {
+			// TODO SAM 2006-04-27 Evaluate whether this should always be saved in the
+			// genesis.  The problem is that the genesis can get very long.
+			for ( String message: messages) {
+				ts.addToGenesis ( message );
+			}
+		}
+		if ( (fillDailyDivFlag != null) && !fillDailyDivFlag.equals("") ) {
+		    ts.addDataFlagMetadata(
+		        new TSDataFlagMetadata(fillDailyDivFlag, "Filled within irrigation year using DWR carry-forward approach because HydroBase daily data omits empty months."));
+		}
+	}
 }
 
 /* TODO: add all these cases to this method */
