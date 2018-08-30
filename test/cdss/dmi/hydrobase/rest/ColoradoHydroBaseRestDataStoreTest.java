@@ -40,7 +40,9 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
 import cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable;
 import cdss.dmi.hydrobase.rest.dao.TelemetryShift;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
+import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
+import cdss.dmi.hydrobase.rest.dao.WaterRightsTransaction;
 
 /**
  * In general, tests are created for methods using web services where there 
@@ -145,7 +147,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		divComment.setComment("AKA LITTLE CACHE ");
 		divComment.setCommentType("DIVERSION");
 		divComment.setIrrYear(1999);
-		divComment.setModified("2001-08-14T11:14:52.187");
+		divComment.setModified(null);
 		divComment.setNotUsed(null);
 		divComment.setNotUsedDescr(null);
 		divComment.setWdid("0300915");
@@ -160,6 +162,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String wdid = "0300915";
 		int irrYear = 1999;
 		List<DiversionComments> resultsList = chrds.getDivComments(wdid, null, irrYear);
+		resultsList.get(0).setModified(null);
 		
 		writeToFile("results/SingleDivCommentFromWdidAndIrrYear.txt", Arrays.asList(expectedResultsList).toString());
 		
@@ -172,7 +175,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		DiversionStageVolume divStageVol = new DiversionStageVolume();
 		divStageVol.setApprovalStatus("Approved");
 		divStageVol.setDataMeasDate("1999-09-30T00:00:00");
-		divStageVol.setModified("2001-08-14T11:47:18.903");
+		divStageVol.setModified(null);
 		divStageVol.setStage(194.4100);
 		divStageVol.setWdid("8003550");
 		divStageVol.setVolume(64595.0000);
@@ -187,6 +190,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String wdid = "8003550";
 		String dataMeasDate = "09/30/1999";
 		List<DiversionStageVolume> resultsList = chrds.getDiversionStageVolume(wdid, dataMeasDate, null);
+		resultsList.get(0).setModified(null);
 		
 		writeToFile("results/SingleDiversionStageVolumeFromWdidAndDataMeasDate.txt", Arrays.asList(resultsList).toString());
 		
@@ -279,7 +283,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		parcelUseTS.setAcresTotal(102.0551);
 		parcelUseTS.setAssocSwWdid("1");
 		parcelUseTS.setAssocGwWdid("0");
-		parcelUseTS.setModified("2018-08-07T14:00:13.757");
+		parcelUseTS.setModified(null);
 		
 		List<ParcelUseTimeSeries> expectedResultsList = new ArrayList<ParcelUseTimeSeries>();
 		expectedResultsList.add(parcelUseTS);
@@ -289,6 +293,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String wdid = "2000505";
 		int parcelId = 32004373;
 		List<ParcelUseTimeSeries> resultsList = chrds.getParcelUseTSListFromParcelId(wdid, parcelId);
+		resultsList.get(0).setModified(null);
 		
 		writeToFile("results/ParcelUseTSListFromParcelId.txt", Arrays.asList(resultsList).toString());
 		
@@ -345,7 +350,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		telStationDataType.setLatdecdeg(36.999694);
 		telStationDataType.setLongdecdeg(-108.188667);
 		telStationDataType.setLocationAccuracy(null);
-		telStationDataType.setModified("2016-01-13T09:45:58.277");
+		telStationDataType.setModified(null);
 		
 		List<TelemetryStationDataTypes> expectedResultsList = new ArrayList<TelemetryStationDataTypes>();
 		expectedResultsList.add(telStationDataType);
@@ -356,6 +361,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<String[]> listOfTriplets = new ArrayList<String[]>();
 		listOfTriplets.add(inputFilters);
 		List<TelemetryStationDataTypes> resultsList = chrds.getTelemetryDataTypes("AIRTEMP", "15min", listOfTriplets);
+		resultsList.get(0).setModified(null);
 		
 		writeToFile("results/SingleTelemetryStationDataTypeFromWdid.txt", Arrays.asList(resultsList).toString());
 		
@@ -393,14 +399,16 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		telDecodeSetting.setShiftCurveName(null);
 		telDecodeSetting.setShiftcurveStartDate(null);
 		telDecodeSetting.setCurrentShift(0.0);
-		telDecodeSetting.setShiftStartDate("2018-08-09T09:10:38.63-06:00");
-		telDecodeSetting.setModified("2018-08-09T09:10:38.63-06:00");
+		telDecodeSetting.setShiftStartDate(null);
 		
 		List<TelemetryDecodeSettings> expectedResultsList = new ArrayList<TelemetryDecodeSettings>();
 		expectedResultsList.add(telDecodeSetting);
 		writeToFile("expectedResults/SingleTelemetryDecodeSettings.txt", Arrays.asList(expectedResultsList).toString());
 
 		List<TelemetryDecodeSettings> resultsList = chrds.getTelemetryDecodeSettings("ABCLATCO");
+		//Modified will change. Remove it from the testing
+		resultsList.get(0).setModified(null);
+		resultsList.get(0).setShiftStartDate(null);
 		writeToFile("results/SingleTelemetryDecodeSettings.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
@@ -434,7 +442,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		telDisMeas.setMeasDuration(0.35);
 		telDisMeas.setMeterNo("A99170");
 		telDisMeas.setMeasRemarks("Found very good measurement section");
-		telDisMeas.setModified("2013-05-22T16:22:29.663-06:00");
+		telDisMeas.setModified(null);
 		
 		List<TelemetryDischargeMeasurement> expectedResultsList = new ArrayList<TelemetryDischargeMeasurement>();
 		expectedResultsList.add(telDisMeas);
@@ -442,6 +450,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		String abbrev = "2900686A";
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(abbrev, null, -1, -1);
+		resultsList.get(0).setModified(null);
 		writeToFile("results/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(resultsList).toString());
 
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
@@ -558,7 +567,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		waterClass.setDivision(2);
 		waterClass.setWaterDistrict(13);
 		waterClass.setCounty("CUSTER");
-		waterClass.setModified("2011-06-02T09:14:25.23");
+		waterClass.setModified(null);
 		waterClass.setAvailableTimesteps("Day,Month,Year");
 		waterClass.setWaterSource("NORTH COLONY CREEK");
 		waterClass.setStreamMile(0.63);
@@ -587,7 +596,11 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<String[]> listOfTriplets = new ArrayList<String[]>();
 		listOfTriplets.add(inputFilters);
 		
-		List<DiversionWaterClass> resultsList = chrds.getWaterClasses("WaterClass", "Month", listOfTriplets);
+		String dataType = "WaterClass";
+		String interval = "Month";
+		
+		List<DiversionWaterClass> resultsList = chrds.getWaterClasses(dataType, interval, listOfTriplets);
+		resultsList.get(0).setModified(null);
 		writeToFile("results/GetWaterClassesFromWdid.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
@@ -624,7 +637,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	}
 
 	@Test
-	public void testDeserializationOfGetWaterRightsNetAmount(){
+	public void testDeserializationOfGetWaterRightsNetAmountFromWdid(){
 		WaterRightsNetAmount wrNetAmt = new WaterRightsNetAmount();
 		wrNetAmt.setWaterRightNetAmtNum(476781);
 		wrNetAmt.setWdid("3600501");
@@ -662,7 +675,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		wrNetAmt.setDecreedUnits("C");
 		wrNetAmt.setSeasonalLimitation("No");
 		wrNetAmt.setComments("LEGAL CORRECTED IN 81-194. AP AT HOAGLAND CANAL");
-		wrNetAmt.setLastModified("2008-06-04T09:50:10-06:00");
+		wrNetAmt.setLastModified(null);
 		wrNetAmt.setMoreInformation("https://dnrweb.state.co.us/cdss/WaterRights/NetAmounts/476781");
 		
 		List<WaterRightsNetAmount> expectedResultsList = new ArrayList<WaterRightsNetAmount>();
@@ -671,7 +684,123 @@ public class ColoradoHydroBaseRestDataStoreTest {
 
 		String wdid = "3600501";
 		List<WaterRightsNetAmount> resultsList = chrds.getWaterRightsNetAmount(wdid);
+		resultsList.get(0).setLastModified(null);
 		writeToFile("results/GetWaterRightsNetAmount.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+	}
+	
+	@Test
+	public void testDeserializationOfGetWaterRightsTransactionFromWdid(){
+		WaterRightsTransaction wrTransaction = new WaterRightsTransaction();
+		wrTransaction.setWaterRightNum(129882);
+		wrTransaction.setWdid("3600501");
+		wrTransaction.setWaterRightName("ABBETT AND BENNETT DITCH");
+		wrTransaction.setStructureType("Ditch");
+		wrTransaction.setWaterSource("SPRUCE CREEK");
+		wrTransaction.setStreamMile(4.04);
+		wrTransaction.setGnisId("00175604");
+		wrTransaction.setDivision(5);
+		wrTransaction.setWaterDistrict(36);
+		wrTransaction.setCounty("SUMMIT");
+		wrTransaction.setQ10(null);
+		wrTransaction.setQ40("SE");
+		wrTransaction.setQ160("SE");
+		wrTransaction.setSection("2");
+		wrTransaction.setTownship("2.0 S");
+		wrTransaction.setRange("81.0 W");
+		wrTransaction.setPm("S");
+		wrTransaction.setUtmX(379000.5);
+		wrTransaction.setUtmY(4418992.0);
+		wrTransaction.setLatitude(39.912384);
+		wrTransaction.setLongitude(-106.415691);
+		wrTransaction.setLocationAccuracy("Spotted from quarters");
+		wrTransaction.setAdjudicationType("O");
+		wrTransaction.setAdjudicationDate("1910-03-02T00:00:00-07:00");
+		wrTransaction.setPriorAdjudicationDate("0001-01-01T00:00:00-07:00");
+		wrTransaction.setAppropriationDate("1883-04-24T00:00:00-06:00");
+		wrTransaction.setSignatureDate("1920-12-23T00:00:00-07:00");
+		wrTransaction.setAdminNumber(12167.00000);
+		wrTransaction.setOrderNumber(0);
+		wrTransaction.setPriorityNumber("14");
+		wrTransaction.setCaseNumber("CA1277");
+		wrTransaction.setCaseNumberUrl("https://dnrweblink.state.co.us/dwr/Search.aspx?searchcommand={[Water Court]:[case number]=\"CA1277\"}&{[Water Court]:[division]=5}");
+		wrTransaction.setDecreedUses("1");
+		wrTransaction.setMaxDecreedRate(3.5000);
+		wrTransaction.setSeasonalLimitation("No");
+		wrTransaction.setComments("LEGAL CORRECTED IN 81-194. AP AT HOAGLAND CANAL");
+		wrTransaction.setLastModified(null);
+		wrTransaction.setMoreInformation("https://dnrweb.state.co.us/cdss/WaterRights/Transactions/129882");
+		
+		List<WaterRightsTransaction> expectedResultsList = new ArrayList<WaterRightsTransaction>();
+		expectedResultsList.add(wrTransaction);
+		writeToFile("expectedResults/GetWaterRightsTransaction.txt", Arrays.asList(expectedResultsList).toString());
+		
+		String wdid = "3600501";
+		List<WaterRightsTransaction> resultsList = chrds.getWaterRightsTransaction(wdid);
+		resultsList.get(0).setLastModified(null);
+		writeToFile("results/GetWaterRightsTransaction.txt", Arrays.asList(resultsList).toString());
+		
+		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
+	}
+	
+	@Test
+	public void testDeserializationOfSingleGetWellsFromWdid(){
+		WaterLevelsWell waterLevelWell = new WaterLevelsWell();
+		waterLevelWell.setWellId(75);
+		waterLevelWell.setWellName("DB-026  HILLCREST VIL #3 LKA");
+		waterLevelWell.setReceipt("9001846");
+		waterLevelWell.setPermit("13904-F");
+		waterLevelWell.setWellDepth(1106);
+		waterLevelWell.setMeasurementDate("2014-05-01T00:00:00");
+		waterLevelWell.setMeasurementBy("DWR");
+		waterLevelWell.setPorStart("1969-05-13T00:00:00");
+		waterLevelWell.setPorEnd("2014-05-01T00:00:00");
+		waterLevelWell.setPorCount(29);
+		waterLevelWell.setPublicationName("DENVER BASIN");
+		waterLevelWell.setAquifers("LOWER ARAPAHOE");
+		waterLevelWell.setElevation(5360.0);
+		waterLevelWell.setTopPerforatedCasing(746);
+		waterLevelWell.setBottomPerforatedCasing(1106);
+		waterLevelWell.setWdid("0205722");
+		waterLevelWell.setLocationNumber("SC00306631DAA");
+		waterLevelWell.setDivision(1);
+		waterLevelWell.setWaterDistrict(2);
+		waterLevelWell.setCounty("ADAMS");
+		waterLevelWell.setQ10("NE");
+		waterLevelWell.setQ40("NE");
+		waterLevelWell.setQ160("SE");
+		waterLevelWell.setSection("31");
+		waterLevelWell.setTownship("3.0 S");
+		waterLevelWell.setRange("66.0 W");
+		waterLevelWell.setPm("S");
+		waterLevelWell.setUtmX(515328.0);
+		waterLevelWell.setUtmY(4399704.0);
+		waterLevelWell.setLatitude(39.747103);
+		waterLevelWell.setLongitude(-104.821089);
+		waterLevelWell.setLocationAccuracy("GPS");
+		waterLevelWell.setDataSource("DWR");
+		waterLevelWell.setModified(null);
+		waterLevelWell.setMoreInformation("https://dnrweb.state.co.us/cdss/GroundWater/WaterLevels/75");
+		
+		//Not from web services:
+		waterLevelWell.setTimeStep("Day");
+		waterLevelWell.setDataType("WaterLevelDepth");
+		
+		List<WaterLevelsWell> expectedResultsList = new ArrayList<WaterLevelsWell>();
+		expectedResultsList.add(waterLevelWell);
+		writeToFile("expectedResults/GetWellsFromWdid.txt", Arrays.asList(expectedResultsList).toString());
+		
+		String[] inputFilters = {"WellID", "EQ", "75"};
+		List<String[]> listOfTriplets = new ArrayList<String[]>();
+		listOfTriplets.add(inputFilters);
+		
+		String dataType = "WaterLevelDepth";
+		String interval = "Day";
+		
+		List<WaterLevelsWell> resultsList = chrds.getWells(dataType, interval, listOfTriplets);
+		resultsList.get(0).setModified(null);
+		writeToFile("results/GetWellsFromWdid.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}
