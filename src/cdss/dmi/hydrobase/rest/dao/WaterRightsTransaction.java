@@ -3,6 +3,7 @@ package cdss.dmi.hydrobase.rest.dao;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import RTi.Util.Time.DateTime;
 import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
@@ -20,7 +21,7 @@ import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
  * If properties are added that are necessary to data processing these can be added,
  * but for now ignore anything that is new so as to not break the code.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class WaterRightsTransaction {
 
 	/**
@@ -646,7 +647,11 @@ public class WaterRightsTransaction {
 	public void setWaterRightName(String waterRightName) {
 		this.waterRightName = waterRightName;
 	}
-
+	
+	/**
+	 * @jurentie - not sure why this specific setter needed an alias
+	 */
+	@JsonProperty("WaterRightNum")
 	public void setWaterRightNum(int waterRightNum) {
 		this.waterRightNum = waterRightNum;
 	}
