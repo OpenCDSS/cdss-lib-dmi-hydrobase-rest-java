@@ -1634,7 +1634,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 			e.printStackTrace();
 		}
 	}
-	wellRequestString += "&apiKey=" + getApiKeyString();
+	wellRequestString += getApiKeyString();
 	return wellRequestString;
 }
 
@@ -1644,7 +1644,7 @@ public List<WaterLevelsWell> getWells(String dataType, String interval, List<Str
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
 	// Create request string
 	JsonNode wellsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(getWellRequestString(listOfTriplets));
-	Message.printStatus(1, routine, "Request Url: " + getWellRequestString(listOfTriplets));
+	Message.printStatus(2, routine, "Request Url: " + getWellRequestString(listOfTriplets));
 	for(int i = 0; i < wellsNode.size(); i++){
 		WaterLevelsWell well = (WaterLevelsWell) JacksonToolkit.getInstance().treeToValue(wellsNode.get(i), WaterLevelsWell.class);
 		well.setDataType(dataType);
@@ -2231,7 +2231,8 @@ throws MalformedURLException, Exception
 			 * If any data is set within the irrigation year then fill the rest of the data
 			 * forward or fill empty data with 0.0
 			 */
-			if(interval_base == TimeInterval.DAY){
+			if(interval_base == TimeInterval.DAY || 
+					interval_base == TimeInterval.MONTH){
 				String FillDailyDiv = null;
 				if((FillDailyDiv == null) || FillDailyDiv.equals("")){
 					FillDailyDiv = "true";
@@ -2241,7 +2242,7 @@ throws MalformedURLException, Exception
 					if((FillDailyDivFlag == null) || FillDailyDivFlag.equals("")){
 						FillDailyDivFlag = "c";
 					}
-					fillTSIrrigationYearCarryForward((DayTS)ts, FillDailyDivFlag);
+					fillTSIrrigationYearCarryForward(ts, FillDailyDivFlag);
 				}
 			}
 			
@@ -2723,14 +2724,14 @@ public void fillTSUsingDiversionComments(ColoradoHydroBaseRestDataStore chrds, T
 	}
 }
 
-public void fillTSIrrigationYearCarryForward(DayTS ts, String fillDailyDivFlag){
+public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 	String routine = "ColoradoHydroBaseRestDataStore.fillTSIrrigationYearCarryForward";
 	if( ts == null ){
 		return;
 	}
-	if( !(ts instanceof DayTS) ){
+	/*if( !(ts instanceof DayTS |) ){
 		return;
-	}
+	}*/
 	
 	DateTime FillStart_DateTime = new DateTime(ts.getDate1());
 	DateTime FillEnd_DateTime = new DateTime(ts.getDate2());
