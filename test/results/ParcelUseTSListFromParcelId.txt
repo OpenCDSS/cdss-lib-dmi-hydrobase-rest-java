@@ -1,2 +1,2 @@
-[[ParcelUseTimeSeries: [ wdid: 2000505, div 3, structureName: ALAMOSA D, calYear: 1998, parcelId:  32004373, landUse: GRASS_PASTURE, irrigType: FLOOD, acresProrated: 102.0551, acresTotal: 102.0551, assocSwWdid: 1, assocGwWdid: 0, modified: 2018-08-07 14:00:13 ]
+[[ParcelUseTimeSeries: [ wdid: 2000505, div 3, structureName: ALAMOSA D, calYear: 1998, parcelId:  32004373, landUse: GRASS_PASTURE, irrigType: FLOOD, acresProrated: 102.0551, acresTotal: 102.0551, assocSwWdid: 1, assocGwWdid: 0, modified: null ]
 ]]
