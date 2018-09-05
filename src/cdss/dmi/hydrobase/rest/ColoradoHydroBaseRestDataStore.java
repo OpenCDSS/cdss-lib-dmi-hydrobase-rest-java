@@ -150,15 +150,15 @@ private List<ParcelUseTimeSeries> parcelUseTSList = null;
 		}
 	}
 	catch (JsonParseException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (JsonMappingException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (IOException e) { 
-		Message.printWarning(1, routine, e);
+		Message.printWarning(3, routine, e);
 		return null;
 	}
 	
@@ -178,15 +178,15 @@ public static JsonNode getJsonNodeResultsFromURLStringMultiplePages(String url, 
 		tempNode = mapper.readTree(new URL(request));
 	} 
 	catch (JsonParseException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (JsonMappingException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (IOException e) { 
-		Message.printWarning(1, routine, e);
+		Message.printWarning(3, routine, e);
 		return null;
 	}
 	
@@ -205,15 +205,15 @@ public static JsonNode getJsonNodeResultsFromURLStringMultiplePages(String url, 
 		}
 	}
 	catch (JsonParseException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (JsonMappingException e ) { 
-		Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+		Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 		return null;
 	}
 	catch (IOException e) { 
-		Message.printWarning(1, routine, e);
+		Message.printWarning(3, routine, e);
 		return null;
 	}
 	return (JsonNode)results;
@@ -1196,7 +1196,7 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 				listOfTriplets.add(triplet);
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			e.printStackTrace();
 		}
 	}
@@ -1288,7 +1288,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 
 	String request = getWaterClassesRequestString(dataType, interval, listOfTriplets);
 	JsonNode waterclassesNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-	
+	 
 	//System.out.println(request);
 	Message.printStatus(2, routine, "Get water classes from URL request: " + request);
 	
@@ -1443,7 +1443,7 @@ public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataT
 				listOfTriplets.add(triplet);
 			}
 		} catch (Exception e) {
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			e.printStackTrace();
 		}
 	}
@@ -1785,6 +1785,13 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
 		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
 			return true;
 		}
+	}
+	return false;
+}
+
+public boolean isWaterClassStructure(String dataType){
+	if(dataType.toUpperCase().startsWith("WATERCLASS")){
+		return true;
 	}
 	return false;
 }
@@ -2718,7 +2725,7 @@ public void fillTSUsingDiversionComments(ColoradoHydroBaseRestDataStore chrds, T
 	catch(Exception e) {
 		String message = "Error getting diversion comments for " +
 		ts.getLocation() + ".  HydroBase/software compatibility issue?";
-		Message.printWarning(2, routine, message );
+		Message.printWarning(3, routine, message );
 		Message.printWarning ( 3, routine, e );
 		//throw new HydroBaseException ( message ); 
 	}
