@@ -84,7 +84,7 @@ throws Exception
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Radius around latitude/longitude
-	input_filters.add ( new InputFilter ( "LatLong Radius", "radius", "radius",
+	input_filters.add ( new InputFilter ( "LatLong Radius", "radius", "radius", "LatLongRadius",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Radius units, used with radius
@@ -92,7 +92,7 @@ throws Exception
 	List<String> radiusUnitsChoices = new ArrayList<String>(2);
 	radiusUnitsChoices.add("feet");
 	radiusUnitsChoices.add("miles");
-	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units",
+	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units", "LatLongRadiusUnits",
 		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
 
 	// Water district
@@ -103,7 +103,7 @@ throws Exception
 		districtList.add ("" + wd.getWaterDistrict() + " - " + wd.getWaterDistrictName());
 		districtInternalList.add ("" + wd.getWaterDistrict() );
 	}
-	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict",
+	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict", "WaterDistrict",
 		StringUtil.TYPE_STRING, districtList, districtInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
@@ -116,19 +116,20 @@ throws Exception
 		divisionList.add ("" + div.getDivision() + " - " + div.getDivisionName());
 		divisionInternalList.add ("" + div.getDivision() );
 	}
-	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision",
+	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision", "WaterDivision",
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
 	
-    input_filters.add ( new InputFilter ( "WaterClass WDID", "wdid", "wdid",
+    input_filters.add ( new InputFilter ( "WaterClass WDID", "wdid", "wdid", "WaterClassWDID",
         StringUtil.TYPE_STRING, null, null, true ) );
 
 	if ( numFilterGroups < 0 ) {
 		// Set number of filter groups to 4 so that latitude, longitude, radius, and units can be specified
 		numFilterGroups = 4;
-		numWhereChoicesToDisplay = input_filters.size();
 	}
+	// Set the number of visible rows in the choices
+	numWhereChoicesToDisplay = input_filters.size();
 	setToolTipText ( "<html>ColoradoHydroBaseRest waterclass queries can be filtered based on waterclass data.</html>" );
 	setInputFilters ( input_filters, numFilterGroups, numWhereChoicesToDisplay );
 }
