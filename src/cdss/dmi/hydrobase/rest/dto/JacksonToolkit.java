@@ -45,15 +45,15 @@ public class JacksonToolkit {
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (IOException e) { 
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 		
@@ -72,15 +72,15 @@ public class JacksonToolkit {
 			tempNode = mapper.readTree(new URL(request));
 		} 
 		catch (JsonParseException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (IOException e) { 
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 		
@@ -99,15 +99,15 @@ public class JacksonToolkit {
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(1, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
 			return null;
 		}
 		catch (IOException e) { 
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 		return (JsonNode)results;
@@ -118,7 +118,7 @@ public class JacksonToolkit {
 		try {
 			return mapper.treeToValue(node, objClass);
 		} catch (JsonProcessingException e) {
-			Message.printWarning(1, routine, e);
+			Message.printWarning(3, routine, e);
 			e.printStackTrace();
 		}
 		return null;
