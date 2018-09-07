@@ -105,12 +105,61 @@ throws Exception
             StringUtil.TYPE_STRING, null, null, true ) );
 
 	if ( numFilterGroups < 0 ) {
-		// Set number of filter groups to 4 so that latitude, longitude, radius, and units can be specified
-		numFilterGroups = 4;
+		// Set number of filter groups to 4 so that latitude, longitude, radius, units, and one other can be specified
+		numFilterGroups = 5;
+	}
+	if ( numWhereChoicesToDisplay < 0 ) {
+		// Set the number of visible rows in the choices
 		numWhereChoicesToDisplay = input_filters.size();
 	}
 	setToolTipText ( "<html>ColoradoHydroBaseRest station queries can be filtered based on station data.</html>" );
 	setInputFilters ( input_filters, numFilterGroups, numWhereChoicesToDisplay );
+}
+
+/**
+ * Check the input filter for appropriate combination of choices.
+ * These checks can be performed in the ReadColoradoHydroBaseRest command and the main TSTool UI,
+ * both of which use this class.
+ * @param displayWarning If true, display a warning dialog if there are errors in the input.
+ * If false, do not display a warning, in which case
+ * the calling code should generally display a warning and optionally
+ * also perform other checks by overriding this method.
+ * @return null if no issues or a string that indicates issues,
+ * can use \n for line breaks and put at the front of the string.
+ */
+@Override
+public String checkInputFilters ( boolean displayWarning ) {
+	// Use the parent class method to check basic input types based on data types
+	// - will return empty string if no issues
+	String warning = super.checkInputFilters(displayWarning);
+	// Perform specific checks
+	String warning2 = "";
+	int coordCount = 0;
+	String Latitude = getInputValue("Latitude", false);
+	String Longitude = getInputValue("Longitude", false);
+	String LatLongRadius = getInputValue("LatLongRadius", false);
+	String LatLongRadiusUnits = getInputValue("LatLongRadiusUnits", false);
+	if ( (Latitude != null) && !Latitude.isEmpty() ) {
+		++coordCount;
+	}
+	if ( (Longitude != null) && !Longitude.isEmpty() ) {
+		++coordCount;
+	}
+	if ( (LatLongRadius != null) && !LatLongRadius.isEmpty() ) {
+		++coordCount;
+	}
+	if ( (LatLongRadiusUnits != null) && !LatLongRadiusUnits.isEmpty() ) {
+		++coordCount;
+	}
+	if ( (coordCount > 0) && (coordCount != 4) ) {
+		warning2 += "\nSpecifying latitude and longitude requires specifying latitude, longitude, radius, and units.";
+	}
+	if ( !warning2.isEmpty() ) {
+		// Have non-empty specific warnings so append specific warnings
+		warning += warning2;
+	}
+	// Return the general warnings or the appended results
+	return warning;
 }
 
 public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore ()
