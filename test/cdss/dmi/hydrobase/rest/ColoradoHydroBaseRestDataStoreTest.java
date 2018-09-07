@@ -463,7 +463,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 */
 	@Test
 	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromCountyList(){
-		int expectedLength = 705;
+		int expectedLength = 709;
 		
 		String county = "MESA";
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, county, -1, -1);
@@ -474,7 +474,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	
 	@Test
 	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDivisionList(){
-		int expectedLength = 2304;
+		int expectedLength = 2316;
 		
 		int waterDivision = 5;
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, waterDivision, -1);
@@ -485,7 +485,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	
 	@Test
 	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDistrictList(){
-		int expectedLength = 2349;
+		int expectedLength = 2356;
 		
 		int waterDistrict = 4;
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, -1, waterDistrict);
