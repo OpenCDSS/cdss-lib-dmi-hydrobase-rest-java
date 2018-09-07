@@ -174,6 +174,27 @@ public String checkInputFilters ( boolean displayWarning ) {
 	if ( (coordCount > 0) && (coordCount != 4) ) {
 		warning2 += "\nSpecifying latitude and longitude requires specifying latitude, longitude, radius, and units.";
 	}
+	// Check that wdid, division, waterDistrict, county, or wcIdentifier specified
+	String Wdid = getInputValue("StructureWDID", false);
+	String Division = getInputValue("WaterDivision", false);
+	String District = getInputValue("WaterDistrict", false);
+	String County = getInputValue("County", false);
+	int necInputFilters = 0;
+	if( (Wdid != null) && !Wdid.isEmpty()){
+		++necInputFilters;
+	}
+	if( (Division != null) && !Division.isEmpty()){
+		++necInputFilters;
+	}
+	if( (District != null) && !District.isEmpty()){
+		++necInputFilters;
+	}
+	if( (County != null) && !County.isEmpty()){
+		++necInputFilters;
+	}
+	if( !(necInputFilters > 0)){
+		warning2 += "\nStructure WDID, Water District, or Water Division is required.";
+	}
 	if ( !warning2.isEmpty() ) {
 		// Have non-empty specific warnings so append specific warnings
 		warning += warning2;
