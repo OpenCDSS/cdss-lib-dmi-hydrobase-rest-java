@@ -1,6 +1,8 @@
 package cdss.dmi.hydrobase.rest.dto;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -32,6 +34,13 @@ public class JacksonToolkit {
 	public JsonNode getJsonNodeFromWebServices(String url){
 		String routine = "JacksonToolkit.getJsonNodeFromWebServices";
 		JsonNode results = null;
+		
+		if(!httpResponse200(url)){
+			Message.printWarning(2, routine, url + " returned a 404 error");
+			return null;
+		}
+		
+		//System.out.println(url);
 		
 		try{
 			URL request = new URL(url);
@@ -111,6 +120,20 @@ public class JacksonToolkit {
 			return null;
 		}
 		return (JsonNode)results;
+	}
+	
+	public boolean httpResponse200(String urlString){
+		HttpURLConnection connection;
+		try {
+			URL url = new URL(urlString);
+			connection = (HttpURLConnection)url.openConnection();
+			if(connection.getResponseCode() == 404) return false;
+		} catch (MalformedURLException e) {
+			return false;
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 	
 	public Object treeToValue(JsonNode node, Class objClass){
