@@ -1288,6 +1288,10 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 
 	String request = getWaterClassesRequestString(dataType, interval, listOfTriplets);
 	JsonNode waterclassesNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	
+	if(waterclassesNode == null){
+		return null;
+	}
 	 
 	//System.out.println(request);
 	Message.printStatus(2, routine, "Get water classes from URL request: " + request);
@@ -2170,6 +2174,9 @@ throws MalformedURLException, Exception
 			}
 			// Get JsonNode results give the request URL
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
+			if(results == null){
+				return ts;
+			}
 			
 			// Pass Data into TS Object
 			if(interval_base == TimeInterval.DAY){
@@ -2339,6 +2346,9 @@ throws MalformedURLException, Exception
 		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
 		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
 		Structure struct = (Structure)JacksonToolkit.getInstance().treeToValue(structResult, Structure.class);
+		if(struct == null){
+			return ts;
+		}
 		
 		// Set structure name as TS Description
 		ts.setDescription(struct.getStructureName());
@@ -2433,6 +2443,7 @@ throws MalformedURLException, Exception
 	}
 	else if(isTelemetryStationTimeSeriesDataType(data_type)){
 		String abbrev = locid;
+		String parameter = ts.getDataType();
 		
 		// Get Telemetry
 		String telemetryRequest = getServiceRootURI() + "/telemetrystations/telemetrystation/?format=json&abbrev=" + abbrev + getApiKeyString();
@@ -2450,22 +2461,25 @@ throws MalformedURLException, Exception
 
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?abbrev=" + abbrev + getApiKeyString();
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw/?abbrev=" + abbrev + "&parameter=" + parameter + getApiKeyString();
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series 15 min intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_HOUR){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?abbrev=" + abbrev + getApiKeyString();
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour/?abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series hourly intervals from DWR REST API request url: " + telRequest);
 		}
 		if(interval_base == DateTime.PRECISION_DAY){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?abbrev=" + abbrev + getApiKeyString();
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
 		}
 		
 		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telRequest);
+		if(results == null){
+			return ts;
+		}
 		
 		//System.out.println(results);
 		
@@ -2623,6 +2637,9 @@ throws MalformedURLException, Exception
 		Message.printStatus(2, routine, "Get wells from DWR REST API request url: " + wellRequest);
 		
 		WaterLevelsWell well = (WaterLevelsWell)JacksonToolkit.getInstance().treeToValue(wellResults, WaterLevelsWell.class);
+		if(well == null){
+			return ts;
+		}
 		
 		// Set Description
 		ts.setDescription(well.getWellName());
