@@ -472,27 +472,6 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		assertThat(expectedLength, equalTo(resultsLength));
 	}
 	
-	@Test
-	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDivisionList(){
-		int expectedLength = 2316;
-		
-		int waterDivision = 5;
-		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, waterDivision, -1);
-		int resultsLength = resultsList.size();
-				
-		assertThat(expectedLength, equalTo(resultsLength));
-	}
-	
-	@Test
-	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromWaterDistrictList(){
-		int expectedLength = 2356;
-		
-		int waterDistrict = 4;
-		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, null, -1, waterDistrict);
-		int resultsLength = resultsList.size();
-		
-		assertThat(expectedLength, equalTo(resultsLength));
-	}
 	
 	/**
 	 * Test that telemetry params list is correct by checking 
