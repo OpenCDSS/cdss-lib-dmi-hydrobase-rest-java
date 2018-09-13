@@ -18,7 +18,7 @@ All of these tests produce output files that can be found in `test/results/` and
 
 Command files have been created that test the actual performance of TSTool and by implication the software behind it. These files test the results returned from certain commands and check that those results are as expected. These command files can be located in the repository [`cdss-app-tstool-test`](https://github.com/OpenWaterFoundation/cdss-app-tstool-test).
 
-Read more about Command File Tests [here](https://github.com/OpenWaterFoundation/cdss-app-tstool-test).
+Read more about testing using command files [here](https://github.com/OpenWaterFoundation/cdss-app-tstool-test).
 
 There are tests for running TSID's found under [`test/regression/commands/general/TSID_ColoradoHydroBaseRest/`](https://github.com/OpenWaterFoundation/cdss-app-tstool-test/tree/master/test/regression/commands/general/TSID_ColoradoHydroBaseRest). Some of these test Structure and Well types comparing results returned from ColoradoHydroBaseRest against results from Hydrobase database. Telemetry types are not possible to test against Hydrobase, so these test a single TSID command and make sure that it runs properly. There are some examples of tests that are expected to fail and these tests start with the comment `# @expectedStatus Warning`.
 
