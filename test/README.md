@@ -1,4 +1,8 @@
-#### JUnit Testing: ####
+# Testing #
+
+This repository contains the code for JUnit tests. JUnit tests are one way of testing this code, command files offer an alternate way of testing.
+
+## JUnit Testing: ##
 
 JUnit is a unit testing framework that makes it possible to test small sections of code at a time. JUnit testing has been written to test [`ColoradoHydroBaseRestDataStore.java`](https://github.com/OpenWaterFoundation/cdss-lib-dmi-hydrobase-rest-java/blob/master/src/cdss/dmi/hydrobase/rest/ColoradoHydroBaseRestDataStore.java) and ensure proper functionality between the software and it's connection to DWR web wervices REST API.
 
@@ -10,7 +14,7 @@ Other tests start with "testLengthOf...". These tests are designed to check the 
 
 All of these tests produce output files that can be found in `test/results/` and can be compared to the output files created on the day the tests were written found in `tests/expectedResults/`.
 
-#### Command File Testing: ####
+## Command File Testing: ##
 
 Command files have been created that test the actual performance of TSTool and by implication the software behind it. These files test the results returned from certain commands and check that those results are as expected. These command files can be located in the repository [`cdss-app-tstool-test`](https://github.com/OpenWaterFoundation/cdss-app-tstool-test).
 
@@ -22,7 +26,7 @@ There are also tests found under [`test/regression/commands/general/ReadColorado
 
 In both the folders specified above you can also find output files in `ExpectedResults/` and `Results/`. Expected Results contains files generated previously and offer as a way of checking re-run tests against old results.
 
-##### Test Suites: ######
+#### Test Suites: #####
 
 Also found in both the folder locations above will be a subfolder titled `TestSuites`. This folder contains two subfolders `create/` and `run/`. First run the command file found in `create/`, which will create another command file found in `run/`. The generated command file in `run/` will contain a list of commands to run every command file for either [`TSID_ColoradoHydroBaseRest/`](https://github.com/OpenWaterFoundation/cdss-app-tstool-test/tree/master/test/regression/commands/general/TSID_ColoradoHydroBaseRest) or [`ReadColoradoHydroBaseRest/`](https://github.com/OpenWaterFoundation/cdss-app-tstool-test/tree/master/test/regression/commands/general/ReadColoradoHydroBaseRest). This command file can be run to see if there are any errors or unforeseen warnings contained within any of the tests without having to run each test individually.
 
