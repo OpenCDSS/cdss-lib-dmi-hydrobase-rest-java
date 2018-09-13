@@ -105,7 +105,7 @@ C:\Users\user\                               Windows user home folder (typical d
 
 OWF has set up two different methods of testing TSTool code. The software can be tested at a performance level through command files written to run and test different commands, or code can be tested at a low level to ensure functionality through several JUnit tests.
 
-Read about testing [here](/test/README.md)
+Read about testing [here](/test)
 
 ## Version ##
 
