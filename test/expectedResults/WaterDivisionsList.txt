@@ -1,0 +1,8 @@
+[[ReferenceTablesWaterDivision [ div: 1, divName: South Platte ]
+, ReferenceTablesWaterDivision [ div: 2, divName: Arkansas ]
+, ReferenceTablesWaterDivision [ div: 3, divName: Rio Grande ]
+, ReferenceTablesWaterDivision [ div: 4, divName: Gunnison ]
+, ReferenceTablesWaterDivision [ div: 5, divName: Colorado ]
+, ReferenceTablesWaterDivision [ div: 6, divName: Yampa/White ]
+, ReferenceTablesWaterDivision [ div: 7, divName: San Juan/Dolores ]
+]]

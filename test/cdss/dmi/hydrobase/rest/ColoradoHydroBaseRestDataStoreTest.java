@@ -96,6 +96,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesCounty> counties = chrds.getCounties();
 		int resultLength = counties.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/CountiesList.txt", Arrays.asList(counties).toString());
 		writeToFile("results/CountiesList.txt", Arrays.asList(counties).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -113,6 +115,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesCurrentInUseCodes> currentInUseCodes = chrds.getCurrentInUseCodes();
 		int resultLength = currentInUseCodes.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/CurrentInUseCodesList.txt", Arrays.asList(currentInUseCodes).toString());
 		writeToFile("results/CurrentInUseCodesList.txt", Arrays.asList(currentInUseCodes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -130,6 +134,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesDesignatedBasin> desBasin = chrds.getDesignatedBasin();
 		int resultLength = desBasin.size();
 		
+		//Uncomment the following the regenerate expected results
+		writeToFile("expectedResults/DesignatedBasinList.txt", Arrays.asList(desBasin).toString());
 		writeToFile("results/DesignatedBasinList.txt", Arrays.asList(desBasin).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -156,6 +162,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<DiversionComments> expectedResultsList = new ArrayList<DiversionComments>();
 		expectedResultsList.add(divComment);
 		
+		//Uncomment the following to regenerate expected results
 		//writeToFile("expectedResults/SingleDivCommentFromWdidAndIrrYear.txt", Arrays.asList(expectedResultsList).toString());
 		
 		// Test one irrigation year and one WDID to limit the test data
@@ -184,6 +191,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<DiversionStageVolume> expectedResultsList = new ArrayList<DiversionStageVolume>();
 		expectedResultsList.add(divStageVol);
 		
+		//Uncomment the following to regenerate expected results
 		//writeToFile("expectedResults/SingleDiversionStageVolumeFromWdidAndDataMeasDate.txt", Arrays.asList(expectedResultsList).toString());
 		
 		//Test one data meas date year and one wdid to limit the test data
@@ -209,6 +217,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesDivRecObservationCodes> divRecObsCodes = chrds.getDivRecObservationCodes();
 		int resultLength = divRecObsCodes.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/DivRecObservationCodesList.txt", Arrays.asList(divRecObsCodes).toString());
 		writeToFile("results/DivRecObservationCodesList.txt", Arrays.asList(divRecObsCodes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -226,6 +236,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesDivRecTypes> divRecTypes = chrds.getDivRecTypes();
 		int resultLength = divRecTypes.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/DivRecTypesList.txt", Arrays.asList(divRecTypes).toString());
 		writeToFile("results/DivRecTypesList.txt", Arrays.asList(divRecTypes).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -243,6 +255,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesGroundwaterPublication> groundwaterPublication = chrds.getGroundwaterPublication();
 		int resultLength = groundwaterPublication.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/GroundwaterPublicationList.txt", Arrays.asList(groundwaterPublication).toString());
 		writeToFile("results/GroundwaterPublicationList.txt", Arrays.asList(groundwaterPublication).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -260,6 +274,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesManagementDistrict> managementDistrict = chrds.getManagementDistrict();
 		int resultLength = managementDistrict.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/ManagementDistrictList.txt", Arrays.asList(managementDistrict).toString());
 		writeToFile("results/ManagementDistrictList.txt", Arrays.asList(managementDistrict).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -288,6 +304,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ParcelUseTimeSeries> expectedResultsList = new ArrayList<ParcelUseTimeSeries>();
 		expectedResultsList.add(parcelUseTS);
 		
+		//Uncomment the following to regenerate expected results
 		//writeToFile("expectedResults/ParcelUseTSListFromParcelId.txt", Arrays.asList(expectedResultsList).toString());
 		
 		String wdid = "2000505";
@@ -312,6 +329,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesPermitActionName> permitActionName = chrds.getPermitActionName();
 		int resultLength = permitActionName.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/PermitActionName.txt", Arrays.asList(permitActionName).toString());
 		writeToFile("results/PermitActionName.txt", Arrays.asList(permitActionName).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
@@ -355,6 +374,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<TelemetryStationDataTypes> expectedResultsList = new ArrayList<TelemetryStationDataTypes>();
 		expectedResultsList.add(telStationDataType);
 		
+		//Uncomment the following to regenerate expected results
 		//writeToFile("expectedResults/SingleTelemetryStationDataTypeFromWdid.txt", Arrays.asList(expectedResults).toString());
 	
 		String[] inputFilters = {"str_name", "MA", "3302204"};
@@ -380,7 +400,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String[] telParams = chrds.getTelemetryDataTypeParametersFromWebServices();
 		int resultLength = telParams.length;
 		
-		writeToFile("results/TelemetryDataTypeParametersList.txt", telParams.toString());
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/TelemetryDataTypeParametersList.txt", Arrays.asList(telParams).toString());
+		writeToFile("results/TelemetryDataTypeParametersList.txt", Arrays.asList(telParams).toString());
 		
 		assertThat(expectedLength, equalTo(resultLength));
 	}
@@ -403,7 +425,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<TelemetryDecodeSettings> expectedResultsList = new ArrayList<TelemetryDecodeSettings>();
 		expectedResultsList.add(telDecodeSetting);
-		writeToFile("expectedResults/SingleTelemetryDecodeSettings.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/SingleTelemetryDecodeSettings.txt", Arrays.asList(expectedResultsList).toString());
 
 		List<TelemetryDecodeSettings> resultsList = chrds.getTelemetryDecodeSettings("ABCLATCO");
 		//Modified will change. Remove it from the testing
@@ -446,7 +470,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<TelemetryDischargeMeasurement> expectedResultsList = new ArrayList<TelemetryDischargeMeasurement>();
 		expectedResultsList.add(telDisMeas);
-		writeToFile("expectedResults/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/SingleTelemetryDischargeMeasurementFromAbbrev.txt", Arrays.asList(expectedResultsList).toString());
 		
 		String abbrev = "2900686A";
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(abbrev, null, -1, -1);
@@ -468,6 +494,10 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String county = "MESA";
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, county, -1, -1);
 		int resultsLength = resultsList.size();
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/TelemetryDischargeMeasurmentFromCounty.txt", Arrays.asList(resultsList).toString());
+		writeToFile("results/TelemetryDischargeMeasurmentFromCounty.txt", Arrays.asList(resultsList).toString());
 				
 		assertThat(expectedLength, equalTo(resultsLength));
 	}
@@ -485,6 +515,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesTelemetryParams> resultsList = chrds.getTelemetryParams();
 		int resultsLength = resultsList.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/TelemetryParamsList.txt", Arrays.asList(resultsList).toString());
 		writeToFile("results/TelemetryParamsList.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(expectedLength, equalTo(resultsLength));
@@ -502,6 +534,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<TelemetryRatingTable> resultsList = chrds.getTelemetryRatingTable(ratingTableName);
 		int resultsLength = resultsList.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/TelemetryRatingTableListFromRatingTableName.txt", Arrays.asList(resultsList).toString());
 		writeToFile("results/TelemetryRatingTableListFromRatingTableName.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(expectedLength, equalTo(resultsLength));
@@ -517,6 +551,8 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<TelemetryShift> resultsList = chrds.getTelemetryShiftCurve(shiftCurveName);
 		int resultsLength = resultsList.size();
 		
+		//Uncomment the following to regenerate expected results
+		writeToFile("expectedResults/TelemetryShiftCurveFromShiftCurveName.txt", Arrays.asList(resultsList).toString());
 		writeToFile("results/TelemetryShiftCurveFromShiftCurveName.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(expectedLength, equalTo(resultsLength));
@@ -569,7 +605,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<DiversionWaterClass> expectedResultsList = new ArrayList<DiversionWaterClass>();
 		expectedResultsList.add(waterClass);
-		writeToFile("expectedResults/GetWaterClassesFromWdid.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/GetWaterClassesFromWdid.txt", Arrays.asList(expectedResultsList).toString());
 		
 		String[] inputFilters = {"WDID", "MA", "1300529"};
 		List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -597,6 +635,10 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		List<ReferenceTablesWaterDistrict> resultsList = chrds.getWaterDistricts();
 		int resultsLength = resultsList.size();
 		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/WaterDistrictsList.txt", Arrays.asList(resultsList).toString());
+		writeToFile("results/WaterDistrictsList.txt", Arrays.asList(resultsList).toString());
+		
 		assertThat(expectedLength, equalTo(resultsLength));
 	}
 	
@@ -611,6 +653,10 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<ReferenceTablesWaterDivision> expectedList = chrds.getWaterDivisions();
 		int resultsLength = expectedList.size();
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/WaterDivisionsList.txt", Arrays.asList(expectedList).toString());
+		writeToFile("results/WaterDivisionsList.txt", Arrays.asList(expectedList).toString());
 		
 		assertThat(expectedLength, equalTo(resultsLength));
 	}
@@ -659,7 +705,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<WaterRightsNetAmount> expectedResultsList = new ArrayList<WaterRightsNetAmount>();
 		expectedResultsList.add(wrNetAmt);
-		writeToFile("expectedResults/GetWaterRightsNetAmount.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/GetWaterRightsNetAmount.txt", Arrays.asList(expectedResultsList).toString());
 
 		String wdid = "3600501";
 		List<WaterRightsNetAmount> resultsList = chrds.getWaterRightsNetAmount(wdid);
@@ -713,7 +761,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<WaterRightsTransaction> expectedResultsList = new ArrayList<WaterRightsTransaction>();
 		expectedResultsList.add(wrTransaction);
-		writeToFile("expectedResults/GetWaterRightsTransaction.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/GetWaterRightsTransaction.txt", Arrays.asList(expectedResultsList).toString());
 		
 		String wdid = "3600501";
 		List<WaterRightsTransaction> resultsList = chrds.getWaterRightsTransaction(wdid);
@@ -768,7 +818,9 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		List<WaterLevelsWell> expectedResultsList = new ArrayList<WaterLevelsWell>();
 		expectedResultsList.add(waterLevelWell);
-		writeToFile("expectedResults/GetWellsFromWdid.txt", Arrays.asList(expectedResultsList).toString());
+		
+		//Uncomment the following to regenerate expected results
+		//writeToFile("expectedResults/GetWellsFromWdid.txt", Arrays.asList(expectedResultsList).toString());
 		
 		String[] inputFilters = {"WellID", "EQ", "75"};
 		List<String[]> listOfTriplets = new ArrayList<String[]>();

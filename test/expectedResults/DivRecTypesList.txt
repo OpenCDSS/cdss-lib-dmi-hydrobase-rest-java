@@ -1,0 +1,13 @@
+[[ReferenceTablesDivRecTypes: [ divRecType: DivComment, divRecTypeLong: A Diversion Comment potentially contains the following information: a 
+“not used” code (NUC); and/or,
+a general comment regarding the structure. 
+ ]
+, ReferenceTablesDivRecTypes: [ divRecType: DivTotal, divRecTypeLong: Total amount of water diverted by structure ]
+, ReferenceTablesDivRecTypes: [ divRecType: RelComment, divRecTypeLong: A Release Comment potentially contains the following information: 
+a “not released” code (NRC); and/or,
+a general comment regarding the structure. 
+ ]
+, ReferenceTablesDivRecTypes: [ divRecType: RelTolal, divRecTypeLong: Total amount of water released by structure ]
+, ReferenceTablesDivRecTypes: [ divRecType: StageVolume, divRecTypeLong: Storage structure stage/volume readings ]
+, ReferenceTablesDivRecTypes: [ divRecType: WaterClass, divRecTypeLong: A Water Class consists of a series of codes that provide the location of the diversion, the SOURCE of water, the USE of the water and the administrative operation required to make a diversion or release. ]
+]]
