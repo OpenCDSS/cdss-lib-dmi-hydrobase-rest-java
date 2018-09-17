@@ -132,6 +132,11 @@ Constructor for web service.
 Important, properties other than the default values passed as parameters may be set with a subsequent
 call to setProperties().  Consequently, initialization should occur from public called methods to ensure
 that information is available for initialization.
+@param name - the name of the datastore
+@param description - a brief description of the datastore being defined
+@param serviceRootURI - the root URI used to access the API of the given datastore
+@param apiKey - apiKey generated from DWR to allow access with a higher rate of requests that can be made to 
+DWR REST API.
 */
 public ColoradoHydroBaseRestDataStore ( String name, String description, URI serviceRootURI, String apiKey )
 throws URISyntaxException, IOException
@@ -189,7 +194,12 @@ private void determineAPIVersion()
 	__apiVersion = version;
 }
 
-// NEW CODE IN PROGRESS:
+/**
+ * Get Administrative Calls from Web Services
+ * @param callId - String representing the callId used to query from web services. Other parameters may
+ * be added in the future for various query parameters from web services.
+ * @return {@link cdss.dmi.hydrobase.rest.dao.AdministrativeCalls} POJO converted from results of call to web services.
+ */
 public AdministrativeCalls getAdministrativeCalls(String callId){
 	String request = getServiceRootURI() + "/administrativecalls/" + callId + "?format=json";
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request).get(0);
@@ -197,13 +207,17 @@ public AdministrativeCalls getAdministrativeCalls(String callId){
 	return ac;
 }
 
+/**
+ * Returns the apiKey for the datastore
+ * @return apiKey - String that is the apiKey for a given user to access the Datastore.
+ */
 private String getApiKey(){
 	return __apiKey;
 }
 
 /**
  * Initialize APIKey from properties list 
- * @return apiKey
+ * @return String that can be concatenated onto a URL request that appends the users api key.
  */
 private String getApiKeyString(){
 	return (getApiKey() == null || getApiKey() == "") ? "" : "&apiKey=" + getApiKey();
@@ -211,7 +225,7 @@ private String getApiKeyString(){
 
 /**
 Return the service API version as determined from determineAPIVersion().
-@return the API version
+@return integer that represents the version of web services parsed from provided serviceRootURI.
 */
 public int getAPIVersion ()
 {
@@ -219,8 +233,9 @@ public int getAPIVersion ()
 }
 
 /**
- * Get the list of counties from global variable
- * @return list of counties
+ * Get the list of counties returned from web services.
+ * If countyList is already defined, return countyList. Otherwise call {@link #readCounties()}.
+ * @return List<ReferenceTablesCounty> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty}.
  */
 public List<ReferenceTablesCounty> getCounties(){
 	if(countyList == null){
@@ -229,6 +244,11 @@ public List<ReferenceTablesCounty> getCounties(){
 	return countyList;
 }
 
+/**
+ * Get the list of current in use codes returned from web services.
+ * If currentInUseCodeList is already defined, return currentInUseCodeList. Otherwise call {@link #readCurrentInUseCodes()}.
+ * @return List<ReferenceTablesCurrentInUseCodes> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesCurrentInUseCodes}.
+ */
 public List<ReferenceTablesCurrentInUseCodes> getCurrentInUseCodes(){
 	if(currentInUseCodeList == null){
 		readCurrentInUseCodes();
@@ -236,6 +256,11 @@ public List<ReferenceTablesCurrentInUseCodes> getCurrentInUseCodes(){
 	return currentInUseCodeList;
 }
 
+/**
+ * Get the list of designated basins from web services.
+ * If designatedBasinList is already defined, return designatedBasinList. Otherwise call {@link #readDesignatedBasins()}. 
+ * @return List<ReferenceTablesDesignatedBasin> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesDesignatedBasin}.
+ */
 public List<ReferenceTablesDesignatedBasin> getDesignatedBasin(){
 	if(designatedBasinList == null){
 		readDesignatedBasins();
@@ -243,6 +268,13 @@ public List<ReferenceTablesDesignatedBasin> getDesignatedBasin(){
 	return designatedBasinList;
 }
 
+/**
+ * Get a list of div comments from web services, querying by passed in parameters.
+ * @param wdid (required) - The WDID of the desired div rec comments. Cannot be null.
+ * @param modified - Optional parameter to search by last date modified. Otherwise null.
+ * @param irrYear - Optional parameter to search by irrigation year. Otherwise -1.
+ * @return List<DiversionComments> of {@link cdss.dmi.hydrobase.rest.dao.DiversionComments}.
+ */
 public List<DiversionComments> getDivComments(String wdid, String modified, int irrYear){
 	//String routine = "ColoradoHydroBaseRestDataStore.getDivComments";
 	List<DiversionComments> divComments = new ArrayList<DiversionComments>();
@@ -261,6 +293,12 @@ public List<DiversionComments> getDivComments(String wdid, String modified, int 
 	return divComments;
 }
 
+/**
+ * Get a list of diversion not used codes from web services.
+ * If diversionNotUsedCodeList is already defined, return diversionNotUsedCodes. 
+ * Otherwise call {@link #readDiversionNotUsedCodes()}.
+ * @return List<ReferenceTablesDiversionNotUsedCodes> of diversion not used codes.
+ */
 public List<ReferenceTablesDiversionNotUsedCodes> getDiversionNotUsedCodes(){
 	if(diversionNotUsedCodeList == null){
 		readDiversionNotUsedCodes();
@@ -268,6 +306,13 @@ public List<ReferenceTablesDiversionNotUsedCodes> getDiversionNotUsedCodes(){
 	return diversionNotUsedCodeList;
 }
 
+/**
+ * Get list of diversion stage volume from web services, querying by passed in parameters.
+ * @param wdid (required) - The WDID for the desired diversion stage volume. Cannot be null.
+ * @param dataMeasDate - Optional parameter to search by date measured. Otherwise null.
+ * @param modified - Optional parameter to search by date modified. Otherwise null.
+ * @return List<DiversionStageVolume> of {@link cdss.dmi.hydrobase.rest.dao.DiversionStageVolume}.
+ */
 public List<DiversionStageVolume> getDiversionStageVolume(String wdid, String dataMeasDate, String modified){
 	List<DiversionStageVolume> divStageVolList = new ArrayList<DiversionStageVolume>();
 	String request = getServiceRootURI() + "/structures/divrec/stagevolume/" + wdid + "?format=json";
@@ -290,6 +335,12 @@ public List<DiversionStageVolume> getDiversionStageVolume(String wdid, String da
 	return divStageVolList;
 }
 
+/**
+ * Get list of diversion record observation codes from web services.
+ * If divRecObservationCodeList is defined, return divRecObservationCodeList.
+ * Otherwise call {@link #getDivRecObservationCodes()}.
+ * @return List<ReferenceTablesDivRecObservationCodes> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecObservationCodes}.
+ */
 public List<ReferenceTablesDivRecObservationCodes> getDivRecObservationCodes(){
 	if(divRecObservationCodeList == null){
 		readDivRecObservationCodes();
@@ -297,6 +348,12 @@ public List<ReferenceTablesDivRecObservationCodes> getDivRecObservationCodes(){
 	return divRecObservationCodeList;
 }
 
+/**
+ * Get list of div rec types from web services.
+ * If divRecTypeList is already defined, return it.
+ * Otherwise call {@link #readDivRecTypes()}.
+ * @return List<ReferenceTablesDivRecTypes> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesDivRecTypes}.
+ */
 public List<ReferenceTablesDivRecTypes> getDivRecTypes(){
 	if(divRecTypeList == null){
 		readDivRecTypes();
@@ -304,6 +361,12 @@ public List<ReferenceTablesDivRecTypes> getDivRecTypes(){
 	return divRecTypeList;
 }
 
+/**
+ * Get list of groundwater publication from web services.
+ * If groundwaterPublicationList is already defined, return it.
+ * Otherwise call {@link #readGroundwaterPublication()}.
+ * @return List<ReferenceTablesGroundwaterPublication> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesGroundwaterPublication}.
+ */
 public List<ReferenceTablesGroundwaterPublication> getGroundwaterPublication(){
 	if(groundwaterPublicationList == null){
 		readGroundwaterPublication();
@@ -311,6 +374,12 @@ public List<ReferenceTablesGroundwaterPublication> getGroundwaterPublication(){
 	return groundwaterPublicationList;
 }
 
+/**
+ * Get list of managment district from web services.
+ * If managementDistrictList is already defined, return it.
+ * Otherwise call {@link #readManagementDistrict()}.
+ * @return List<ReferenceTablesManagementDistrict> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesManagementDistrict}.
+ */
 public List<ReferenceTablesManagementDistrict> getManagementDistrict(){
 	if(managementDistrictList == null){
 		readManagementDistrict();
@@ -318,7 +387,12 @@ public List<ReferenceTablesManagementDistrict> getManagementDistrict(){
 	return managementDistrictList;
 }
 
-public void getParcelUseTSList(String wdid){	
+/**
+ * Initialize parcelUseTSList from WDID. This method can be used to 
+ * cache the ParcelUseTSList when using read commands in StateDMI.
+ * @param wdid (required) - The WDID to query the ParcelUseTsList.
+ */
+public void readParcelUseTSList(String wdid){	
 	String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
 	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
 	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid + "?apiKey=" + getApiKey();
@@ -334,10 +408,16 @@ public void getParcelUseTSList(String wdid){
 	this.parcelUseTSList = parcelUseTSList;
 }
 
-
+/**
+ * If parcelUseTSList is not defined first call {@link #readParcelUseTSList(String)}.
+ * Parse through the ParcelUseTSList and add all results with the given parcel_id.
+ * @param wdid - The WDID for the ParcelUseTSList. 
+ * @param parcel_id - The parcel_id of interest that is used to match results.
+ * @return List<ParcelUseTimeSeries> of {@link cdss.dmi.hydrobase.rest.dao.ParcelUseTimeSeries}.
+ */
 public List<ParcelUseTimeSeries> getParcelUseTSListFromParcelId(String wdid, int parcel_id){
 	if(parcelUseTSList == null){
-		getParcelUseTSList(wdid);
+		readParcelUseTSList(wdid);
 	}
 	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>();
 	for(int i = 0; i < this.parcelUseTSList.size(); i++){
@@ -361,7 +441,7 @@ public List<ReferenceTablesPermitActionName> getPermitActionName(){
  * input filter. This method takes the operator and the value and
  * returns the appropriately formatted string to append to the 
  * request URL.
- * @param operator
+ * @param operator (MA, SW, EW, CN) - Matches, Starts With, Ends With, Contains
  * @param value
  * @return formatted String
  */
@@ -506,9 +586,10 @@ public List<Structure> getStructureTimeSeriesCatalog ( String dataType, String i
  * a list of telemetryStationDataTypes from DWR web services.
  * @param dataType - any of the data types that can be returned from 
  * getTelemetryDataTypesFromWebServices()
+ * @param interval - An interval such as 15min, day, month, or year.
  * @param listOfTriplets - input filter values such as 
  * ['County', 'MA', 'mesa'], [argument, operator, value].
- * @return List<TelemeteryStationDataTypes>
+ * @return List<TelemeteryStationDataTypes> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes}.
  */
 public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, String interval, List<String[]> listOfTriplets) {
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryParams";
@@ -533,7 +614,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
 /**
  * Returns a list of parameters specified from
  * api/v2/referencetables/telemetryparams
- * @return a list of telemetry parameters
+ * @return a String array of telemetry parameters
  */
 public String[] getTelemetryDataTypeParametersFromWebServices(){	
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
@@ -550,11 +631,11 @@ public String[] getTelemetryDataTypeParametersFromWebServices(){
 }
 
 /**
- * Based on the given dataType, interval, and input filter values
- * will format the request string necessary for retrieving data from 
+ * Based on the given dataType, and input filter values this method
+ * will format the request string necessary for retrieving Telemetry Data Types from 
  * web services.
  * @param dataType - any of the data types that can be returned from 
- * getTelemetryDataTypesFromWebServices()
+ * {@link #getTelemetryDataTypesFromWebServices()}.
  * @param listOfTriplets - input filter values such as 
  * ['County', 'MA', 'mesa'], [argument, operator, value].
  * @return a formatted request string for retrieving telemetry data.
@@ -658,6 +739,11 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 	
 }
 
+/**
+ * Get list of telemetry decode settings from web services given the abbreviation.
+ * @param abbrev - Abbreviation of telemetry station.
+ * @return List<TelemetryDecodeSettings> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings}.
+ */
 public List<TelemetryDecodeSettings> getTelemetryDecodeSettings(String abbrev){
 	List<TelemetryDecodeSettings> telDecSettings = new ArrayList<TelemetryDecodeSettings>();
 	String request = getServiceRootURI() + "/telemetrystations/telemetrydecodesettings/?format=json" + "&abbrev=" + abbrev;
@@ -669,6 +755,14 @@ public List<TelemetryDecodeSettings> getTelemetryDecodeSettings(String abbrev){
 	return telDecSettings;
 }
 
+/**
+ * Get list of telemetry discharge measurement from passed in parameters.
+ * @param abbrev - Optional parameter to search by abbreviation. Otherwise null.
+ * @param county - Optional parameter to search by county. Otherwise null.
+ * @param waterDivision - Optional parameter to search by waterDivision. Otherwise -1.
+ * @param waterDistrict - Optional parameter to search by waterDistrict. Otherwise -1.
+ * @return List<TelemetryDischargeMeasurement> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement}.
+ */
 public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(String abbrev, String county, int waterDivision, int waterDistrict){
 	String request = getServiceRootURI() + "/telemetrystations/telemetrydischargemeasurement/" + "?format=json";
 	if(!(abbrev == null || abbrev == "")){
@@ -692,6 +786,11 @@ public List<TelemetryDischargeMeasurement> getTelemetryDischargeMeasurement(Stri
 	return telDischargeMeasurementsList;
 }
 
+/**
+ * Get list of telemetry params from webservices.If telemetryParamsList is defined,
+ * return it. Otherwise call {@link #readTelemetryParams()}.
+ * @return List<ReferenceTablesTelemetryParams> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesTelemetryParams}.
+ */
 public List<ReferenceTablesTelemetryParams> getTelemetryParams(){
 	if(telemetryParamsList == null){
 		readTelemetryParams();
@@ -699,8 +798,17 @@ public List<ReferenceTablesTelemetryParams> getTelemetryParams(){
 	return telemetryParamsList;
 }
 
+/**
+ * Get list of telemetry rating table from web services querying by
+ * ratingTableName if specified.
+ * @param ratingTableName - Optional parameter to search by ratingTableName from web services.
+ * @return List<TelemetryRatingTable> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable}.
+ */
 public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName){
-	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json" + "&ratingTableName=" + ratingTableName;
+	String request = getServiceRootURI() + "/telemetrystations/telemetryratingtable/" + "?format=json";
+	if(!(ratingTableName == null && ratingTableName == "")){
+		request += "&ratingTableName=" + ratingTableName;
+	}
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	List<TelemetryRatingTable> telRatingTableList = new ArrayList<TelemetryRatingTable>();
 	for(int i = 0; i < results.size(); i++){
@@ -710,6 +818,12 @@ public List<TelemetryRatingTable> getTelemetryRatingTable(String ratingTableName
 	return telRatingTableList;
 }
 
+/**
+ * Get list of telemetry shift adjusted rating table using abbreviation and parameter.
+ * @param abbrev (required) - Abbreviation to search by.
+ * @param parameter (required) - Parameter to search by.
+ * @return List<TelemetryShift> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryShift}.
+ */
 public List<TelemetryShift> getTelemetryShiftAdjustedRatingTable(String abbrev, String parameter){
 	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftadjustedratingtable/" + "?format=json" + "&abbrev=" + abbrev + "&parameter=" + parameter;
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
@@ -721,8 +835,16 @@ public List<TelemetryShift> getTelemetryShiftAdjustedRatingTable(String abbrev, 
 	return telShiftList;
 }
 
+/**
+ * Get list of telemetry shift curve from web services by shiftCurveName if specified.
+ * @param shiftCurveName - Optional parameter to search by shift curve name. Otherwise null.
+ * @return List<TelemetryShift> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryShift}.
+ */
 public List<TelemetryShift> getTelemetryShiftCurve(String shiftCurveName){
-	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftcurve/" + "?format=json" + "&shiftCurveName=" + shiftCurveName;
+	String request = getServiceRootURI() + "/telemetrystations/telemetryshiftcurve/" + "?format=json";
+	if(!(shiftCurveName == null || shiftCurveName == "")){
+		request += "&shiftCurveName=" + shiftCurveName;
+	}
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	List<TelemetryShift> telShiftList = new ArrayList<TelemetryShift>();
 	for(int i = 0; i < results.size(); i++){
@@ -738,11 +860,11 @@ public List<TelemetryShift> getTelemetryShiftCurve(String shiftCurveName){
 /**
  * Return the list of telemetry station time series, suitable for display in TSTool browse area.
  * @param dataType - any of the data types that can be returned from 
- * getTelemetryDataTypesFromWebServices()
+ * {@link #getTelemetryDataTypesFromWebServices()}.
  * @param interval - time interval 
  * (telemetry always comes back in 15min intervals regardless)
  * @param filterPanel - values for filtering requested data
- * @return List<TelemetryStationDataTypes>
+ * @return List<TelemetryStationDataTypes> of {@link cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes}.
  */
 // TODO @jurentie fix throw catch
 public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel filterPanel ) {
@@ -774,6 +896,7 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
  * Returns a list of data types that can be displayed in TSTool
  * @param group - if true return the group label in front of the 
  * data types, otherwise just return data types.
+ * @return list of data types that can be accessed via datastore.
  */
 public List<String> getTimeSeriesDataTypes(boolean group){
 	List<String> dataTypes = new ArrayList<String>();
@@ -810,8 +933,8 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 /**
  * Return a list of time steps associated with different
  * data types
- * @param selectedDataType
- * @return List<String> - list of time steps
+ * @param selectedDataType - data type selected ex. "DivTotal".
+ * @return List<String> of time steps
  */
 public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	List<String> timeSteps = new ArrayList<String>();
@@ -839,14 +962,14 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 
 /**
  * Using the string request returned from 
- * getWaterClassesRequestString() retrieve a list
+ * {@link #getWaterClassesRequestString()} retrieve a list
  * of DiversionWaterClasses from web services.
  * @param dataType - any of the data types that can be returned from 
  * getWaterClasses()
  * @param interval - day, month, or year
  * @param listOfTriplets - input filter values such as 
  * ['County', 'MA', 'mesa'], [argument, operator, value].
- * @return List<DiversionWaterClass> 
+ * @return List<DiversionWaterClass> of {@link cdss.dmi.hydrobase.rest.dmi.DiversionWaterClass}.
  */
 public List<DiversionWaterClass> getWaterClasses(String dataType, String interval, List<String[]> listOfTriplets) {
 	String routine = "ColoradoHydroBaseRestDataStore.getWaterClasses";
@@ -873,6 +996,12 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 	return waterclasses;
 }
 
+/**
+ * If parameter is either stage or volume return "StageVolume" otherwise just
+ * return the given dataType.
+ * @param dataType - String representing the datatype
+ * @return String represeting the datatype.
+ */
 private String lookUpDataType(String dataType){
 	if(dataType.equalsIgnoreCase("STAGE") || dataType.equalsIgnoreCase("VOLUME")){
 		return "StageVolume";
@@ -887,7 +1016,7 @@ private String lookUpDataType(String dataType){
  * will format the request string necessary for retrieving data from 
  * web services.
  * @param dataType - any of the data types that can be returned from 
- * getWaterClasses()
+ * {@link #getWaterClasses()}
  * @param interval - day, month, or year
  * @param listOfTriplets - input filter values such as 
  * ['County', 'MA', 'mesa'], [argument, operator, value].
@@ -987,11 +1116,10 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 //but go with Structure for now.
 /**
 * Return the list of structure time series, suitable for display in TSTool browse area.
-* @param dataType
-* @param interval
-* @param filterPanel
-* @return
-* @throws Exception // TODO @jurentie 06/21/20  work out throws exceptions
+* @param dataType - String representing the datatype. Ex "DivTotal"
+* @param interval - Interval such as 15min, day, month, year.
+* @param filterPanel - {@link cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel}
+* @return List<DiversionWaterClass> of {@link cdss.dmi.hydrobase.rest.dao.DiversionWaterClass}.
 */
 public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
 	String routine = "ColoradyHydroBaseRestDataStore.getWaterClassesTimeSeriesCatalog";
@@ -1023,9 +1151,9 @@ public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataT
 }
 
 /**
- * Get list of districts from global variable
- * @return list of districts
- * @throws MalformedURLException
+ * Get list of districts from web services. If waterDistrictList 
+ * is defined, return it. Otherwise call {@link #readWaterDistricts()}.
+ * @return List<ReferenceTablesWaterDistrict> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict}.
  */
 public List<ReferenceTablesWaterDistrict> getWaterDistricts(){
 	if(waterDistrictList == null){
@@ -1034,6 +1162,12 @@ public List<ReferenceTablesWaterDistrict> getWaterDistricts(){
 	return waterDistrictList;
 }
 
+/**
+ * Get water division by matching the water district from the wdid to the
+ * appropriate result in list of water districts.
+ * @param wdid - The WDID to search for in list of water disticts.
+ * @return integer that is the water division.
+ */
 public int getWaterDivisionFromWaterDistricts(String wdid){
 	String wd = wdid.substring(0, 2);
 	List<ReferenceTablesWaterDistrict> waterDistricts;
@@ -1050,8 +1184,9 @@ public int getWaterDivisionFromWaterDistricts(String wdid){
 }
 
 /**
- * Get list of divisions from global variable
- * @return list of divisions
+ * Get list of divisions from web services. If waterDivisionList is defined,
+ * return it. Otherwise call {@link #readWaterDivisions()}.
+ * @return List<ReferenceTablesWaterDivision> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision}.
  */
 public List<ReferenceTablesWaterDivision> getWaterDivisions(){
 	if(waterDivisionList == null){
@@ -1060,7 +1195,12 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions(){
 	return waterDivisionList;
 }
 
-//
+/**
+ * Retrieve water rights net amount from web services using wdid. Convert to POJO using
+ * Jackson and sort by Admin Number.
+ * @param wdid - The wdid to search by to retrieve water rights net amount from web services.
+ * @return List<WaterRightsNetAmount> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount}.
+ */
 public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
 	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
 	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount/?format=json&wdid=" + wdid + getApiKeyString();
@@ -1073,6 +1213,11 @@ public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
 	return waterRightsList;
 }
 
+/**
+ * 
+ * @param wdid
+ * @return
+ */
 public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
 	String request = getServiceRootURI() + "/waterrights/transaction/" + "?format=json" + "&wdid=" + wdid;
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
@@ -1398,7 +1543,8 @@ public boolean isWellTimeSeriesDataType ( String dataType ) {
 }
 
 /**
- * Read counties from web services
+ * Read counties from web services and initialize 
+ * countyList to cache data.
  */
 private void readCounties(){
 	String countyRequest = getServiceRootURI() + "/referencetables/county/?format=json" + getApiKeyString();
@@ -1410,7 +1556,8 @@ private void readCounties(){
 } 
 
 /**
- * Read current in use codes from web services
+ * Read current in use codes from web services and 
+ * initialize currentInUseCodeList to cache data.
  */
 private void readCurrentInUseCodes(){
 	String currentInUseCodesRequest = getServiceRootURI() + "/referencetables/currentinusecodes/?format=json" + getApiKeyString();
@@ -1422,7 +1569,8 @@ private void readCurrentInUseCodes(){
 }
 
 /**
- * Read Designated Basins from web services
+ * Read Designated Basins from web services and 
+ * initialize designatedBasinList to cache data.
  */
 private void readDesignatedBasins(){
 	String designatedBasinRequest = getServiceRootURI() + "/referencetables/designatedbasin/?format=json" + getApiKeyString();
@@ -1434,7 +1582,8 @@ private void readDesignatedBasins(){
 }
 
 /**
- * Read diversion not used codes from web services
+ * Read diversion not used codes from web services and 
+ * initialize diversionNotUsedCodeList to cache data.
  */
 private void readDiversionNotUsedCodes(){
 	String diversionNotUsedCodesRequest = getServiceRootURI() + "/referencetables/diversionnotusedcodes/?format=json" + getApiKeyString();
@@ -1447,6 +1596,7 @@ private void readDiversionNotUsedCodes(){
 
 /**
  * Read div rec observation codes from web services
+ * and initialize divRecObservationList to cache data.
  */
 private void readDivRecObservationCodes(){
 	String divRecObservationCodesRequest = getServiceRootURI() + "/referencetables/divrecobservationcodes/?format=json" + getApiKeyString();
@@ -1458,7 +1608,8 @@ private void readDivRecObservationCodes(){
 }
 
 /**
- * Read div rec types from web services
+ * Read div rec types from web services and 
+ * initialize divRecTypeList to cache data.
  */
 private void readDivRecTypes(){
 	String divRecTypeRequest = getServiceRootURI() + "/referencetables/divrectypes/?format=json" + getApiKeyString();
@@ -1470,7 +1621,22 @@ private void readDivRecTypes(){
 }
 
 /**
- * Read in data and store in global variables for caching purposes
+ * Read in data and store in global variables for caching purposes.<br>
+ * Calls the following methods:<br>
+ * <ul>
+ * <li>{@link #readCounties()}</li>
+ * <li>{@link #readCurrentInUseCodes()}</li>
+ * <li>{@link #readDiversionNotUsedCodes()}</li>
+ * <li>{@link #readDivRecObservationCodes()}</li>
+ * <li>{@link #readDivRecTypes()}</li>
+ * <li>{@link #readGroundwaterPublication()}</li>
+ * <li>{@link #readDesignatedBasins()}</li>
+ * <li>{@link #readManagementDistrict()}</li>
+ * <li>{@link #readPermitActionName()}</li>
+ * <li>{@link #readTelemetryParams()}</li>
+ * <li>{@link #readWaterDistricts()}<li>
+ * <li>{@link #readWaterDivisions()}</li>
+ * </ul>
  * @throws MalformedURLException 
  */
 private void readGlobalData() throws MalformedURLException{
