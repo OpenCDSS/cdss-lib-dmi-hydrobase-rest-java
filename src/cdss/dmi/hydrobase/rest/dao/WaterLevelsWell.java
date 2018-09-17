@@ -10,9 +10,10 @@ import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
- * returned.
- * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells
- * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells-wellId * @author jurentie
+ * returned.<br>
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells<br>
+ * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-groundwater-waterlevels-wells-wellId<br> 
+ * @author jurentie
  */
 /*
  * Ignore any properties defined after defining this class.
