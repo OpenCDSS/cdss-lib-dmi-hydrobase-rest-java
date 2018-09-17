@@ -19,7 +19,7 @@ import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
  * @author jurentie
  *
  */
-/**
+/*
  * Ignore any properties defined after defining this class.
  * If properties are added that are necessary to data processing these can be added,
  * but for now ignore anything that is new so as to not break the code.
