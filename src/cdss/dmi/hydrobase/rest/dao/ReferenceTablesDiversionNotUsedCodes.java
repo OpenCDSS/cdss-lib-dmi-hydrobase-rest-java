@@ -5,13 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 /**
  * This class acts as a way to convert results from DWR web services
  * to a plain old java object, for means of processing the data 
- * returned.
+ * returned.<br>
  * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-referencetables-diversionnotusedcodes
  * @author jurentie
  *
  */
-
-/**
+/*
  * Ignore any properties defined after defining this class.
  * If properties are added that are necessary to data processing these can be added,
  * but for now ignore anything that is new so as to not break the code.
