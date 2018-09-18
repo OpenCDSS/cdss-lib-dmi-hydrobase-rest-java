@@ -2877,7 +2877,7 @@ public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 
 /* TODO: add all these cases to this method */
 public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
-	
+	String routine = getClass().getSimpleName() + ".readWaterClassNumForWdid";
 	DiversionWaterClass waterClass = null;
 
 	try {
@@ -2893,7 +2893,10 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 			waterClass = (DiversionWaterClass)JacksonToolkit.getInstance().treeToValue(resultList.get(i), DiversionWaterClass.class);
 		}
 	} 
-	catch (IOException e) { e.printStackTrace(); }
+	catch (IOException e) {
+		Message.printWarning(3, routine, "Error reading waterclasses (" + e + ").");
+		Message.printWarning(3, routine, e );
+	}
 	
 	return waterClass;
 }
