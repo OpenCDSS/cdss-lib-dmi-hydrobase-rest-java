@@ -14,16 +14,34 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import RTi.Util.Message.Message;
 
+/**
+ * This class is used to simplify the common uses of Jackson in 
+ * {@link cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore}. Jackson is used
+ * to retrieve JSON data from Web Services and then convert that data to a POJO.
+ * @author jurentie
+ *
+ */
 public class JacksonToolkit {
 	
+	/**
+	 * Global ObjectMapper as part of the Jackson library used 
+	 * for serializing and deserializing JSON data to a POJO.
+	 */
 	private ObjectMapper mapper;
+	
+	/**
+	 * Jackson Toolkit used for lazy initialization of a singleton class
+	 */
 	private static JacksonToolkit instance;
 	
 	private JacksonToolkit(){
 		mapper = new ObjectMapper();
 	}
 	
-	//Lazy initialization of a singleton class instance
+	/**
+	 * Lazy initialization of a singleton class instance
+	 * @return instance of JacksonToolkit class
+	 */
 	public static JacksonToolkit getInstance(){
 		if(instance == null){
 			instance = new JacksonToolkit();
@@ -31,6 +49,12 @@ public class JacksonToolkit {
 		return instance;
 	}
 	
+	/**
+	 * Given a url to Web Services this method retrieves the JSON response from 
+	 * DWR web services and converts that to a JsonNode from the Jackson Library.
+	 * @param url - String representing the URL to web services
+	 * @return JsonNode of returned value from web services request.
+	 */
 	public JsonNode getJsonNodeFromWebServices(String url){
 		String routine = "JacksonToolkit.getJsonNodeFromWebServices";
 		JsonNode results = null;
@@ -70,6 +94,13 @@ public class JacksonToolkit {
 		return results;
 	}
 	
+	/**
+	 * If web services returns multiple pages this method will retrieve all results from
+	 * across the separate pages and combine it into a single JsonNode from the Jackson library. 
+	 * @param url - String representing the URL for the request from web services.
+	 * @param pageCount - Number of pages returned from web services.
+	 * @return a single JsonNode with the results from all pages of results.
+	 */
 	private JsonNode getJsonNodeResultsFromURLStringMultiplePages(String url, int pageCount){
 		String routine = "ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLStringsMultiplePages";
 		//Add page index 1 to url
@@ -122,6 +153,11 @@ public class JacksonToolkit {
 		return (JsonNode)results;
 	}
 	
+	/**
+	 * Checks to see if the request string returns a response 200 or an error 404.
+	 * @param urlString - String representing the URL request from web services.
+	 * @return True if request came back okay, with a response 200. False if response 404.
+	 */
 	public boolean httpResponse200(String urlString){
 		HttpURLConnection connection;
 		try {
@@ -136,6 +172,13 @@ public class JacksonToolkit {
 		return true;
 	}
 	
+	/**
+	 * Deserializes a JsonNode to a POJO class.
+	 * @param node - JsonNode to deserialize to POJO.
+	 * @param objClass - The class that the JsonNOde is to be deserialized to.
+	 * @return the POJO that has been initialized via Jackson deserialization 
+	 * from the JsonNode data.
+	 */
 	public Object treeToValue(JsonNode node, Class objClass){
 		String routine = "JacksonToolkit.treeToValue";
 		try {
