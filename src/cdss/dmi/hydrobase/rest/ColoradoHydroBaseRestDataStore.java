@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PrimitiveIterator.OfDouble;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -429,6 +430,11 @@ public List<ParcelUseTimeSeries> getParcelUseTSListFromParcelId(String wdid, int
 	return parcelUseTSList;
 }
 
+/**
+ * Get permit action name list. If permitActionNameList is defined, 
+ * return it. Otherwise call {@link #readPermitActionName()}.
+ * @return List<ReferenceTablesPermitActionName> of {@link cdss.dmi.hydrobase.rest.dao.ReferenceTablesPermitActionName}.
+ */
 public List<ReferenceTablesPermitActionName> getPermitActionName(){
 	if(permitActionNameList == null){
 		readPermitActionName();
@@ -1214,9 +1220,10 @@ public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
 }
 
 /**
- * 
- * @param wdid
- * @return
+ * Retrieve water rights transactions from web services using wdid. Convert to POJO
+ * using Jackson.
+ * @param wdid - The wdid to search by to retrieve water rights transaction from web services.
+ * @return List<WaterRightsTransaction> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsTransaction}.
  */
 public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
 	String request = getServiceRootURI() + "/waterrights/transaction/" + "?format=json" + "&wdid=" + wdid;
@@ -1229,13 +1236,26 @@ public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
 	return waterRightsTransList;
 }
 
-//
+/**
+ * Strips the water class identifier string from data type string when processing
+ * water classes.
+ * @param dataType - The data type portion of the TSID, for water classes.
+ * @return String containing just the water class identifier by removing 'WaterClass-' from the front.
+ */
 private String getWCIdentStringFromDataType(String dataType){
 	int indexOf = dataType.indexOf("-");
 	return (dataType.charAt(dataType.length()  - 1) == ("'").charAt(0)) ? dataType.substring(indexOf + 1, dataType.length() - 1) : 
 						dataType.substring(indexOf + 1, dataType.length());
 }
 
+/**
+ * Based on the given dataType, and input filter values this method
+ * will format the request string necessary for retrieving Wells from 
+ * web services.
+ * @param listOfTriplets - input filter values such as 
+ * ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @return a formatted request string for retrieving well data.
+ */
 public String getWellRequestString(List<String[]> listOfTriplets){
 	String wellRequestString = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json";
 	int newVal;
@@ -1353,7 +1373,13 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 	return wellRequestString;
 }
 
-//
+/**
+ * Get list of water level wells from web services. 
+ * @param dataType
+ * @param interval
+ * @param listOfTriplets
+ * @return
+ */
 public List<WaterLevelsWell> getWells(String dataType, String interval, List<String[]> listOfTriplets){
 	String routine = "ColoradoHydroBaseRestDataStore.getWells";
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
@@ -1373,12 +1399,12 @@ public List<WaterLevelsWell> getWells(String dataType, String interval, List<Str
 // TODO smalers 2018-06-19 the following should return something like WellTimeSeriesCatalog
 // but go with Station for now.
 /**
- * Return the list of well time series, suitable for display in TSTool browse area.
- * @param dataType
- * @param interval
- * @param filterPanel
- * @return
- */
+* Return the list of well time series, suitable for display in TSTool browse area.
+* @param dataType - String representing the datatype. Ex "WellLevelElev"
+* @param interval - Interval such as 15min, day, month, year.
+* @param filterPanel - {@link cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel}
+* @return List<WaterLevelsWell> of {@link cdss.dmi.hydrobase.rest.dao.WaterLevelsWell}.
+*/
 public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
 	List<WaterLevelsWell> wellsList = new ArrayList<>();
 	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
@@ -1479,8 +1505,9 @@ throws URISyntaxException, IOException
 }
 
 /**
- * Indicate whether a time series data type corresponds to a station.
- * @param dataType
+ * Indicate whether a time series data type corresponds to a station.<br>
+ * Needs updated. Right now only returns false
+ * @param dataType - the datatype portion of the TSID ex. 'DivTotal'
  * @return true if data type is for a station, false otherwise
  */
 public boolean isStationTimeSeriesDataType ( String dataType ) {
@@ -1490,7 +1517,7 @@ public boolean isStationTimeSeriesDataType ( String dataType ) {
 
 /**
  * Indicate whether a time series data type corresponds to a structure.
- * @param dataType
+ * @param dataType - the datatype portion of the TSID ex. 'DivTotal'
  * @return true if data type is for a structure, false otherwise
  */
 public boolean isStructureTimeSeriesDataType ( String dataType ) {
@@ -1504,6 +1531,12 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
 	return false;
 }
 
+/**
+ * Returns true if the datatype is a waterclass structure 
+ * @param dataType - the datatype portion of the TSID<br>
+ * ex. 'WaterClass-0102411 S:3 F:0110319.001 U:A T: G:0102552 To:'
+ * @return true if datatype starts with WaterClass
+ */
 public boolean isWaterClassStructure(String dataType){
 	if(dataType.toUpperCase().startsWith("WATERCLASS")){
 		return true;
@@ -1513,7 +1546,7 @@ public boolean isWaterClassStructure(String dataType){
 
 /**
  * Indicate whether a time series data type corresponds to a telemetry station.
- * @param dataType
+ * @param dataType - the datatype portion of the TSID ex. 'DO_SAT'
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
@@ -1528,7 +1561,7 @@ public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
 
 /**
  * Indicate whether a time series data type corresponds to a well.
- * @param dataType
+ * @param dataType - the datatype portion of the TSID ex. 'WaterLevelDepth'
  * @return true if data type is for a well, false otherwise
  */
 public boolean isWellTimeSeriesDataType ( String dataType ) {
@@ -1655,7 +1688,7 @@ private void readGlobalData() throws MalformedURLException{
 }
 
 /**
- * Read groundwater publications from web services
+ * Read groundwater publications from web services. Convert to POJO.
  */
 private void readGroundwaterPublication(){
 	String groundwaterPublicationRequest = getServiceRootURI() + "/referencetables/groundwaterpublication?format=json" + getApiKeyString();
@@ -1666,10 +1699,8 @@ private void readGroundwaterPublication(){
 	}
 }
 
-//TODO @jurentie NOT SURE HOW TO DEAL WITH ANALYSIS SERVICES
-
 /**
- * Read management districts from web services
+ * Read management districts from web services. Convert to POJO.
  */
 private void readManagementDistrict(){
 	String managementDistrictRequest = getServiceRootURI() + "/referencetables/managementdistrict/?format=json" + getApiKeyString();
@@ -1681,8 +1712,7 @@ private void readManagementDistrict(){
 }
 
 /**
- * Read permit action names from web services
- * @throws MalformedURLException 
+ * Read permit action names from web services. Convert to POJO.
  */
 private void readPermitActionName(){
 	String permitActionNameRequest = getServiceRootURI() + "/referencetables/permitactionname/?format=json" + getApiKeyString();
@@ -1694,7 +1724,7 @@ private void readPermitActionName(){
 }
 
 /**
- * Read telemetry params from web services
+ * Read telemetry params from web services. Convert to POJO.
  */
 private void readTelemetryParams(){
 	String telemetryParamsRequest = getServiceRootURI() + "/referencetables/telemetryparams/?format=json" + getApiKeyString();
@@ -2447,39 +2477,28 @@ throws MalformedURLException, Exception
     return ts;
 }
 
-public void fillTSUsingDiversionComments(ColoradoHydroBaseRestDataStore chrds, TS ts, DateTime date1, DateTime date2, 
-		String fillflag, String fillFlagDesc, boolean extend_period){
-	String routine = "ColoradoHydroBaseRestDataStore.fillTSUsingDiversionComments";
-	
-	if( ts == null ){
-		//Nothing to fill
-		return;
-	}
-	
-	TS divcomts = null;
-	int interval_base = ts.getDataIntervalBase();
-	int interval_mult = ts.getDataIntervalMult();
-	try{
-		//Get the diversion comments as a time series, where the year in the time series is irrigation year.
-		if(ts.getDataType().equalsIgnoreCase("DivTotal") || 
-				ts.getDataType().startsWith("WaterClass") || ts.getDataType().startsWith("'WaterClass")){
-			// Diversion comments...
-			System.out.println("Hello World!");
-		}
-	}
-	/*catch ( NoDataFoundException e ) {
-		// This is OK.  There just aren't any diversion comments in the database for this structure.
-		divcomts = null;
-	}*/
-	catch(Exception e) {
-		String message = "Error getting diversion comments for " +
-		ts.getLocation() + ".  HydroBase/software compatibility issue?";
-		Message.printWarning(3, routine, message );
-		Message.printWarning ( 3, routine, e );
-		//throw new HydroBaseException ( message ); 
-	}
-}
-
+/**
+Fill a daily diversion (DivTotal or DivClass) or reservoir (RelTotal, RelClass)
+time series by carrying forward data.  This method is typically only called by internal database
+API code (should be part of data retrieval process, not user-driven data filling).
+The following rules are applied:
+<ol>
+<li>	Filling considers data in blocks of irrigation years (Nov to Oct).</li>
+<li>	If an entire irrigation year is missing, no filling occurs.</li>
+<li>	If an observation occurs before Oct 31 (but no value is recorded on
+	Oct 31), the last observation in the irrigation year is carried to the
+	end of the irrigation year.</li>
+</li>	If an observation occurs after Nov 1 (but no value is recorded on
+	Nov 1), zero is used at the beginning of the irrigation year, until the
+	first observation in that irrigation year.</li>
+<li>	HydroBase should have full months of daily data for months in which
+	there was an observation.  However, do not count on this and fill all
+	months of daily data, as per the rules.</li>
+</ol>
+@param ts Time series to fill.
+@param fillDailyDivFlag a string used to flag filled data.
+@exception Exception if there is an error filling the data.
+*/
 public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 	String routine = "ColoradoHydroBaseRestDataStore.fillTSIrrigationYearCarryForward";
 	if( ts == null ){
@@ -2607,7 +2626,15 @@ public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 	}
 }
 
-/* TODO: add all these cases to this method */
+/**
+ * Get the water class num given the WDID and specifying the div rec type to search by.
+ * @param wdid - the WDID matching the waterclassnum desired.
+ * @param waterClassReqString - If wanting waterclass num for a water class this string will 
+ * be used to match the result with the desired request string.
+ * @param divTotalReq - If true then retrieve DivTotal div rec type.
+ * @param relTotalReq - If true then retrieve RelTotal div rec type.
+ * @return
+ */
 public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,boolean divTotalReq, boolean relTotalReq){
 	
 	DiversionWaterClass waterClass = null;
@@ -2631,8 +2658,7 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 }
 
 /**
- * Read districts from web services
- * @throws MalformedURLException 
+ * Read districts from web services. Convert to POJO.
  */
 private void readWaterDistricts(){
 	String districtRequest = getServiceRootURI() + "/referencetables/waterdistrict/?format=json" + getApiKeyString();
@@ -2644,8 +2670,7 @@ private void readWaterDistricts(){
 }
 
 /**
- * Read divisions from web services
- * @throws MalformedURLException 
+ * Read divisions from web services. Convert to POJO.
  */
 private void readWaterDivisions(){
 	String divisionRequest = getServiceRootURI() + "/referencetables/waterdivision/?format=json" + getApiKeyString();
@@ -2656,6 +2681,10 @@ private void readWaterDivisions(){
 	}
 }
 
+/**
+ * Set the apiKey 
+ * @param apiKey - String that is the api key.
+ */
 public void setApiKey(String apiKey){
 	__apiKey = apiKey;
 }
@@ -2668,6 +2697,13 @@ public void setApiKey(String apiKey){
 
 //TODO @jurentie wellPermitHistory()
 
+/**
+ * Set the comments of the time series if the datatype is a structure. Either DivTotal, RelTotal, or WaterClass
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the comments.<br>
+ * {@link RTi.TS.TS}
+ * @param struct - The Structure containing data used in setting the comments.<br>
+ * {@link cdss.dmi.hydrobase.rest.dao.Structure}
+ */
 public static void setCommentsStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.addToComments("Structure and time series infromation from HydroBaseRest...");
@@ -2684,6 +2720,13 @@ public static void setCommentsStructure ( TS ts, Structure struct )
 	ts.addToComments("Latitude, Longitude             = " + struct.getLatdecdeg() + ", " + struct.getLongdecdeg());
 }
 
+/**
+ * Set the comments of the time series if the datatype is telemetry station.
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the comments.<br>
+ * {@link RTi.TS.TS}
+ * @param tel - The TelemetryStation object containing data used in setting the comments.<br>
+ * {@link cdss.dmi.hydrobase.rest.dao.TelemetryStation}
+ */
 public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
 {
 	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
@@ -2700,6 +2743,13 @@ public static void setCommentsTelemetry (TS ts, TelemetryStation tel)
 	ts.addToComments("Latitude, Longitude             = " + tel.getLatitude() + ", " + tel.getLongitude());
 }
 
+/**
+ * Set the comments of the time series if the datatype is well. Ex. 'WellLevelElev' or 'WellLevelDepth'
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the comments.<br>
+ * {@link RTi.TS.TS}
+ * @param well - The WaterLevelsWell object containing the data used in setting the comments.
+ * {@link cdss.dmi.hydrobase.rest.dao.WaterLevelsWell}
+ */
 public static void setCommentsWell (TS ts, WaterLevelsWell well)
 {
 	ts.addToComments("Telemetry and time series information from HydroBaseRest...");
@@ -2716,6 +2766,13 @@ public static void setCommentsWell (TS ts, WaterLevelsWell well)
 	ts.addToComments("Latitude, Longitude             = " + well.getLatitude() + ", " + well.getLongitude());
 }
 
+/**
+ * Set the properties of the time series if the datatype is a structure. Either DivTotal, RelTotal, or WaterClass
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the properties.<br>
+ * {@link RTi.TS.TS}
+ * @param struct - The Structure containing data used in setting the properties.<br>
+ * {@link cdss.dmi.hydrobase.rest.dao.Structure}
+ */
 public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 {   // Use the same names as the database view columns, same order as view
 	ts.setProperty("wdid", (struct.getWdid() == null) ? null : new Integer(struct.getWdid()));
@@ -2757,6 +2814,13 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct )
 	ts.setProperty("modified", (struct.getModified() == null) ? "" : struct.getModified());
 }
 
+/**
+ * Set the properties of the time series if the datatype is telemetry station.
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the properties.<br>
+ * {@link RTi.TS.TS}
+ * @param tel - The TelemetryStation object containing data used in setting the properties.<br>
+ * {@link cdss.dmi.hydrobase.rest.dao.TelemetryStation}
+ */
 public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel)
 {
 	ts.setProperty("div", (new Integer(tel.getDivision()) == null) ? null : new Integer(tel.getDivision()));
@@ -2789,6 +2853,13 @@ public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel
 	ts.setProperty("moreInformation", (tel.getMoreInformation() == null) ? null : tel.getMoreInformation());
 }
 
+/**
+ * Set the properties of the time series if the datatype is well. Ex. 'WellLevelElev' or 'WellLevelDepth'
+ * @param ts - The time series to add data to. Also used for retrieving data used in setting the properties.<br>
+ * {@link RTi.TS.TS}
+ * @param well - The WaterLevelsWell object containing the data used in setting the properties.
+ * {@link cdss.dmi.hydrobase.rest.dao.WaterLevelsWell}
+ */
 public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 {   // Use the same names as the database view columns, same order as view
 	ts.setProperty("well_id", (new Integer(well.getWellId()) == null) ? null : new Integer(well.getWellId()));
@@ -2837,6 +2908,12 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 	ts.setProperty("more_information", (well.getMoreInformation() == null) ? null : well.getMoreInformation());
 }
 
+/**
+ * Check to see if a water class has diversion comments. This is used in filling data with 
+ * zeroes if a year of data does happen to have diversion comments.
+ * @param wdid - The WDID used to query the given waterclass
+ * @return
+ */
 public boolean waterclassHasComments(String wdid){
 	
 	DiversionWaterClass waterClass = null;
