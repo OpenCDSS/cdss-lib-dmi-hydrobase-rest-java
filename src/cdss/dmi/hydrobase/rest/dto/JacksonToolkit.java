@@ -58,16 +58,17 @@ public class JacksonToolkit {
 	public JsonNode getJsonNodeFromWebServices(String url){
 		String routine = "JacksonToolkit.getJsonNodeFromWebServices";
 		JsonNode results = null;
+		URL request = null;
 		
 		if(!httpResponse200(url)){
-			Message.printWarning(2, routine, url + " returned a 404 error");
+			Message.printWarning(2, routine, "Error: " + url + " returned a 404 error");
 			return null;
 		}
 		
 		//System.out.println(url);
 		
 		try{
-			URL request = new URL(url);
+			request = new URL(url);
 			JsonNode divrecRootNode = mapper.readTree(request);
 			int pageCount = divrecRootNode.get("PageCount").asInt();
 			if(pageCount > 1){
@@ -78,15 +79,18 @@ public class JacksonToolkit {
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
+		catch (MalformedURLException e) {
+			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+		}
 		catch (IOException e) { 
-			Message.printWarning(3, routine, e);
+			Message.printWarning(2, routine, "IOExpection: " + e);
 			return null;
 		}
 		
@@ -112,15 +116,18 @@ public class JacksonToolkit {
 			tempNode = mapper.readTree(new URL(request));
 		} 
 		catch (JsonParseException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
+		catch (MalformedURLException e) {
+			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+		}
 		catch (IOException e) { 
-			Message.printWarning(3, routine, e);
+			Message.printWarning(2, routine, "IOExpection: " + e);
 			return null;
 		}
 		
@@ -139,15 +146,18 @@ public class JacksonToolkit {
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(3, routine, "Error querying results from (" + e + ")");
+			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
 			return null;
 		}
+		catch (MalformedURLException e) {
+			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+		}
 		catch (IOException e) { 
-			Message.printWarning(3, routine, e);
+			Message.printWarning(2, routine, "IOExpection: " + e);
 			return null;
 		}
 		return (JsonNode)results;
@@ -183,11 +193,19 @@ public class JacksonToolkit {
 		String routine = "JacksonToolkit.treeToValue";
 		try {
 			return mapper.treeToValue(node, objClass);
-		} catch (JsonProcessingException e) {
-			Message.printWarning(3, routine, e);
-			e.printStackTrace();
 		}
-		return null;
+		catch (JsonParseException e ) { 
+			Message.printWarning(2, routine, "Error converting response to value from. " + e);
+			return null;
+		}
+		catch (JsonMappingException e ) { 
+			Message.printWarning(2, routine, "Error converting response to value from. " + e);
+			return null;
+		}
+		catch (IOException e) { 
+			Message.printWarning(2, routine, "IOExpection: " + e);
+			return null;
+		}
 	}
 
 }
