@@ -1831,7 +1831,7 @@ throws MalformedURLException, Exception
 		}
 		
 		/* Get first and last date */
-		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
+		// First Date
 		DateTime firstDate = null;
 		if(interval_base == TimeInterval.DAY){ 
 			firstDate = new DateTime(DateTime.PRECISION_DAY); 
@@ -1839,8 +1839,6 @@ throws MalformedURLException, Exception
 			firstDate.setMonth(struct.getPorStart().getMonth());
 			firstDate.setDay(struct.getPorStart().getDay());
 			ts.setDate1Original(firstDate);
-			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
-			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
 		}
 		if(interval_base == TimeInterval.MONTH){ 
 			firstDate = new DateTime(DateTime.PRECISION_MONTH); 
@@ -1977,6 +1975,22 @@ throws MalformedURLException, Exception
 				for(int i = 0; i < results.size(); i++){
 					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionByMonth.class);
 					
+					// 1. Check to see if units have been set
+					// if not, set them.
+					String units = divRecCurrMonth.getMeasUnits();
+					if(tsUnits == null){
+						tsUnits = units;
+						ts.setDataUnits(tsUnits);
+						ts.setDataUnitsOriginal(tsUnits);
+					}
+					
+					// 2. Make sure units are the same
+					if(!units.equalsIgnoreCase(tsUnits)){
+						// TODO ... automatically convert units
+						continue;
+						// TODO ... decide whether and exception should be thrown?
+					}
+					
 					// Set Date
 					DateTime date = new DateTime(DateTime.PRECISION_MONTH);
 					date.setYear(divRecCurrMonth.getYear());
@@ -1991,6 +2005,22 @@ throws MalformedURLException, Exception
 			if(interval_base == TimeInterval.YEAR){
 				for(int i = 0; i < results.size(); i++){
 					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionByYear.class);
+					
+					// 1. Check to see if units have been set
+					// if not, set them.
+					String units = divRecCurrYear.getMeasUnits();
+					if(tsUnits == null){
+						tsUnits = units;
+						ts.setDataUnits(tsUnits);
+						ts.setDataUnitsOriginal(tsUnits);
+					}
+					
+					// 2. Make sure units are the same
+					if(!units.equalsIgnoreCase(tsUnits)){
+						// TODO ... automatically convert units
+						continue;
+						// TODO ... decide whether and exception should be thrown?
+					}
 					
 					// Set Date
 					DateTime date = new DateTime(DateTime.PRECISION_YEAR);
