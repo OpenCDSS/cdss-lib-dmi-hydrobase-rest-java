@@ -604,6 +604,9 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
 	String tdRequestString = getTelemetryDataTypesRequestString(dataType, listOfTriplets);
 	
 	JsonNode telemetryParamsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(tdRequestString);
+	if(telemetryParamsNode == null){
+		return telemetryParams;
+	}
 	
 	//System.out.println(tdRequestString);
 	Message.printStatus(2, routine, "Retrieve telemetry params from url request: " + tdRequestString);
@@ -913,9 +916,8 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 		dataTypes.add("Structure - Volume");
 		dataTypes.add("Structure - WaterClass");
 		// Get list of telemetry data types
-		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
-		for(int i = 0; i < telDataTypes.length; i++){
-			dataTypes.add("Telemetry Station - " + telDataTypes[i]);
+		for(int i = 0; i < telemetryParamsList.size(); i++){
+			dataTypes.add("Telemetry Station - " + telemetryParamsList.get(i).getParameter());
 		}
 		dataTypes.add("Well - WaterLevelDepth");
 		dataTypes.add("Well - WaterLevelElev");
@@ -926,9 +928,8 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 		dataTypes.add("Volume");
 		dataTypes.add("WaterClass");
 		// Get list of telemetry data types
-		String[] telDataTypes = getTelemetryDataTypeParametersFromWebServices();
-		for(int i = 0; i < telDataTypes.length; i++){
-			dataTypes.add(telDataTypes[i]);
+		for(int i = 0; i < telemetryParamsList.size(); i++){
+			dataTypes.add(telemetryParamsList.get(i).getParameter());
 		}
 		dataTypes.add("WaterLevelDepth");
 		dataTypes.add("WaterLevelElev");
@@ -1550,9 +1551,8 @@ public boolean isWaterClassStructure(String dataType){
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
-	String[] dataTypes = getTelemetryDataTypeParametersFromWebServices();
-	for ( int i = 0; i < dataTypes.length; i++ ) {
-		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
+	for ( int i = 0; i < telemetryParamsList.size(); i++ ) {
+		if ( dataType.equalsIgnoreCase(telemetryParamsList.get(i).getParameter()) ) {
 			return true;
 		}
 	}
@@ -1911,7 +1911,10 @@ throws MalformedURLException, Exception
 
 		// FIXME @jurentie 06/26/2018 Do not read all data if not within the bounds of the specified dates
 		// 5. Read Data: 
-		if(readData){
+		if(!readData){
+			return ts;
+		}
+		else{
 			// Get the data from web services
 			String divRecRequest = null;
 			if(interval_base == TimeInterval.DAY){
@@ -2202,7 +2205,10 @@ throws MalformedURLException, Exception
 		
 		setCommentsStructure(ts, struct);
 		
-		if(readData){
+		if(!readData){
+			return ts;
+		}
+		else{
 			// Get the data from web services
 			String divRecRequest = null;
 			// Create request URL for web services API
@@ -2364,8 +2370,11 @@ throws MalformedURLException, Exception
 		setTimeSeriesPropertiesTelemetry(ts, telStation);
 		setCommentsTelemetry(ts, telStation);
 		
+		if(!readData){
+			return ts;
+		}
 		// Read Data
-		if(readData){
+		else{
 			// Pass Data into TS Object
 			if(interval_base == TimeInterval.MINUTE){
 				for(int i = 0; i < results.size(); i++){
