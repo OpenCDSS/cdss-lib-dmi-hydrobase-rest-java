@@ -324,7 +324,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 */
 	@Test
 	public void testLengthOfGetPemitActionNameList(){
-		int expectedLength = 54;
+		int expectedLength = 56;
 		
 		List<ReferenceTablesPermitActionName> permitActionName = chrds.getPermitActionName();
 		int resultLength = permitActionName.size();
@@ -395,9 +395,13 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 */
 	@Test
 	public void testLengthOfGetTelemetryDataTypeParametersFromWebServicesList(){
-		int expectedLength = 40;
+		int expectedLength = 36;
 		
-		String[] telParams = chrds.getTelemetryDataTypeParametersFromWebServices();
+		List<ReferenceTablesTelemetryParams> telParamsList = chrds.getTelemetryParams();
+		String[] telParams = new String[telParamsList.size()];
+		for(int i = 0; i < telParamsList.size(); i++){
+			telParams[i] = telParamsList.get(i).getParameter();
+		}
 		int resultLength = telParams.length;
 		
 		//Uncomment the following to regenerate expected results
@@ -489,7 +493,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 */
 	@Test
 	public void testLengthOfGetSingleTelemetryDischargeMeasurementFromCountyList(){
-		int expectedLength = 709;
+		int expectedLength = 715;
 		
 		String county = "MESA";
 		List<TelemetryDischargeMeasurement> resultsList = chrds.getTelemetryDischargeMeasurement(null, county, -1, -1);
@@ -510,7 +514,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	 */
 	@Test
 	public void testLengthOfGetTelemetryParamsList(){
-		int expectedLength = 40;
+		int expectedLength = 36;
 		
 		List<ReferenceTablesTelemetryParams> resultsList = chrds.getTelemetryParams();
 		int resultsLength = resultsList.size();
