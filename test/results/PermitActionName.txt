@@ -16,6 +16,8 @@
 , ReferenceTablesPermitActionName [ actionName: First Beneficial Use, actionDescr: Date of first beneficial use. ]
 , ReferenceTablesPermitActionName [ actionName: Geophysical Log Received, actionDescr: Geophysical Log Received ]
 , ReferenceTablesPermitActionName [ actionName: Geophysical Log Waived, actionDescr: Geophysical Log Waived ]
+, ReferenceTablesPermitActionName [ actionName: Hydrogeology Review Completed, actionDescr: Hydrogeology Review Completed ]
+, ReferenceTablesPermitActionName [ actionName: Hydrogeology Review Requested, actionDescr: Hydrogeology Review Requested ]
 , ReferenceTablesPermitActionName [ actionName: Late Notice Sent, actionDescr: Notice sent to owner indicating permit about to expire. ]
 , ReferenceTablesPermitActionName [ actionName: Notice (Test Hole), actionDescr: Test hole notice.  Replaced by MH notice in 1988 (no longer used). ]
 , ReferenceTablesPermitActionName [ actionName: Notice of Commencement of Beneficial Use, actionDescr: Notice of Commencement of Beneficial Use received (Statewide nontributary rules). ]
