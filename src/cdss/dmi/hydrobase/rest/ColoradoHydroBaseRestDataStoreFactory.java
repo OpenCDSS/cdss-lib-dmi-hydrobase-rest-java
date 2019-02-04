@@ -3,6 +3,7 @@ package cdss.dmi.hydrobase.rest;
 import java.net.URI;
 
 import RTi.Util.IO.PropList;
+import RTi.Util.Message.Message;
 import riverside.datastore.DataStore;
 import riverside.datastore.DataStoreFactory;
 
@@ -15,10 +16,10 @@ public class ColoradoHydroBaseRestDataStoreFactory implements DataStoreFactory
 {
 
 /**
-Create an ColoradoHydrobaseRestDataStore instance.
+Create a ColoradoHydroBaseRestDataStore instance.
 */
 public DataStore create ( PropList props )
-{
+{   String routine = getClass().getSimpleName() + ".create";
     String name = props.getValue ( "Name" );
     String description = props.getValue ( "Description" );
     if ( description == null ) {
@@ -32,6 +33,8 @@ public DataStore create ( PropList props )
         return ds;
     }
     catch ( Exception e ) {
+        Message.printWarning(3,routine,"Exception opening the Colorado HydroBase REST web service datstore (" + e + ")");
+        Message.printWarning(3,routine,e);
         throw new RuntimeException ( e );
     }
 }
