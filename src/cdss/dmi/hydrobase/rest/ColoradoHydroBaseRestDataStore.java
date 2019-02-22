@@ -1137,8 +1137,8 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 			e.printStackTrace();
 		}
 	}
-	wcRequestString += "&apiKey=" + getApiKeyString();
-		
+	wcRequestString += getApiKeyString();
+	System.out.println("wcRequestString: " + wcRequestString);
 	return wcRequestString;
 }
 
@@ -1775,6 +1775,8 @@ throws MalformedURLException, Exception
 {   
 	String routine = "ColoradoHydroBaseRestDataStore.readTimeSeries";
 	
+	boolean debug = false;
+	
 	// Make sure data store is initialized
     initialize();
     determineAPIVersion();
@@ -1785,6 +1787,10 @@ throws MalformedURLException, Exception
 	String locid = tsident.getLocation();
 	String data_type = tsident.getType(); // TSID data type
 	String data_source = tsident.getSource();
+	
+	if(debug){
+		System.out.println("Data Type: " + data_type);
+	}
 	
 	String tsUnits = null;
 
@@ -1957,6 +1963,9 @@ throws MalformedURLException, Exception
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear/?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + getApiKeyString();
 				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
+			}
+			if(debug){ 
+				System.out.println("DivRecRequest: " + divRecRequest);
 			}
 			// Get JsonNode results give the request URL
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
@@ -2158,6 +2167,9 @@ throws MalformedURLException, Exception
 		
 		// Get Structure
 		String structRequest = getServiceRootURI() + "/structures/?format=json&wdid=" + wdid + getApiKeyString();
+		if(debug){
+			System.out.println("structRequest: " + structRequest);
+		}
 		JsonNode structResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(structRequest).get(0);
 		// Log structure request for debugging properties
 		//System.out.println(structRequest);
@@ -2238,6 +2250,9 @@ throws MalformedURLException, Exception
 			divRecRequest = getServiceRootURI() + "/structures/divrec/stagevolume/" + wdid + "?format=json" + getApiKeyString();
 			//System.out.println(divRecRequest);
 			// Get JsonNode results give the request URL
+			if(debug){
+				System.out.println("divRecRequest: " + divRecRequest);
+			}
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
 				
 			for(int i = 0; i < results.size(); i++){
@@ -2268,6 +2283,9 @@ throws MalformedURLException, Exception
 		
 		// Get Telemetry
 		String telemetryRequest = getServiceRootURI() + "/telemetrystations/telemetrystation/?format=json&abbrev=" + abbrev + getApiKeyString();
+		if(debug){
+			System.out.println("telemetryRequest: " + telemetryRequest);
+		}
 		JsonNode telemetryResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telemetryRequest).get(0);
 		
 		TelemetryStation telStation = (TelemetryStation)JacksonToolkit.getInstance().treeToValue(telemetryResult, TelemetryStation.class);
@@ -2295,6 +2313,10 @@ throws MalformedURLException, Exception
 			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday/?abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
 			//System.out.println(telRequest);
 			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
+		}
+		
+		if(debug){
+			System.out.println("telRequest: " + telRequest);
 		}
 		
 		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telRequest);
@@ -2455,6 +2477,9 @@ throws MalformedURLException, Exception
 		
 		// Get Well 
 		String wellRequest = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid +  getApiKeyString();
+		if(debug){
+			System.out.println("wellRequest: " + wellRequest);
+		}
 		JsonNode wellResults = JacksonToolkit.getInstance().getJsonNodeFromWebServices(wellRequest).get(0);
 		
 		//System.out.println(wellRequest);
@@ -2508,6 +2533,9 @@ throws MalformedURLException, Exception
 		// Read Data
 		if(readData){
 			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + getApiKeyString();
+			if(debug){
+				System.out.println("wellMeasurementRequest: " + wellMeasurementRequest);
+			}
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(wellMeasurementRequest);
 			//System.out.println(wellMeasurementRequest);
 			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
