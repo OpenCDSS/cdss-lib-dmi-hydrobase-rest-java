@@ -29,19 +29,18 @@ import java.util.List;
 //import DWR.DMI.HydroBaseDMI.HydroBase_StationGeolocMeasType;
 //import DWR.DMI.HydroBaseDMI.HydroBase_Util;
 
-import RTi.DMI.DMIUtil;
 import RTi.TS.TSIdent;
 import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
+import cdss.dmi.hydrobase.rest.dao.Station;
 
 /**
 This class is a table model for time series header information for HydroBase station time series.
 By default the sheet will contain row and column numbers.
 */
 @SuppressWarnings("serial")
-public class ColoradoHydroBaseRest_Station_TableModel<T> extends JWorksheet_AbstractRowTableModel<T> implements TimeSeriesIdentifierProvider
+public class ColoradoHydroBaseRest_Station_TableModel extends JWorksheet_AbstractRowTableModel<Station> implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -86,7 +85,7 @@ The input type defaults to "HydroBase".
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_Station_TableModel ( JWorksheet worksheet, List<T> data )
+public ColoradoHydroBaseRest_Station_TableModel ( JWorksheet worksheet, List<Station> data )
 throws Exception
 {
     this ( worksheet, data, null );
@@ -101,7 +100,7 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_Station_TableModel ( JWorksheet worksheet, List<T> data, String inputType )
+public ColoradoHydroBaseRest_Station_TableModel ( JWorksheet worksheet, List<Station> data, String inputType )
 throws Exception
 {
 	if ( data == null ) {
@@ -252,6 +251,9 @@ Return a TSIdent object for the specified row, used to transfer the table to val
 @exception Exception if there is an error setting the interval in the TSIdent.
 */
 public TSIdent getTimeSeriesIdentifier(int row) {
+	if ( __inputType == null ) {
+		// TODO use to avoid compiler warning about unused
+	}
     TSIdent tsid = new TSIdent();
     String id = (String)getValueAt( row, COL_ID );
     tsid.setLocation(id);

@@ -25,7 +25,7 @@ package cdss.dmi.hydrobase.rest.ui;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -34,9 +34,9 @@ import RTi.Util.GUI.InputFilter_JPanel;
 
 import RTi.Util.String.StringUtil;
 import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
-import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
-import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
-import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
+//import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCounty;
+//import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
+//import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 
 @SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_Station_InputFilter_JPanel
@@ -82,7 +82,7 @@ throws Exception
 	input_filters.add ( new InputFilter ("", "",
 	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter
 
-	InputFilter filter;
+	//InputFilter filter;
 	// TODO smalers 2018-06-20 Don't show any filters until station web service is actually available
 	/*
     // County

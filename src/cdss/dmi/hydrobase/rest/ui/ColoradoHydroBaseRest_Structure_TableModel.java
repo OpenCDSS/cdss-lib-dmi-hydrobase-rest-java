@@ -29,18 +29,17 @@ import java.util.List;
 //import DWR.DMI.HydroBaseDMI.HydroBase_StructureGeolocStructMeasType;
 //import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 
-import RTi.DMI.DMIUtil;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
 import cdss.dmi.hydrobase.rest.dao.Structure;
 
 /**
 This class is a table model for time series header information for HydroBase structure time series.
 By default the sheet will contain row and column numbers.
 */
+@SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_Structure_TableModel
-extends JWorksheet_AbstractRowTableModel
+extends JWorksheet_AbstractRowTableModel<Structure>
 {
 
 /**
@@ -127,7 +126,7 @@ throws Exception
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		// FIXME - can't seem to handle missing...
 		//case COL_START:		return Integer.class;
@@ -269,7 +268,14 @@ From AbstractTableModel.  Returns the data that should be placed in the JTable a
 */
 public Object getValueAt(int row, int col)
 {	
+	if ( __wdid_length < 0 ) {
+		// TODO put in so compiler does not complain about unused
+	}
+	if ( __inputType == null ) {
+		// TODO put in so compiler does not complain about unused
+	}
 	return null;
+	
 	// If sorted, get the position in the data from the displayed row.
 	/*if (_sortOrder != null) {
 		row = _sortOrder[row];

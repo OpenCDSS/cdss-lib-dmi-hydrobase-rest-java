@@ -23,8 +23,6 @@ NoticeEnd */
 
 package cdss.dmi.hydrobase.rest.dao;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;

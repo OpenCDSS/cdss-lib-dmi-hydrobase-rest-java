@@ -29,7 +29,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -212,7 +211,7 @@ public class JacksonToolkit {
 	 * @return the POJO that has been initialized via Jackson deserialization 
 	 * from the JsonNode data.
 	 */
-	public Object treeToValue(JsonNode node, Class objClass){
+	public Object treeToValue(JsonNode node, Class<?> objClass){
 		String routine = "JacksonToolkit.treeToValue";
 		try {
 			return mapper.treeToValue(node, objClass);

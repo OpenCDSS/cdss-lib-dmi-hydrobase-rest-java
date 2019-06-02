@@ -30,22 +30,20 @@ import java.util.List;
 //import DWR.DMI.HydroBaseDMI.HydroBase_WaterDistrict;
 ///import DWR.DMI.HydroBaseDMI.HydroBase_GroundWaterWellsView;
 
-import RTi.DMI.DMIUtil;
 import RTi.TS.TSIdent;
 import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
-import RTi.Util.String.StringUtil;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
-import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 
 /**
 This class is a table model for time series header information for HydroBase well time series that are not stored
 with structures.
 By default the sheet will contain row and column numbers.
 */
+@SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_Well_TableModel
-extends JWorksheet_AbstractRowTableModel implements TimeSeriesIdentifierProvider
+extends JWorksheet_AbstractRowTableModel<WaterLevelsWell> implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -73,7 +71,7 @@ public final int COL_UTM_X = 16;
 public final int COL_UTM_Y = 17;
 public final int COL_INPUT_TYPE = 18;
 
-private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs.
+//private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs.
 
 /**
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
@@ -91,7 +89,7 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, List data )
+public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, List<WaterLevelsWell> data )
 throws Exception
 {
     this ( worksheet, -1, data, null );
@@ -107,12 +105,12 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, int wdid_length, List data, String inputType )
+public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, int wdid_length, List<WaterLevelsWell> data, String inputType )
 throws Exception
 {	if ( wdid_length <= 0 ) {
 		wdid_length = 7;
 	}
-	__wdid_length = wdid_length;
+	//__wdid_length = wdid_length;
 	if ( data == null ) {
 		_rows = 0;
 	}
@@ -129,7 +127,7 @@ throws Exception
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		// FIXME - can't seem to handle missing...
 		//case COL_START:		return Integer.class;
@@ -293,7 +291,7 @@ public Object getValueAt(int row, int col)
 		row = _sortOrder[row];
 	}
 
-	WaterLevelsWell well = (WaterLevelsWell) _data.get(row);
+	WaterLevelsWell well = _data.get(row);
 	
 	DecimalFormat df = new DecimalFormat();
 	df.setMaximumFractionDigits(6);
@@ -340,7 +338,7 @@ Set the width of WDIDs, which controls formatting of the ID column for structure
 @param wdid_length WDID length for formatting the ID.
 */
 public void setWDIDLength ( int wdid_length )
-{	__wdid_length = wdid_length;
+{	//__wdid_length = wdid_length;
 }
 
 }
