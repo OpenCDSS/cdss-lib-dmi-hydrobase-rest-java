@@ -37,7 +37,7 @@ This class is a table model for time series header information for HydroBase sta
 By default the sheet will contain row and column numbers.
 */
 @SuppressWarnings("serial")
-public class ColoradoHydroBaseRest_TelemetryStation_TableModel<T> extends JWorksheet_AbstractRowTableModel<T>
+public class ColoradoHydroBaseRest_TelemetryStation_TableModel extends JWorksheet_AbstractRowTableModel<TelemetryStationDataTypes>
 implements TimeSeriesIdentifierProvider
 {
 
@@ -84,7 +84,7 @@ The input type defaults to "HydroBase".
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_TelemetryStation_TableModel ( JWorksheet worksheet, List<T> data )
+public ColoradoHydroBaseRest_TelemetryStation_TableModel ( JWorksheet worksheet, List<TelemetryStationDataTypes> data )
 throws Exception
 {
     this ( worksheet, data, null );
@@ -99,7 +99,7 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_TelemetryStation_TableModel ( JWorksheet worksheet, List<T> data, String inputType )
+public ColoradoHydroBaseRest_TelemetryStation_TableModel ( JWorksheet worksheet, List<TelemetryStationDataTypes> data, String inputType )
 throws Exception
 {
 	if ( data == null ) {

@@ -23,8 +23,6 @@ NoticeEnd */
 
 package cdss.dmi.hydrobase.rest.dao;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
@@ -110,13 +108,13 @@ public class WaterRightsNetAmount {
 	private String decreedUnits;
 	
 	/**
-	 * Beneficial uses of water right: • 0 - STORAGE • 1 - IRRIGATION • 2 - MUNICIPAL • 3 - COMMERCIAL 
-	 * • 4- INDUSTRIAL • 5 - RECREATION • 6 - FISHERY • 7 - FIRE • 8 - DOMESTIC • 9 - STOCK 
-	 * • A - AUGMENTATION • B - EXPORT FROM BASIN • C - CUMULATIVE ACCRETION TO RIVER 
-	 * • D - CUMULATIVE DEPLETION FROM RIVER • E - EVAPORATIVE • F - FEDERAL RESERVED 
-	 * • G - GEOTHERMAL • H - HOUSEHOLD USE ONLY • K - SNOW MAKING • M - MINIMUM STREAMFLOW 
-	 * • N - NET EFFECT ON RIVER • P - POWER GENERATION • Q - OTHER • R - RECHARGE • S - EXPORT FROM STATE 
-	 * • T - TRANSMOUNTAIN EXPORT • W - WILDLIFE • X - ALL BENEFICIAL USES
+	 * Beneficial uses of water right: â€¢ 0 - STORAGE â€¢ 1 - IRRIGATION â€¢ 2 - MUNICIPAL â€¢ 3 - COMMERCIAL 
+	 * â€¢ 4- INDUSTRIAL â€¢ 5 - RECREATION â€¢ 6 - FISHERY â€¢ 7 - FIRE â€¢ 8 - DOMESTIC â€¢ 9 - STOCK 
+	 * â€¢ A - AUGMENTATION â€¢ B - EXPORT FROM BASIN â€¢ C - CUMULATIVE ACCRETION TO RIVER 
+	 * â€¢ D - CUMULATIVE DEPLETION FROM RIVER â€¢ E - EVAPORATIVE â€¢ F - FEDERAL RESERVED 
+	 * â€¢ G - GEOTHERMAL â€¢ H - HOUSEHOLD USE ONLY â€¢ K - SNOW MAKING â€¢ M - MINIMUM STREAMFLOW 
+	 * â€¢ N - NET EFFECT ON RIVER â€¢ P - POWER GENERATION â€¢ Q - OTHER â€¢ R - RECHARGE â€¢ S - EXPORT FROM STATE 
+	 * â€¢ T - TRANSMOUNTAIN EXPORT â€¢ W - WILDLIFE â€¢ X - ALL BENEFICIAL USES
 	 */
 	private String decreedUses;
 	
@@ -186,7 +184,7 @@ public class WaterRightsNetAmount {
 	private String permit;
 	
 	/**
-	 * Principal Meridian of well’s legal location - there are 5 principal meridians in CO: Sixth (S), 
+	 * Principal Meridian of wellâ€™s legal location - there are 5 principal meridians in CO: Sixth (S), 
 	 * New Mexico (N), Baca (B), Costilla (C), and Ute (U)
 	 */
 	private String pm;
@@ -218,7 +216,7 @@ public class WaterRightsNetAmount {
 	private String q40;
 	
 	/**
-	 * Legal location: A number in the format “nnnd” where “nnn” is the range number and “d” is the direction 
+	 * Legal location: A number in the format â€œnnndâ€� where â€œnnnâ€� is the range number and â€œdâ€� is the direction 
 	 * either East or West
 	 */
 	private String range;
@@ -229,7 +227,7 @@ public class WaterRightsNetAmount {
 	private String seasonalLimitation;
 	
 	/**
-	 * Section number - township, range divided into 36 one square mile sections; “U” indicates location in 
+	 * Section number - township, range divided into 36 one square mile sections; â€œUâ€� indicates location in 
 	 * Ute Correction (Division 7 only)
 	 */
 	private String section;

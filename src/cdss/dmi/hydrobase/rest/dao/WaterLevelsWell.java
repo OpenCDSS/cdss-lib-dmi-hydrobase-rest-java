@@ -23,8 +23,6 @@ NoticeEnd */
 
 package cdss.dmi.hydrobase.rest.dao;
 
-import java.time.LocalDateTime;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
@@ -184,24 +182,24 @@ public class WaterLevelsWell {
 	private String permit;
 
 	/**
-	 * Principal Meridian of well’s legal location - there are 5 principal 
+	 * Principal Meridian of wellâ€™s legal location - there are 5 principal 
 	 * meridians in CO: Sixth (S), New Mexico (N), Baca (B), Costilla (C), 
 	 * and Ute (U)
 	 */
 	private String pm;
 
 	/**
-	 * Count of measurements in the well’s period of record
+	 * Count of measurements in the wellâ€™s period of record
 	 */
 	private int porCount;
 
 	/**
-	 * Date of last measurement in the well’s period of record
+	 * Date of last measurement in the wellâ€™s period of record
 	 */
 	private DateTime porEnd;
 
 	/**
-	 * Date of first measurement in the well’s period of record
+	 * Date of first measurement in the wellâ€™s period of record
 	 */
 	private DateTime porStart;
 
@@ -226,8 +224,8 @@ public class WaterLevelsWell {
 	private String q40;
 
 	/**
-	 * Legal location: A number in the format “nnnd” where “nnn” 
-	 * is the range number and “d” is the direction either East or West
+	 * Legal location: A number in the format â€œnnndâ€� where â€œnnnâ€� 
+	 * is the range number and â€œdâ€� is the direction either East or West
 	 */
 	private String range;
 
@@ -238,7 +236,7 @@ public class WaterLevelsWell {
 
 	/**
 	 * Section number - township, range divided into 36 one square mile sections; 
-	 * “U” indicates location in Ute Correction (Division 7 only)
+	 * â€œUâ€� indicates location in Ute Correction (Division 7 only)
 	 */
 	private String section;
 

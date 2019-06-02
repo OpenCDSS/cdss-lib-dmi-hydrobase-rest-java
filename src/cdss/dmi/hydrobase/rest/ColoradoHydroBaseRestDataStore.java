@@ -28,27 +28,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.PrimitiveIterator.OfDouble;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import riverside.datastore.AbstractWebServiceDataStore;
-import RTi.DMI.DMISelectStatement;
-import RTi.DMI.DMIUtil;
-import RTi.TS.DayTS;
 import RTi.TS.TS;
 import RTi.TS.TSData;
 import RTi.TS.TSDataFlagMetadata;
@@ -99,7 +86,6 @@ import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWellMeasurement;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsTransaction;
-import cdss.dmi.hydrobase.rest.dao.WellPermit;
 import cdss.dmi.hydrobase.rest.dto.JacksonToolkit;
 
 /**
@@ -417,7 +403,7 @@ public List<ReferenceTablesManagementDistrict> getManagementDistrict(){
  * @param wdid (required) - The WDID to query the ParcelUseTsList.
  */
 public void readParcelUseTSList(String wdid){	
-	String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
+	//String routine = "ColoradoHydroBaseRestDataStore.getParcelUseTSList";
 	List<ParcelUseTimeSeries> parcelUseTSList = new ArrayList<ParcelUseTimeSeries>(); 
 	String parcelUseRequest = getServiceRootURI() + "/structures/parcelusets/" + wdid + "?apiKey=" + getApiKey();
 	JsonNode parcelUseResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(parcelUseRequest);
@@ -649,7 +635,7 @@ public List<TelemetryStationDataTypes> getTelemetryDataTypes(String dataType, St
  * @return a String array of telemetry parameters
  */
 public String[] getTelemetryDataTypeParametersFromWebServices(){	
-	String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
+	//String routine = "ColoradoHydroBaseRestDataStore.getTelemetryDataTypesFromWebServices";
 	String telParametersRequest = getServiceRootURI() + "/referencetables/telemetryparams/?apiKey=" + getApiKey();
 	JsonNode telemetryDataTypes = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telParametersRequest);
 
@@ -1786,7 +1772,7 @@ throws MalformedURLException, Exception
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
 	String locid = tsident.getLocation();
 	String data_type = tsident.getType(); // TSID data type
-	String data_source = tsident.getSource();
+	//String data_source = tsident.getSource();
 	
 	if(debug){
 		System.out.println("Data Type: " + data_type);
@@ -2183,7 +2169,7 @@ throws MalformedURLException, Exception
 		// Set structure name as TS Description
 		ts.setDescription(struct.getStructureName());
 		
-		int waterClassNumForWdid = 0;
+		//int waterClassNumForWdid = 0;
 		
 		/* Get first and last date */
 		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
@@ -2231,7 +2217,7 @@ throws MalformedURLException, Exception
 			ts.setInputName ( "HydroBase annual_amt.ann_amt");
 		}
 		
-		TSIterator iterator = ts.iterator();
+		//TSIterator iterator = ts.iterator();
 		
 		// 4. Set Properties:
 		//FIXME @jurentie 06/26/2018 - move add to genesis elsewhere

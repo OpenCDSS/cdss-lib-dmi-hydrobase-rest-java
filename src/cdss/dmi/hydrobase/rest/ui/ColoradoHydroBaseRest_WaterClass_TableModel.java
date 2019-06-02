@@ -39,7 +39,7 @@ By default the sheet will contain row and column numbers.
 */
 @SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_WaterClass_TableModel
-extends JWorksheet_AbstractRowTableModel implements TimeSeriesIdentifierProvider
+extends JWorksheet_AbstractRowTableModel<DiversionWaterClass> implements TimeSeriesIdentifierProvider
 {
 
 /**
@@ -76,7 +76,7 @@ with other State-related data, such as ColoradoWaterSMS).
 */
 private String __inputType = "ColoradoHydroBaseRest";
 
-private String __timeStep = null;
+//private String __timeStep = null;
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -121,7 +121,7 @@ throws Exception
 From AbstractTableModel.  Returns the class of the data stored in a given column.
 @param columnIndex the column for which to return the data class.
 */
-public Class getColumnClass (int columnIndex) {
+public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
 		// FIXME - can't seem to handle missing...
 		//case COL_START:		return Integer.class;
@@ -373,7 +373,7 @@ Sets the alternate time step to display, rather than the one read from the
 database.
 */
 public void setTimeStep(String timeStep) {
-	__timeStep = timeStep;
+	//__timeStep = timeStep;
 }
 
 }

@@ -4,6 +4,9 @@
 # Ignore the distribution folder created for local distribution and setup.exe files
 /dist
 
+# Ignore Eclipse settings
+/.settings
+
 # Ignore vi editor swap files
 *.swp
 *.swo

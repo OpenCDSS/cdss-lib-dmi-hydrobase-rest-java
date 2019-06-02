@@ -28,6 +28,7 @@ import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
 /**
 This class is used to render cells for TSTool_HydroBase_StructureGeolocStructMeasType_TableModel data.
 */
+@SuppressWarnings("serial")
 public class ColoradoHydroBaseRest_Structure_CellRenderer
 extends JWorksheet_DefaultTableCellRenderer {
 
