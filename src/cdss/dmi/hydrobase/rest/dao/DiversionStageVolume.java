@@ -67,18 +67,17 @@ public class DiversionStageVolume {
 	/**
 	 * Recorded stage (feet) 
 	 */
-	private double stage;
+	private Double stage;
 	
 	/** 
 	 * Recorded volume (AF) 
 	 */
-	private double volume;
+	private Double volume;
 
 	/**
 	 * WDID 
 	 */
 	private String wdid;
-	
 	
 	/**
 	 * Getters and setters for defined variables.
@@ -93,11 +92,11 @@ public class DiversionStageVolume {
 	public DateTime getModified() {
 		return modified;
 	}
-	public double getStage() {
+	public Double getStage() {
 		return stage;
 	}
 
-	public double getVolume() {
+	public Double getVolume() {
 		return volume;
 	}
 	public String getWdid() {
@@ -114,11 +113,11 @@ public class DiversionStageVolume {
 	public void setModified(String modified) {
 		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
 	}
-	public void setStage(double stage) {
+	public void setStage(Double stage) {
 		this.stage = stage;
 	}
 
-	public void setVolume(double volume) {
+	public void setVolume(Double volume) {
 		this.volume = volume;
 	}
 	public void setWdid(String wdid) {

@@ -61,12 +61,12 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	/**
 	 * Analysis Out Of Priority Percent Of Day
 	 */
-	private double analysisOutOfPriorityPercentOfDay;
+	private Double analysisOutOfPriorityPercentOfDay;
 	
 	/**
 	 * Analysis Stream Mile
 	 */
-	private double analysisStreamMile;
+	private Double analysisStreamMile;
 	
 	/**
 	 * Analysis Water Source Name
@@ -76,7 +76,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	/**
 	 * Analysis Water Right Administration Number
 	 */
-	private double analysisWrAdminNo;
+	private Double analysisWrAdminNo;
 	
 	/**
 	 * Bounding Structure Name
@@ -104,7 +104,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	private DateTime dateTimeSet;
 	
 	/**
-	 * DWR Water Divsion
+	 * DWR Water Division
 	 */
 	private int division;
 	
@@ -121,12 +121,12 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	/**
 	 * Location Wdid Stream Mile
 	 */
-	private double locationWdidStreamMile;
+	private Double locationWdidStreamMile;
 	
 	/**
 	 * Priority Administration Number
 	 */
-	private double priorityAdminNo;
+	private Double priorityAdminNo;
 	
 	/**
 	 * Priority Date
@@ -141,7 +141,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 	/**
 	 * Priority Order Number
 	 */
-	private int priorityOrderNo;
+	private Integer priorityOrderNo;
 	
 	/**
 	 * Priority Structure
@@ -179,17 +179,17 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		return analysisGnisId;
 	}
 	
-	public double getAnalysisOutOfPriorityPercentOfDay() {
+	public Double getAnalysisOutOfPriorityPercentOfDay() {
 		return analysisOutOfPriorityPercentOfDay;
 	}
-	public double getAnalysisStreamMile() {
+	public Double getAnalysisStreamMile() {
 		return analysisStreamMile;
 	}
 	
 	public String getAnalysisWaterSourceName() {
 		return analysisWaterSourceName;
 	}
-	public double getAnalysisWrAdminNo() {
+	public Double getAnalysisWrAdminNo() {
 		return analysisWrAdminNo;
 	}
 	
@@ -221,10 +221,10 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		return locationWdid;
 	}
 	
-	public double getLocationWdidStreamMile() {
+	public Double getLocationWdidStreamMile() {
 		return locationWdidStreamMile;
 	}
-	public double getPriorityAdminNo() {
+	public Double getPriorityAdminNo() {
 		return priorityAdminNo;
 	}
 	
@@ -235,7 +235,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		return priorityNo;
 	}
 	
-	public int getPriorityOrderNo() {
+	public Integer getPriorityOrderNo() {
 		return priorityOrderNo;
 	}
 	public String getPriorityStructure() {
@@ -263,17 +263,17 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		this.analysisGnisId = analysisGnisId;
 	}
 	
-	public void setAnalysisOutOfPriorityPercentOfDay(double analysisOutOfPriorityPercentOfDay) {
+	public void setAnalysisOutOfPriorityPercentOfDay(Double analysisOutOfPriorityPercentOfDay) {
 		this.analysisOutOfPriorityPercentOfDay = analysisOutOfPriorityPercentOfDay;
 	}
-	public void setAnalysisStreamMile(double analysisStreamMile) {
+	public void setAnalysisStreamMile(Double analysisStreamMile) {
 		this.analysisStreamMile = analysisStreamMile;
 	}
 	
 	public void setAnalysisWaterSourceName(String analysisWaterSourceName) {
 		this.analysisWaterSourceName = analysisWaterSourceName;
 	}
-	public void setAnalysisWrAdminNo(double analysisWrAdminNo) {
+	public void setAnalysisWrAdminNo(Double analysisWrAdminNo) {
 		this.analysisWrAdminNo = analysisWrAdminNo;
 	}
 	
@@ -305,10 +305,10 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		this.locationWdid = locationWdid;
 	}
 	
-	public void setLocationWdidStreamMile(double locationWdidStreamMile) {
+	public void setLocationWdidStreamMile(Double locationWdidStreamMile) {
 		this.locationWdidStreamMile = locationWdidStreamMile;
 	}
-	public void setPriorityAdminNo(double priorityAdminNo) {
+	public void setPriorityAdminNo(Double priorityAdminNo) {
 		this.priorityAdminNo = priorityAdminNo;
 	}
 	
@@ -319,7 +319,7 @@ public class AnalysisServicesCallAnalysisByGnisId {
 		this.priorityNo = priorityNo;
 	}
 	
-	public void setPriorityOrderNo(int priorityOrderNo) {
+	public void setPriorityOrderNo(Integer priorityOrderNo) {
 		this.priorityOrderNo = priorityOrderNo;
 	}
 	public void setPriorityStructure(String priorityStructure) {

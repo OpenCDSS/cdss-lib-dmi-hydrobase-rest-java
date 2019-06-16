@@ -30,6 +30,7 @@ import RTi.TS.TSIdent;
 import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import RTi.Util.Time.DateTime;
 import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
 
 /**
@@ -44,7 +45,7 @@ implements TimeSeriesIdentifierProvider
 /**
 Number of columns in the table model, including the row number.
 */
-private final int __COLUMNS = 21;
+private final int __COLUMNS = 25;
 
 public final int COL_ID = 0;
 public final int COL_ABBREV = 1;
@@ -54,19 +55,24 @@ public final int COL_DATA_SOURCE_NAME = 4;
 public final int COL_DATA_TYPE = 5;
 public final int COL_TIME_STEP = 6;
 public final int COL_UNITS = 7;
-public final int COL_START = 8;
-public final int COL_END = 9;
-public final int COL_MEAS_COUNT = 10;
-public final int COL_DIV = 11;
-public final int COL_DIST = 12;
-public final int COL_COUNTY = 13;
-public final int COL_STATE = 14;
-public final int COL_HUC = 15;
-public final int COL_LONG = 16;
-public final int COL_LAT = 17;
-public final int COL_UTM_X = 18;
-public final int COL_UTM_Y = 19;
-public final int COL_INPUT_TYPE = 20;
+public final int COL_STATUS = 8;
+public final int COL_THIRD_PARTY = 9;
+public final int COL_START = 10;
+public final int COL_END = 11;
+//public final int COL_MEAS_COUNT = 10;
+public final int COL_DIV = 12;
+public final int COL_DIST = 13;
+public final int COL_COUNTY = 14;
+public final int COL_STATE = 15;
+public final int COL_GNIS_ID = 16;
+public final int COL_STREAM_MILE = 17;
+public final int COL_WATER_SOURCE = 18;
+public final int COL_HUC = 19;
+public final int COL_LONG = 20;
+public final int COL_LAT = 21;
+public final int COL_UTM_X = 22;
+public final int COL_UTM_Y = 23;
+public final int COL_INPUT_TYPE = 24;
 
 /**
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
@@ -153,17 +159,22 @@ public String getColumnName(int columnIndex) {
 		case COL_UNITS: return "Units";
 		case COL_START: return "Start";
 		case COL_END: return "End";
-		case COL_MEAS_COUNT: return "Meas. Count";
+		//case COL_MEAS_COUNT: return "Meas. Count";
+		case COL_STATUS: return "Status";
+		case COL_THIRD_PARTY: return "Third Party";
 		case COL_DIV: return "Div.";
 		case COL_DIST: return "Dist.";
 		case COL_COUNTY: return "County";
 		case COL_STATE: return "State";
+		case COL_GNIS_ID: return "GNIS ID";
+		case COL_STREAM_MILE: return "Stream Mile";
+		case COL_WATER_SOURCE: return "Water Source";
 		case COL_HUC: return "HUC";
         case COL_LONG: return "Longtitude";
         case COL_LAT: return "Latitude";
 		case COL_UTM_X: return "UTM X";
 		case COL_UTM_Y: return "UTM Y";
-		case COL_INPUT_TYPE: return "Data Store/Input Type";
+		case COL_INPUT_TYPE: return "Datastore/Input Type";
 		default: return "";
 	}
 }
@@ -185,11 +196,16 @@ public String[] getColumnToolTips() {
     tips[COL_UNITS] = "Data units are not currently available from web services for station/parameter";
     tips[COL_START] = "Starting date/time of available data";
     tips[COL_END] = "Ending date/time of available data";
-    tips[COL_MEAS_COUNT] = "Count of available measurements";
+    //tips[COL_MEAS_COUNT] = "Count of available measurements";
+    tips[COL_STATUS] = "Station status.";
+    tips[COL_THIRD_PARTY] = "Is data provided by third party?  See data source for authoritative source and moreInformation time series property.";
     tips[COL_DIV] = "Water division";
     tips[COL_DIST] = "Water district";
     tips[COL_COUNTY] = "County name";
     tips[COL_STATE] = "State abbreviation";
+    tips[COL_GNIS_ID] = "GNIS ID for stream";
+    tips[COL_STREAM_MILE] = "Stream mile";
+    tips[COL_WATER_SOURCE] = "Water source name";
     tips[COL_HUC] = "Hydrologic Unit Code";
     tips[COL_LONG] = "Longitude decimal degrees";
     tips[COL_LAT] = "Latitude decimal degrees";
@@ -211,15 +227,20 @@ public int[] getColumnWidths() {
     widths[COL_DATA_SOURCE_NAME] = 10;
     widths[COL_DATA_SOURCE] = 10;
     widths[COL_DATA_TYPE] = 15;
-    widths[COL_TIME_STEP] = 8;
+    widths[COL_TIME_STEP] = 7;
     widths[COL_UNITS] = 8;
     widths[COL_START] = 10;
     widths[COL_END] = 10;
-    widths[COL_MEAS_COUNT] = 8;
-    widths[COL_DIV] = 5;
-    widths[COL_DIST] = 5;
+    //widths[COL_MEAS_COUNT] = 8;
+    widths[COL_STATUS] = 7;
+    widths[COL_THIRD_PARTY] = 7;
+    widths[COL_DIV] = 3;
+    widths[COL_DIST] = 3;
     widths[COL_COUNTY] = 8;
     widths[COL_STATE] = 3;
+    widths[COL_GNIS_ID] = 8;
+    widths[COL_STREAM_MILE] = 8;
+    widths[COL_WATER_SOURCE] = 15;
     widths[COL_HUC] = 8;
     widths[COL_LONG] = 8;
     widths[COL_LAT] = 8;
@@ -283,7 +304,6 @@ public TSIdent getTimeSeriesIdentifier(int row) {
     return tsid;
 }
 
-//FIXME @jurentie 06/20/2018 imports/irrelevant code
 /**
 From AbstractTableModel.  Returns the data that should be placed in the JTable at the given row and column.
 @param row the row for which to return data.
@@ -292,9 +312,6 @@ From AbstractTableModel.  Returns the data that should be placed in the JTable a
 */
 public Object getValueAt(int row, int col)
 {	
-	
-	// If sorted, get the position in the data from the displayed row.
-	// TODO @jurentie 06/22/2018 ask steve if you can remove this
 	if (_sortOrder != null) {
 		row = _sortOrder[row];
 	}
@@ -303,8 +320,10 @@ public Object getValueAt(int row, int col)
 	df.setMaximumFractionDigits(6);
 	df.setMinimumFractionDigits(6);
 
-	TelemetryStationDataTypes tsds = (TelemetryStationDataTypes)_data.get(row);
+	TelemetryStationDataTypes tsds = _data.get(row);
 	
+	String timestep = tsds.getTimeStep();
+	DateTime dt;
 	switch (col) {
 		// case 0 handled above.
 		case COL_ID: return tsds.getWdid();
@@ -313,18 +332,65 @@ public Object getValueAt(int row, int col)
 		case COL_DATA_SOURCE_NAME: return tsds.getDataSource();
 		case COL_DATA_SOURCE: return tsds.getDataSourceAbbrev();
 		case COL_DATA_TYPE: return tsds.getParameter();
-		case COL_TIME_STEP: return tsds.getTimeStep();
-		//case COL_UNITS: return
-		//case COL_START:
-		//case COL_END:
+		case COL_TIME_STEP: return timestep;
+		case COL_UNITS: return tsds.getParameterUnit();
+		case COL_START:
+			dt = tsds.getParameterPorStart();
+			if ( dt == null ) {
+				return null;
+			}
+			else if ( timestep.equalsIgnoreCase("15min") ) {
+				dt.setPrecision(DateTime.PRECISION_MINUTE);
+			}
+			else if ( timestep.equalsIgnoreCase("hour") ) {
+				dt.setPrecision(DateTime.PRECISION_HOUR);
+			}
+			else if ( timestep.equalsIgnoreCase("day") ) {
+				dt.setPrecision(DateTime.PRECISION_DAY);
+			}
+			return dt.toString();
+		case COL_END:
+			dt = tsds.getParameterPorEnd();
+			if ( dt == null ) {
+				return null;
+			}
+			else if ( timestep.equalsIgnoreCase("15min") ) {
+				dt.setPrecision(DateTime.PRECISION_MINUTE);
+			}
+			else if ( timestep.equalsIgnoreCase("hour") ) {
+				dt.setPrecision(DateTime.PRECISION_HOUR);
+			}
+			else if ( timestep.equalsIgnoreCase("day") ) {
+				dt.setPrecision(DateTime.PRECISION_DAY);
+			}
+			return dt.toString();
 		//case COL_MEAS_COUNT: return
+		case COL_STATUS: return tsds.getStationStatus();
+		case COL_THIRD_PARTY: return "" + tsds.getThirdParty();
 		case COL_DIV: return tsds.getDivision();
 		case COL_DIST: return tsds.getWaterDistrict();
 		case COL_COUNTY: return tsds.getCounty();
 		case COL_STATE: return "CO";
+		case COL_GNIS_ID: return tsds.getGnisId();
+		case COL_STREAM_MILE: return tsds.getStreamMile();
+		case COL_WATER_SOURCE: return tsds.getWaterSource();
 		case COL_HUC: return tsds.getHuc10();
-		case COL_LONG: return df.format(tsds.getLongdecdeg());
-		case COL_LAT: return df.format(tsds.getLatdecdeg());
+		case COL_LONG:
+			Double longitude = tsds.getLongdecdeg();
+			if ( longitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(longitude);
+			}
+		case COL_LAT:
+			Double latitude = tsds.getLatdecdeg();
+			if ( latitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(latitude);
+			}
 		case COL_UTM_X: return tsds.getUtmX();
 		case COL_UTM_Y: return tsds.getUtmY();
 		case COL_INPUT_TYPE: return __inputType;

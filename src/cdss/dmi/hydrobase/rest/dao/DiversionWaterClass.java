@@ -61,7 +61,7 @@ public class DiversionWaterClass {
 	/**
 	 * Distance and direction from East/West section line (feet)
 	 */
-	private int coordsew;
+	private Integer coordsew;
 	
 	/**
 	 * Direction of measurement from East/West section line
@@ -72,7 +72,7 @@ public class DiversionWaterClass {
 	/**
 	 * Distance and direction from North/South section line (feet)
 	 */
-	private int coordsns;
+	private Integer coordsns;
 	
 	/**
 	 * Direction of measurement from North/South section line
@@ -113,12 +113,12 @@ public class DiversionWaterClass {
 	/**
 	 * Account number of water class that water is From in SFUTG coding
 	 */
-	private int fromWdidAcctId;
+	private Integer fromWdidAcctId;
 	
 	/**
 	 * Account name of water class that water is From in SFUTG coding
 	 */
-	private int fromWdidAcctName;
+	private Integer fromWdidAcctName;
 	
 	/**
 	 * National Hydrographic Dataset stream identifier
@@ -138,12 +138,12 @@ public class DiversionWaterClass {
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latdecdeg;
+	private Double latdecdeg;
 	
 	/**
 	 * Longitude (decimal degrees)
 	 */
-	private double longdecdeg;
+	private Double longdecdeg;
 	
 	/**
 	 * Thirteen local districts, within the Designated Basins,
@@ -158,7 +158,7 @@ public class DiversionWaterClass {
 	private DateTime modified;
 	
 	/**
-	 * Principal Meridian of well’s legal location - there are 5 principal 
+	 * Principal Meridian of well's legal location - there are 5 principal 
 	 * meridians in CO: Sixth (S), New Mexico (N), Baca (B), Costilla (C), 
 	 * and Ute (U)
 	 */
@@ -195,14 +195,13 @@ public class DiversionWaterClass {
 	private String q40;
 	
 	/**
-	 * Legal location: A number in the format “nnnd” where “nnn” 
-	 * is the range number and “d” is the direction either East or West
+	 * Legal location: * is the range number direction either East or West
 	 */
 	private String range;
 	
 	/**
 	 * Section number - township, range divided into 36 one square mile sections; 
-	 * “U” indicates location in Ute Correction (Division 7 only)
+	 * may indicate location in Ute Correction (Division 7 only)
 	 */
 	private String section;
 	
@@ -220,7 +219,7 @@ public class DiversionWaterClass {
 	 * Distance in miles to the confluence with the next downstream water 
 	 * source (or distance to state line)
 	 */
-	private double streamMile;
+	private Double streamMile;
 	
 	/**
 	 * Name of structure
@@ -255,12 +254,12 @@ public class DiversionWaterClass {
 	/**
 	 * To WDID account ID
 	 */
-	private int toWdidAcctId;
+	private Integer toWdidAcctId;
 	
 	/**
 	 * To WDID account Name
 	 */
-	private int toWdidAcctName;
+	private Integer toWdidAcctName;
 	
 	/**
 	 * Legal location: Township number and direction
@@ -291,17 +290,17 @@ public class DiversionWaterClass {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 	
 	/**
 	 * The y (Northing) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum)
 	 */
-	private double utmY;
+	private Double utmY;
 	
 	/**
 	 * Water Class Number
 	 */
-	private int waterclassNum;
+	private Integer waterclassNum;
 	
 	/**
 	 * DWR Water District
@@ -333,12 +332,12 @@ public class DiversionWaterClass {
 	/**
 	 * WDID account ID
 	 */
-	private int wdidAcctId;
+	private Integer wdidAcctId;
 	
 	/**
 	 * WDID account name
 	 */
-	private int wdidAcctName;
+	private Integer wdidAcctName;
 	
 	
 	/**
@@ -354,14 +353,14 @@ public class DiversionWaterClass {
 	public String getCiuCodeLong() {
 		return ciuCodeLong;
 	}
-	public int getCoordsew() {
+	public Integer getCoordsew() {
 		return coordsew;
 	}
 
 	public String getCoordsewDir() {
 		return coordsewDir;
 	}
-	public int getCoordsns() {
+	public Integer getCoordsns() {
 		return coordsns;
 	}
 
@@ -389,11 +388,11 @@ public class DiversionWaterClass {
 	public String getFromWdid() {
 		return fromWdid;
 	}
-	public int getFromWdidAcctId() {
+	public Integer getFromWdidAcctId() {
 		return fromWdidAcctId;
 	}
 
-	public int getFromWdidAcctName() {
+	public Integer getFromWdidAcctName() {
 		return fromWdidAcctName;
 	}
 	public String getGnisId() {
@@ -407,10 +406,10 @@ public class DiversionWaterClass {
 		return groupWdid;
 	}
 	
-	public double getLatdecdeg() {
+	public Double getLatdecdeg() {
 		return latdecdeg;
 	}
-	public double getLongdecdeg() {
+	public Double getLongdecdeg() {
 		return longdecdeg;
 	}
 
@@ -427,8 +426,6 @@ public class DiversionWaterClass {
 	public DateTime getPorEnd() {
 		return porEnd;
 	}
-
-
 
 	public DateTime getPorLastModified() {
 		return porLastModified;
@@ -461,7 +458,7 @@ public class DiversionWaterClass {
 	public String getSourceDescr() {
 		return sourceDescr;
 	}
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 
@@ -486,10 +483,10 @@ public class DiversionWaterClass {
 		return toWdid;
 	}
 
-	public int getToWdidAcctId() {
+	public Integer getToWdidAcctId() {
 		return toWdidAcctId;
 	}
-	public int getToWdidAcctName() {
+	public Integer getToWdidAcctName() {
 		return toWdidAcctName;
 	}
 
@@ -510,14 +507,14 @@ public class DiversionWaterClass {
 	public String getUseDescr() {
 		return useDescr;
 	}
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
 
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
-	public int getWaterclassNum() {
+	public Integer getWaterclassNum() {
 		return waterclassNum;
 	}
 	
@@ -538,11 +535,11 @@ public class DiversionWaterClass {
 	public String getWdid() {
 		return wdid;
 	}
-	public int getWdidAcctId() {
+	public Integer getWdidAcctId() {
 		return wdidAcctId;
 	}
 
-	public int getWdidAcctName() {
+	public Integer getWdidAcctName() {
 		return wdidAcctName;
 	}
 	public void setAvailableTimesteps(String availableTimesteps) {
@@ -556,14 +553,14 @@ public class DiversionWaterClass {
 		this.ciuCodeLong = ciuCodeLong;
 	}
 
-	public void setCoordsew(int coordsew) {
+	public void setCoordsew(Integer coordsew) {
 		this.coordsew = coordsew;
 	}
 	public void setCoordsewDir(String coordsewDir) {
 		this.coordsewDir = coordsewDir;
 	}
 
-	public void setCoordsns(int coordsns) {
+	public void setCoordsns(Integer coordsns) {
 		this.coordsns = coordsns;
 	}
 	public void setCoordsnsDir(String coordsnsDir) {
@@ -591,10 +588,10 @@ public class DiversionWaterClass {
 		this.fromWdid = fromWdid;
 	}
 
-	public void setFromWdidAcctId(int fromWdidAcctId) {
+	public void setFromWdidAcctId(Integer fromWdidAcctId) {
 		this.fromWdidAcctId = fromWdidAcctId;
 	}
-	public void setFromWdidAcctName(int fromWdidAcctName) {
+	public void setFromWdidAcctName(Integer fromWdidAcctName) {
 		this.fromWdidAcctName = fromWdidAcctName;
 	}
 
@@ -608,11 +605,11 @@ public class DiversionWaterClass {
 	public void setGroupWdid(String groupWdid) {
 		this.groupWdid = groupWdid;
 	}
-	public void setLatdecdeg(double latdecdeg) {
+	public void setLatdecdeg(Double latdecdeg) {
 		this.latdecdeg = latdecdeg;
 	}
 
-	public void setLongdecdeg(double longdecdeg) {
+	public void setLongdecdeg(Double longdecdeg) {
 		this.longdecdeg = longdecdeg;
 	}
 	public void setManagementDistrictName(String managementDistrictName) {
@@ -661,7 +658,7 @@ public class DiversionWaterClass {
 		this.sourceDescr = sourceDescr;
 	}
 
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 	public void setStructureName(String structureName) {
@@ -685,11 +682,11 @@ public class DiversionWaterClass {
 	public void setToWdid(String toWdid) {
 		this.toWdid = toWdid;
 	}
-	public void setToWdidAcctId(int toWdidAcctId) {
+	public void setToWdidAcctId(Integer toWdidAcctId) {
 		this.toWdidAcctId = toWdidAcctId;
 	}
 
-	public void setToWdidAcctName(int toWdidAcctName) {
+	public void setToWdidAcctName(Integer toWdidAcctName) {
 		this.toWdidAcctName = toWdidAcctName;
 	}
 	public void setTownship(String township) {
@@ -710,14 +707,14 @@ public class DiversionWaterClass {
 		this.useDescr = useDescr;
 	}
 
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 
-	public void setWaterclassNum(int waterclassNum) {
+	public void setWaterclassNum(Integer waterclassNum) {
 		this.waterclassNum = waterclassNum;
 	}
 	public void setWaterDistrict(int waterDistrict) {
@@ -738,10 +735,10 @@ public class DiversionWaterClass {
 		this.wdid = wdid;
 	}
 
-	public void setWdidAcctId(int wdidAcctId) {
+	public void setWdidAcctId(Integer wdidAcctId) {
 		this.wdidAcctId = wdidAcctId;
 	}
-	public void setWdidAcctName(int wdidAcctName) {
+	public void setWdidAcctName(Integer wdidAcctName) {
 		this.wdidAcctName = wdidAcctName;
 	}
 

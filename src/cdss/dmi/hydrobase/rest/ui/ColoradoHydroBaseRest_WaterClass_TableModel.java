@@ -23,13 +23,16 @@ NoticeEnd */
 
 package cdss.dmi.hydrobase.rest.ui;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 import RTi.TS.TSIdent;
 import RTi.TS.TimeSeriesIdentifierProvider;
 import RTi.Util.GUI.JWorksheet;
 import RTi.Util.GUI.JWorksheet_AbstractRowTableModel;
+import cdss.dmi.hydrobase.rest.ColoradoHydroBaseRestDataStore;
 import cdss.dmi.hydrobase.rest.dao.DiversionWaterClass;
+import cdss.dmi.hydrobase.rest.dao.ReferenceTablesCurrentInUseCodes;
 
 
 // FIXME @jurentie why is this complaining? 06/22/2018
@@ -45,7 +48,7 @@ extends JWorksheet_AbstractRowTableModel<DiversionWaterClass> implements TimeSer
 /**
 Number of columns in the table model, including the row number.
 */
-private final int __COLUMNS = 22;
+private final int __COLUMNS = 23;
 
 public final int COL_ID = 0;
 public final int COL_NAME = 1;
@@ -53,22 +56,25 @@ public final int COL_DATA_SOURCE = 2;
 public final int COL_DATA_TYPE = 3;
 public final int COL_TIME_STEP = 4;
 public final int COL_UNITS = 5;
-public final int COL_START = 6;
-public final int COL_END = 7;
-public final int COL_MEAS_COUNT = 8;
-public final int COL_DIV = 9;
-public final int COL_DIST = 10;
-public final int COL_COUNTY = 11;
-public final int COL_STATE = 12;
-public final int COL_HUC = 13;
-public final int COL_LONG = 14;
-public final int COL_LAT = 15;
-public final int COL_UTM_X = 16;
-public final int COL_UTM_Y = 17;
-public final int COL_STR_TYPE = 18;
-public final int COL_STRTYPE = 19;
-public final int COL_WDID = 20;
-public final int COL_INPUT_TYPE = 21;
+public final int COL_STR_TYPE = 6;
+public final int COL_CIU = 7;
+public final int COL_START = 8;
+public final int COL_END = 9;
+// public final int COL_MEAS_COUNT = 8;  // Not in object
+public final int COL_DIV = 10;
+public final int COL_DIST = 11;
+public final int COL_COUNTY = 12;
+public final int COL_STATE = 13;
+public final int COL_GNIS_ID = 14;
+public final int COL_STREAM_MILE = 15;
+public final int COL_WATER_SOURCE = 16;
+// public final int COL_HUC = 13;  // Not in object
+public final int COL_LONG = 17;
+public final int COL_LAT = 18;
+public final int COL_UTM_X = 19;
+public final int COL_UTM_Y = 20;
+public final int COL_WDID = 21;
+public final int COL_INPUT_TYPE = 22;
 
 /**
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
@@ -76,11 +82,15 @@ with other State-related data, such as ColoradoWaterSMS).
 */
 private String __inputType = "ColoradoHydroBaseRest";
 
-//private String __timeStep = null;
+/**
+ * Datastore associated with the data being displayed.
+ */
+private ColoradoHydroBaseRestDataStore dataStore = null;
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
 The input type defaults to "HydroBase".
+@param dataStore datastore that can be used for additional queries, such as to form tooltips.
 @param worksheet the JWorksheet that displays the data from the table model.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
@@ -88,14 +98,16 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_WaterClass_TableModel ( JWorksheet worksheet, List<DiversionWaterClass> data )
+public ColoradoHydroBaseRest_WaterClass_TableModel ( ColoradoHydroBaseRestDataStore dataStore,
+	JWorksheet worksheet, List<DiversionWaterClass> data )
 throws Exception
 {
-    this ( worksheet, data, null );
+    this ( dataStore, worksheet, data, null );
 }
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
+@param dataStore datastore that can be used for additional queries, such as to form tooltips.
 @param worksheet the JWorksheet that displays the data from the table model.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
@@ -103,7 +115,8 @@ that will be displayed in the table (null is allowed - see setData()).
 when using the class to display data from the ColoradoWaterSMS database.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_WaterClass_TableModel ( JWorksheet worksheet, List<DiversionWaterClass> data, String inputType )
+public ColoradoHydroBaseRest_WaterClass_TableModel ( ColoradoHydroBaseRestDataStore dataStore,
+	JWorksheet worksheet, List<DiversionWaterClass> data, String inputType )
 throws Exception
 {	if ( data == null ) {
 		_rows = 0;
@@ -115,6 +128,7 @@ throws Exception
 	if ( (inputType != null) && !inputType.equals("") ) {
 	    __inputType = inputType;
 	}
+	this.dataStore = dataStore;
 }
 
 /**
@@ -154,18 +168,21 @@ public String getColumnName(int columnIndex) {
 		case COL_UNITS: return "Units";
 		case COL_START: return "Start";
 		case COL_END: return "End";
-		case COL_MEAS_COUNT: return "Meas. Count";
+		//case COL_MEAS_COUNT: return "Meas. Count";
 		case COL_DIV: return "Div.";
 		case COL_DIST: return "Dist.";
 		case COL_COUNTY: return "County";
 		case COL_STATE: return "State";
-		case COL_HUC: return "HUC";
+		case COL_GNIS_ID: return "GNIS ID";
+		case COL_STREAM_MILE: return "Stream Mile";
+		case COL_WATER_SOURCE: return "Water Source";
+		//case COL_HUC: return "HUC";
         case COL_LONG: return "Longtitude";
         case COL_LAT: return "Latitude";
 		case COL_UTM_X: return "UTM X";
 		case COL_UTM_Y: return "UTM Y";
-		case COL_STR_TYPE: return "DSS Waterclass Type";
-		case COL_STRTYPE: return "Waterclass Type";
+		case COL_STR_TYPE: return "Structure Type";
+		case COL_CIU: return "CIU";
 		case COL_WDID: return "WDID";
 		case COL_INPUT_TYPE: return "Data Store/Input Type";
 		default: return "";
@@ -186,20 +203,21 @@ public String[] getColumnToolTips() {
     tips[COL_UNITS] = "Data units";
     tips[COL_START] = "Starting date/time of available data";
     tips[COL_END] = "Ending date/time of available data";
-    tips[COL_MEAS_COUNT] = "Count of available measurements";
+    //tips[COL_MEAS_COUNT] = "Count of available measurements";
     tips[COL_DIV] = "Water division, determined from spatial location";
     tips[COL_DIST] = "Water district, determined from spatial location";
     tips[COL_COUNTY] = "County name, determined from spatial location";
     tips[COL_STATE] = "State abbreviation";
-    tips[COL_HUC] = "Hydrologic Unit Code";
+    tips[COL_GNIS_ID] = "GNIS ID for stream";
+    tips[COL_STREAM_MILE] = "Stream mile";
+    tips[COL_WATER_SOURCE] = "Water source name";
+    //tips[COL_HUC] = "Hydrologic Unit Code";
     tips[COL_LONG] = "Longitude decimal degrees";
     tips[COL_LAT] = "Latitude decimal degrees";
     tips[COL_UTM_X] = "UTM X, meters";
     tips[COL_UTM_Y] = "UTM Y, meters";
-    tips[COL_STR_TYPE] = "Type of waterclass in broad DSS categories.";
-    tips[COL_STRTYPE] = "A means to describe an administrative waterclasses " +
-    	"physical diversion point in detail or a way to define a group of waterclass " +
-    	"(e.g., augmentation plan, well field).";
+    tips[COL_STR_TYPE] = "Structure type";
+    tips[COL_CIU] = this.dataStore.getCurrentInUseToolTip();
     tips[COL_WDID] = "Water district identifier";
     tips[COL_INPUT_TYPE] = "Input type or data store name";
     return tips;
@@ -219,18 +237,21 @@ public int[] getColumnWidths() {
     widths[COL_UNITS] = 8;
     widths[COL_START] = 10;
     widths[COL_END] = 10;
-    widths[COL_MEAS_COUNT] = 8;
+    //widths[COL_MEAS_COUNT] = 8;
     widths[COL_DIV] = 5;
     widths[COL_DIST] = 5;
     widths[COL_COUNTY] = 8;
     widths[COL_STATE] = 3;
-    widths[COL_HUC] = 8;
+    widths[COL_GNIS_ID] = 8;
+    widths[COL_STREAM_MILE] = 8;
+    widths[COL_WATER_SOURCE] = 15;
+    //widths[COL_HUC] = 8;
     widths[COL_LONG] = 8;
     widths[COL_LAT] = 8;
     widths[COL_UTM_X] = 8;
     widths[COL_UTM_Y] = 8;
+    widths[COL_CIU] = 5;
     widths[COL_STR_TYPE] = 13;
-    widths[COL_STRTYPE] = 10;
     widths[COL_WDID] = 5;
     widths[COL_INPUT_TYPE] = 15;
     return widths;
@@ -296,8 +317,11 @@ public Object getValueAt(int row, int col)
 		row = _sortOrder[row];
 	}
 	
-	// Cast _data row to DiversionWaterClass
-	DiversionWaterClass divWC = (DiversionWaterClass)_data.get(row);
+	DiversionWaterClass divWC = _data.get(row);
+
+	DecimalFormat df = new DecimalFormat();
+	df.setMaximumFractionDigits(6);
+	df.setMinimumFractionDigits(6);
 	
 	// TODO @jurentie 06/22/2018 join structure with waterclass to finish populating table
 	// Populate table with data values
@@ -339,20 +363,37 @@ public Object getValueAt(int row, int col)
 				// TODO smalers 2018-06-30 fill this in as other data types are tested
 				return "";
 			}
-		case COL_START: return divWC.getPorStart().getYear();
-		case COL_END: return divWC.getPorEnd().getYear();
+		case COL_START: return divWC.getPorStart();
+		case COL_END: return divWC.getPorEnd();
 		//case COL_MEAS_COUNT: return
 		case COL_DIV: return divWC.getDivision();
 		case COL_DIST: return divWC.getWaterDistrict();
 		case COL_COUNTY: return divWC.getCounty();
 		case COL_STATE: return "CO";
-		//case COL_HUC: return
-		//case COL_LONG: return
-		//case COL_LAT: return
-		//case COL_UTM_X: return
-    	//case COL_UTM_Y: return
-		//case COL_STR_TYPE: return
-		//case COL_STRTYPE: return
+		case COL_GNIS_ID: return divWC.getGnisId();
+		case COL_STREAM_MILE: return divWC.getStreamMile();
+		case COL_WATER_SOURCE: return divWC.getWaterSource();
+		//case COL_HUC: return divWC.getHuc10();
+		case COL_LONG:
+			Double longitude = divWC.getLongdecdeg();
+			if ( longitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(longitude);
+			}
+		case COL_LAT:
+			Double latitude = divWC.getLatdecdeg();
+			if ( latitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(latitude);
+			}
+		case COL_UTM_X: return divWC.getUtmX();
+		case COL_UTM_Y: return divWC.getUtmY();
+		case COL_CIU: return divWC.getCiuCode();
+		case COL_STR_TYPE: return divWC.getStructureType();
 		case COL_WDID: return divWC.getWdid();
 		case COL_INPUT_TYPE: return __inputType;
 		default: return "";

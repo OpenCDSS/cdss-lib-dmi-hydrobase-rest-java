@@ -67,7 +67,7 @@ public class DiversionComments {
 	/** 
 	 * Irrigation year (Nov 1 to Oct31) 
 	 */
-	private int irrYear;
+	private Integer irrYear;
 	
 	/** 
 	 * Modified date/time 
@@ -102,7 +102,7 @@ public class DiversionComments {
 	public String getCommentType() {
 		return commentType;
 	}
-	public int getIrrYear() {
+	public Integer getIrrYear() {
 		return irrYear;
 	}
 
@@ -130,7 +130,7 @@ public class DiversionComments {
 	public void setCommentType(String commentType) {
 		this.commentType = commentType;
 	}
-	public void setIrrYear(int irrYear) {
+	public void setIrrYear(Integer irrYear) {
 		this.irrYear = irrYear;
 	}
 

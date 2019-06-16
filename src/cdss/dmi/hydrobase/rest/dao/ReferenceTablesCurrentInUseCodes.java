@@ -65,6 +65,10 @@ public class ReferenceTablesCurrentInUseCodes {
 	public String getCiuCodeLong() {
 		return ciuCodeLong;
 	}
+	
+	/**
+	 * @param ciuCode
+	 */
 	public void setCiuCode(String ciuCode) {
 		this.ciuCode = ciuCode;
 	}

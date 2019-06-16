@@ -51,12 +51,12 @@ public class AdministrativeCalls {
 	/**
 	 * Latitude (decimal degrees) of bounding structure
 	 */
-	private double boundingStructureLatitude;
+	private Double boundingStructureLatitude;
 	
 	/**
 	 * Longitude (decimal degrees) of bounding structure
 	 */
-	private double boundingStructureLongitude;
+	private Double boundingStructureLongitude;
 	
 	/**
 	 * Structure Name of upper terminus of Call; if blank, the call extends 
@@ -73,7 +73,7 @@ public class AdministrativeCalls {
 	/**
 	 * Unique call identifier
 	 */
-	private int callNumber;
+	private Integer callNumber;
 	
 	/**
 	 * The type of administration being described: Call, Futile Call, 
@@ -99,12 +99,12 @@ public class AdministrativeCalls {
 	/**
 	 * Latitude (decimal degrees) of calling structure
 	 */
-	private double locationStructureLatitude;
+	private Double locationStructureLatitude;
 	
 	/**
 	 * Longitude (decimal degrees) of calling structure
 	 */
-	private double locationStructureLongitude;
+	private Double locationStructureLongitude;
 	
 	/**
 	 * Call location structure name
@@ -119,7 +119,7 @@ public class AdministrativeCalls {
 	/**
 	 * Call location structure stream mile
 	 */
-	private double locationWdidStreammile;
+	private Double locationWdidStreammile;
 	
 	/**
 	 * Last date time that this record was modified in the DWR database
@@ -135,7 +135,7 @@ public class AdministrativeCalls {
 	 * A calculated number developed by DWR to rank water rights in 
 	 * order of seniority.
 	 */
-	private double priorityAdminNumber;
+	private Double priorityAdminNumber;
 	
 	/**
 	 * Either the appropriation date or the previous adjudication date, 
@@ -153,7 +153,7 @@ public class AdministrativeCalls {
 	 * An order number may be assigned to distinguish decrees with identical dates 
 	 * but have been decreed to have specifically different priorities.
 	 */
-	private int priorityOrderNumber;
+	private Integer priorityOrderNumber;
 	
 	/**
 	 * Waterright Structure...definition
@@ -184,10 +184,10 @@ public class AdministrativeCalls {
 	 * Getters and setters for defined variables
 	 */
 	
-	public double getBoundingStructureLatitude() {
+	public Double getBoundingStructureLatitude() {
 		return boundingStructureLatitude;
 	}
-	public double getBoundingStructureLongitude() {
+	public Double getBoundingStructureLongitude() {
 		return boundingStructureLongitude;
 	}
 	
@@ -198,7 +198,7 @@ public class AdministrativeCalls {
 		return boundingWdid;
 	}
 	
-	public int getCallNumber() {
+	public Integer getCallNumber() {
 		return callNumber;
 	}
 	public String getCallType() {
@@ -215,11 +215,11 @@ public class AdministrativeCalls {
 	public int getDivision() {
 		return division;
 	}
-	public double getLocationStructureLatitude() {
+	public Double getLocationStructureLatitude() {
 		return locationStructureLatitude;
 	}
 	
-	public double getLocationStructureLongitude() {
+	public Double getLocationStructureLongitude() {
 		return locationStructureLongitude;
 	}
 	public String getLocationStructureName() {
@@ -229,7 +229,7 @@ public class AdministrativeCalls {
 	public String getLocationWdid() {
 		return locationWdid;
 	}
-	public double getLocationWdidStreammile() {
+	public Double getLocationWdidStreammile() {
 		return locationWdidStreammile;
 	}
 	
@@ -240,7 +240,7 @@ public class AdministrativeCalls {
 		return moreInformation;
 	}
 	
-	public double getPriorityAdminNumber() {
+	public Double getPriorityAdminNumber() {
 		return priorityAdminNumber;
 	}
 	public DateTime getPriorityDate() {
@@ -250,7 +250,7 @@ public class AdministrativeCalls {
 	public String getPriorityNumber() {
 		return priorityNumber;
 	}
-	public int getPriorityOrderNumber() {
+	public Integer getPriorityOrderNumber() {
 		return priorityOrderNumber;
 	}
 	
@@ -271,11 +271,11 @@ public class AdministrativeCalls {
 	public String getWaterSourceName() {
 		return waterSourceName;
 	}
-	public void setBoundingStructureLatitude(double boundingStructureLatitude) {
+	public void setBoundingStructureLatitude(Double boundingStructureLatitude) {
 		this.boundingStructureLatitude = boundingStructureLatitude;
 	}
 	
-	public void setBoundingStructureLongitude(double boundingStructureLongitude) {
+	public void setBoundingStructureLongitude(Double boundingStructureLongitude) {
 		this.boundingStructureLongitude = boundingStructureLongitude;
 	}
 	public void setBoundingStructureName(String boundingStructureName) {
@@ -285,7 +285,7 @@ public class AdministrativeCalls {
 	public void setBoundingWdid(String boundingWdid) {
 		this.boundingWdid = boundingWdid;
 	}
-	public void setCallNumber(int callNumber) {
+	public void setCallNumber(Integer callNumber) {
 		this.callNumber = callNumber;
 	}
 	
@@ -303,10 +303,10 @@ public class AdministrativeCalls {
 		this.division = division;
 	}
 	
-	public void setLocationStructureLatitude(double locationStructureLatitude) {
+	public void setLocationStructureLatitude(Double locationStructureLatitude) {
 		this.locationStructureLatitude = locationStructureLatitude;
 	}
-	public void setLocationStructureLongitude(double locationStructureLongitude) {
+	public void setLocationStructureLongitude(Double locationStructureLongitude) {
 		this.locationStructureLongitude = locationStructureLongitude;
 	}
 	
@@ -317,7 +317,7 @@ public class AdministrativeCalls {
 		this.locationWdid = locationWdid;
 	}
 	
-	public void setLocationWdidStreammile(double locationWdidStreammile) {
+	public void setLocationWdidStreammile(Double locationWdidStreammile) {
 		this.locationWdidStreammile = locationWdidStreammile;
 	}
 	public void setModified(String modified) {
@@ -327,7 +327,7 @@ public class AdministrativeCalls {
 	public void setMoreInformation(String moreInformation) {
 		this.moreInformation = moreInformation;
 	}
-	public void setPriorityAdminNumber(double priorityAdminNumber) {
+	public void setPriorityAdminNumber(Double priorityAdminNumber) {
 		this.priorityAdminNumber = priorityAdminNumber;
 	}
 	
@@ -338,7 +338,7 @@ public class AdministrativeCalls {
 		this.priorityNumber = priorityNumber;
 	}
 	
-	public void setPriorityOrderNumber(int priorityOrderNumber) {
+	public void setPriorityOrderNumber(Integer priorityOrderNumber) {
 		this.priorityOrderNumber = priorityOrderNumber;
 	}
 	public void setPriorityStructureName(String priorityStructureName) {

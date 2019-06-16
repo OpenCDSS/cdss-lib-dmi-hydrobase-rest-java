@@ -57,7 +57,7 @@ public class TelemetryStationDataTypes {
 	/**
 	 * Contributing Area
 	 */
-	private double contrArea;
+	private Double contrArea;
 	
 	/**
 	 * County where the well is located
@@ -82,7 +82,7 @@ public class TelemetryStationDataTypes {
 	/**
 	 * Drainage Area
 	 */
-	private double drainArea;
+	private Double drainArea;
 	
 	/**
 	 * National Hydrographic Dataset stream identifier
@@ -97,7 +97,7 @@ public class TelemetryStationDataTypes {
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latdecdeg;
+	private Double latdecdeg;
 	
 	/**
 	 * Accuracy of location coordinates
@@ -107,7 +107,7 @@ public class TelemetryStationDataTypes {
 	/**
 	 * Longitude in decimal degrees
 	 */
-	private double longdecdeg;
+	private Double longdecdeg;
 	
 	/**
 	 * Last date time that this record was modified in the DWR database
@@ -118,6 +118,16 @@ public class TelemetryStationDataTypes {
 	 * Parameter
 	 */
 	private String parameter;
+	
+	/**
+	 * Period of record end.
+	 */
+	private DateTime parameterPorEnd;
+	
+	/**
+	 * Period of record start.
+	 */
+	private DateTime parameterPorStart;
 	
 	/**
 	 * Unit for given Parameter
@@ -143,12 +153,17 @@ public class TelemetryStationDataTypes {
 	 * Distance in miles to the confluence with the next downstream 
 	 * water source (or distance to state line)
 	 */
-	private double streamMile;
+	private Double streamMile;
 	
 	/**
 	 * Type of structure
 	 */
 	private String structureType;
+	
+	/**
+	 * Whether third party data.
+	 */
+	private Boolean thirdParty;
 	
 	/**
 	 * USGS Station ID
@@ -159,13 +174,13 @@ public class TelemetryStationDataTypes {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 	
 	/**
 	 * The y (Northing) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmY;
+	private Double utmY;
 	/**
 	 * Added variable for use in other places in the code. 
 	 * Not originally from web services
@@ -212,7 +227,7 @@ public class TelemetryStationDataTypes {
 		return division;
 	}
 	
-	public double getDrainArea() {
+	public Double getDrainArea() {
 		return drainArea;
 	}
 	public String getGnisId() {
@@ -222,14 +237,14 @@ public class TelemetryStationDataTypes {
 	public String getHuc10() {
 		return huc10;
 	}
-	public double getLatdecdeg() {
+	public Double getLatdecdeg() {
 		return latdecdeg;
 	}
 	
 	public String getLocationAccuracy() {
 		return locationAccuracy;
 	}
-	public double getLongdecdeg() {
+	public Double getLongdecdeg() {
 		return longdecdeg;
 	}
 	
@@ -240,13 +255,21 @@ public class TelemetryStationDataTypes {
 		return parameter;
 	}
 	
+	public DateTime getParameterPorEnd() {
+		return parameterPorEnd;
+	}
+
+	public DateTime getParameterPorStart() {
+		return parameterPorStart;
+	}
+	
 	public String getParameterUnit(){
 		return parameterUnit;
 	}
 	public String getStationName() {
 		return stationName;
 	}
-	
+
 	public String getStationStatus() {
 		return stationStatus;
 	}
@@ -254,7 +277,7 @@ public class TelemetryStationDataTypes {
 		return stationType;
 	}
 	
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 	public String getStructureType() {
@@ -264,14 +287,17 @@ public class TelemetryStationDataTypes {
 	public String getTimeStep() {
 		return timeStep;
 	}
+	public Boolean getThirdParty() {
+		return thirdParty;
+	}
 	public String getUsgsStationId() {
 		return usgsStationId;
 	}
 	
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 	
@@ -289,7 +315,7 @@ public class TelemetryStationDataTypes {
 		this.abbrev = abbrev;
 	}
 	
-	public void setContrArea(double contrArea) {
+	public void setContrArea(Double contrArea) {
 		this.contrArea = contrArea;
 	}
 	public void setCounty(String county) {
@@ -306,7 +332,7 @@ public class TelemetryStationDataTypes {
 	public void setDivision(int division) {
 		this.division = division;
 	}
-	public void setDrainArea(double drainArea) {
+	public void setDrainArea(Double drainArea) {
 		this.drainArea = drainArea;
 	}
 	
@@ -317,14 +343,14 @@ public class TelemetryStationDataTypes {
 		this.huc10 = huc10;
 	}
 	
-	public void setLatdecdeg(double latdecdeg) {
+	public void setLatdecdeg(Double latdecdeg) {
 		this.latdecdeg = latdecdeg;
 	}
 	public void setLocationAccuracy(String locationAccuracy) {
 		this.locationAccuracy = locationAccuracy;
 	}
 	
-	public void setLongdecdeg(double longdecdeg) {
+	public void setLongdecdeg(Double longdecdeg) {
 		this.longdecdeg = longdecdeg;
 	}
 	public void setModified(String modified) {
@@ -334,13 +360,19 @@ public class TelemetryStationDataTypes {
 	public void setParameter(String parameter) {
 		this.parameter = parameter;
 	}
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+	public void setParameterPorEnd(String parameterPorEnd) {
+		this.parameterPorEnd = TimeToolkit.getInstance().toDateTime(parameterPorEnd, false);
+	}
+	public void setParameterPorStart(String parameterPorStart) {
+		this.parameterPorStart = TimeToolkit.getInstance().toDateTime(parameterPorStart, false);
+	}
 	public void setParameterUnit(String parameterUnit){
 		this.parameterUnit = parameterUnit;
 	}
 	
-	public void setStationName(String stationName) {
-		this.stationName = stationName;
-	}
 	public void setStationStatus(String stationStatus) {
 		this.stationStatus = stationStatus;
 	}
@@ -348,12 +380,15 @@ public class TelemetryStationDataTypes {
 	public void setStationType(String stationType) {
 		this.stationType = stationType;
 	}
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 	
 	public void setStructureType(String structureType) {
 		this.structureType = structureType;
+	}
+	public void setThirdParty(Boolean thirdParty) {
+		this.thirdParty = thirdParty;
 	}
 	public void setTimeStep(String timeStep) {
 		this.timeStep = timeStep;
@@ -362,11 +397,11 @@ public class TelemetryStationDataTypes {
 	public void setUsgsStationId(String usgsStationId) {
 		this.usgsStationId = usgsStationId;
 	}
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
 	
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 	public void setWaterDistrict(int waterDistrict) {

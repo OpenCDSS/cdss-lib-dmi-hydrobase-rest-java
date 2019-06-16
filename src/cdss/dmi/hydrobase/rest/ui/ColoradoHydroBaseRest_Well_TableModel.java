@@ -49,27 +49,31 @@ extends JWorksheet_AbstractRowTableModel<WaterLevelsWell> implements TimeSeriesI
 /**
 Number of columns in the table model, including the row number.
 */
-private final int __COLUMNS = 19;
+private final int __COLUMNS = 23;
 
 public final int COL_ID = 0;
-public final int COL_NAME = 1;
-public final int COL_DATA_SOURCE = 2;
-public final int COL_DATA_TYPE = 3;
-public final int COL_TIME_STEP = 4;
-public final int COL_UNITS = 5;
-public final int COL_START = 6;
-public final int COL_END = 7;
-public final int COL_MEAS_COUNT = 8;
-public final int COL_DIV = 9;
-public final int COL_DIST = 10;
-public final int COL_COUNTY = 11;
-public final int COL_STATE = 12;
-public final int COL_HUC = 13;
-public final int COL_LONG = 14;
-public final int COL_LAT = 15;
-public final int COL_UTM_X = 16;
-public final int COL_UTM_Y = 17;
-public final int COL_INPUT_TYPE = 18;
+public final int COL_RECEIPT = 1;
+public final int COL_NAME = 2;
+public final int COL_DATA_SOURCE = 3;
+public final int COL_DATA_TYPE = 4;
+public final int COL_TIME_STEP = 5;
+public final int COL_UNITS = 6;
+public final int COL_START = 7;
+public final int COL_END = 8;
+public final int COL_MEAS_COUNT = 9;
+public final int COL_DIV = 10;
+public final int COL_DIST = 11;
+public final int COL_COUNTY = 12;
+public final int COL_STATE = 13;
+public final int COL_DESIG_BASIN = 14;
+public final int COL_AQUIFERS = 15;
+public final int COL_DEPTH = 16;
+public final int COL_ELEV = 17;
+public final int COL_LONG = 18;
+public final int COL_LAT = 19;
+public final int COL_UTM_X = 20;
+public final int COL_UTM_Y = 21;
+public final int COL_INPUT_TYPE = 22;
 
 //private int __wdid_length = 7; // The length to use when formatting WDIDs in IDs.
 
@@ -153,6 +157,7 @@ From AbstractTableMode.  Returns the name of the column at the given position.
 public String getColumnName(int columnIndex) {
 	switch (columnIndex) {
 		case COL_ID: return "ID";
+		case COL_RECEIPT: return "Receipt";
 		case COL_NAME: return "Name/Description";
 		case COL_DATA_SOURCE: return "Data Source";
 		case COL_DATA_TYPE: return "Data Type";
@@ -165,7 +170,10 @@ public String getColumnName(int columnIndex) {
 		case COL_DIST: return "Dist.";
 		case COL_COUNTY: return "County";
 		case COL_STATE: return "State";
-		case COL_HUC: return "HUC";
+		case COL_DESIG_BASIN: return "Designated Basin";
+		case COL_AQUIFERS: return "Aquifers";
+		case COL_DEPTH: return "Well Depth";
+		case COL_ELEV: return "Elevation";
         case COL_LONG: return "Longtitude";
         case COL_LAT: return "Latitude";
 		case COL_UTM_X: return "UTM X";
@@ -182,6 +190,7 @@ Returns an array containing the column widths (in number of characters).
 public String[] getColumnToolTips() {
     String[] tips = new String[__COLUMNS];
     tips[COL_ID] = "Well identifier from primary data provider";
+    tips[COL_RECEIPT] = "Well permit receipt (unique identifier for well permits)";
     tips[COL_NAME] = "Well name";
     tips[COL_DATA_SOURCE] = "Organization/agency abbreviation";
     tips[COL_DATA_TYPE] = "Data type";
@@ -194,7 +203,11 @@ public String[] getColumnToolTips() {
     tips[COL_DIST] = "Water district";
     tips[COL_COUNTY] = "County name";
     tips[COL_STATE] = "State abbreviation";
-    tips[COL_HUC] = "Hydrologic Unit Code";
+    tips[COL_DESIG_BASIN] = "Designated basin";
+    tips[COL_AQUIFERS] = "Aquifers";
+    tips[COL_DEPTH] = "Well depth";
+    tips[COL_ELEV] = "Well head elevation";
+    //tips[COL_HUC] = "Hydrologic Unit Code";
     tips[COL_LONG] = "Longitude decimal degrees";
     tips[COL_LAT] = "Latitude decimal degrees";
     tips[COL_UTM_X] = "UTM X, meters";
@@ -210,6 +223,7 @@ Returns an array containing the column widths (in number of characters).
 public int[] getColumnWidths() {
     int[] widths = new int[__COLUMNS];
     widths[COL_ID] = 12;
+    widths[COL_RECEIPT] = 8;
     widths[COL_NAME] = 20;
     widths[COL_DATA_SOURCE] = 10;
     widths[COL_DATA_TYPE] = 15;
@@ -222,7 +236,11 @@ public int[] getColumnWidths() {
     widths[COL_DIST] = 5;
     widths[COL_COUNTY] = 8;
     widths[COL_STATE] = 3;
-    widths[COL_HUC] = 8;
+    widths[COL_DESIG_BASIN] = 15;
+    widths[COL_AQUIFERS] = 12;
+    widths[COL_DEPTH] = 8;
+    widths[COL_ELEV] = 6;
+    //widths[COL_HUC] = 8;
     widths[COL_LONG] = 8;
     widths[COL_LAT] = 8;
     widths[COL_UTM_X] = 8;
@@ -257,7 +275,7 @@ Return a TSIdent object for the specified row, used to transfer the table to val
 public TSIdent getTimeSeriesIdentifier(int row) {
     TSIdent tsid = new TSIdent();
 	String locType = "wellid:";
-    String id = (String)getValueAt( row, COL_ID );
+    String id = "" + getValueAt( row, COL_ID );
     tsid.setLocation(locType + id );
     tsid.setSource((String)getValueAt( row, COL_DATA_SOURCE));
     tsid.setType((String)getValueAt( row, COL_DATA_TYPE));
@@ -299,7 +317,8 @@ public Object getValueAt(int row, int col)
 
 	switch(col){
 		// case 0 handled above.
-		case COL_ID: return new Integer(well.getWellId()).toString();
+		case COL_ID: return well.getWellId();
+		case COL_RECEIPT: return well.getReceipt();
 		case COL_NAME: return well.getWellName();
 		case COL_DATA_SOURCE: return well.getDataSource();
 		case COL_DATA_TYPE: return well.getDataType();
@@ -312,9 +331,27 @@ public Object getValueAt(int row, int col)
 		case COL_DIST: return well.getWaterDistrict();
 		case COL_COUNTY: return well.getCounty();
 		case COL_STATE: return "CO";
+		case COL_DESIG_BASIN: return well.getDesignatedBasin();
+		case COL_AQUIFERS: return well.getAquifers();
+		case COL_DEPTH: return well.getWellDepth();
+		case COL_ELEV: return well.getElevation();
 		//case COL_HUC: return
-		case COL_LONG: return df.format(well.getLongitude());
-		case COL_LAT: return df.format(well.getLatitude());
+		case COL_LONG:
+			Double longitude = well.getLongitude();
+			if ( longitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(longitude);
+			}
+		case COL_LAT:
+			Double latitude = well.getLatitude();
+			if ( latitude == null ) {
+				return null;
+			}
+			else {
+				return df.format(latitude);
+			}
 		case COL_UTM_X: return well.getUtmX();
     	case COL_UTM_Y: return well.getUtmY();
 		//case COL_STR_TYPE: return

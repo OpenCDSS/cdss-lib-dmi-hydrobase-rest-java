@@ -94,7 +94,7 @@ public class WaterRightsTransaction {
 	/**
 	 * Distance and direction from East/West section line (feet)
 	 */
-	private int coordinatesEw;
+	private Integer coordinatesEw;
 	
 	/**
 	 * Direction of measurement from East/West section line
@@ -104,7 +104,7 @@ public class WaterRightsTransaction {
 	/**
 	 * Distance and direction from North/South section line (feet)
 	 */
-	private int coordinatesNs;
+	private Integer coordinatesNs;
 	
 	/**
 	 * Direction of measurement from North/South section line
@@ -145,7 +145,7 @@ public class WaterRightsTransaction {
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latitude;
+	private Double latitude;
 	
 	/**
 	 * Accuracy of location coordinates
@@ -155,13 +155,13 @@ public class WaterRightsTransaction {
 	/**
 	 * Longitude (decimal degrees)
 	 */
-	private double longitude;
+	private Double longitude;
 	
 	/**
 	 * The maximum annual decreed rate (CFS). Decrees may have seasonal rates that differ from 
 	 * this amount
 	 */
-	private double maxDecreedRate;
+	private Double maxDecreedRate;
 	
 	/**
 	 * Hyperlink to additional details
@@ -171,7 +171,7 @@ public class WaterRightsTransaction {
 	/**
 	 * Used to distinguish the priority of multiple water rights with identical dates
 	 */
-	private int orderNumber;
+	private Integer orderNumber;
 	
 	/**
 	 * Well permit number
@@ -246,7 +246,7 @@ public class WaterRightsTransaction {
 	 * Distance in miles to the confluence with the next downstream water source 
 	 * (or distance to state line)
 	 */
-	private double streamMile;
+	private Double streamMile;
 	
 	/**
 	 * Type of Structure
@@ -257,7 +257,7 @@ public class WaterRightsTransaction {
 	 * The maximum annual decreed volumetric limit (AF). Decrees may have seasonal rates that 
 	 * differ from this amount
 	 */
-	private double totalVolumetricLimit;
+	private Double totalVolumetricLimit;
 
 	/**
 	 * Legal location: Township number and direction
@@ -268,13 +268,13 @@ public class WaterRightsTransaction {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 	
 	/**
 	 * The y (Northing) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmY;
+	private Double utmY;
 	
 	/**
 	 * DWR Water District
@@ -340,11 +340,11 @@ public class WaterRightsTransaction {
 		return coordinatesEwDir;
 	}
 
-	public int getCoordinatesEw() {
+	public Integer getCoordinatesEw() {
 		return coordinatesEw;
 	}
 
-	public int getCoordinatesNs() {
+	public Integer getCoordinatesNs() {
 		return coordinatesNs;
 	}
 
@@ -372,7 +372,7 @@ public class WaterRightsTransaction {
 		return lastModified;
 	}
 
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
@@ -380,11 +380,11 @@ public class WaterRightsTransaction {
 		return locationAccuracy;
 	}
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
-	public double getMaxDecreedRate() {
+	public Double getMaxDecreedRate() {
 		return maxDecreedRate;
 	}
 
@@ -392,7 +392,7 @@ public class WaterRightsTransaction {
 		return moreInformation;
 	}
 
-	public int getOrderNumber() {
+	public Integer getOrderNumber() {
 		return orderNumber;
 	}
 
@@ -448,7 +448,7 @@ public class WaterRightsTransaction {
 		return signatureDate;
 	}
 
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 
@@ -456,7 +456,7 @@ public class WaterRightsTransaction {
 		return structureType;
 	}
 
-	public double getTotalVolumetricLimit() {
+	public Double getTotalVolumetricLimit() {
 		return totalVolumetricLimit;
 	}
 
@@ -464,11 +464,11 @@ public class WaterRightsTransaction {
 		return township;
 	}
 
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
 
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 
@@ -528,11 +528,11 @@ public class WaterRightsTransaction {
 		this.coordinatesEwDir = coordiantesEwDir;
 	}
 
-	public void setCoordinatesEw(int coordinatesEw) {
+	public void setCoordinatesEw(Integer coordinatesEw) {
 		this.coordinatesEw = coordinatesEw;
 	}
 
-	public void setCoordinatesNs(int coordinatesNs) {
+	public void setCoordinatesNs(Integer coordinatesNs) {
 		this.coordinatesNs = coordinatesNs;
 	}
 
@@ -560,7 +560,7 @@ public class WaterRightsTransaction {
 		this.lastModified = TimeToolkit.getInstance().toDateTime(lastModified, true);
 	}
 
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
 
@@ -568,11 +568,11 @@ public class WaterRightsTransaction {
 		this.locationAccuracy = locationAccuracy;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
-	public void setMaxDecreedRate(double maxDecreedRate) {
+	public void setMaxDecreedRate(Double maxDecreedRate) {
 		this.maxDecreedRate = maxDecreedRate;
 	}
 
@@ -580,7 +580,7 @@ public class WaterRightsTransaction {
 		this.moreInformation = moreInformation;
 	}
 
-	public void setOrderNumber(int orderNumber) {
+	public void setOrderNumber(Integer orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
@@ -636,7 +636,7 @@ public class WaterRightsTransaction {
 		this.signatureDate = TimeToolkit.getInstance().toDateTime(signatureDate, true);
 	}
 
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 
@@ -644,7 +644,7 @@ public class WaterRightsTransaction {
 		this.structureType = structureType;
 	}
 
-	public void setTotalVolumetricLimit(double totalVolumetricLimit) {
+	public void setTotalVolumetricLimit(Double totalVolumetricLimit) {
 		this.totalVolumetricLimit = totalVolumetricLimit;
 	}
 
@@ -652,11 +652,11 @@ public class WaterRightsTransaction {
 		this.township = township;
 	}
 
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
 
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 
@@ -711,5 +711,3 @@ public class WaterRightsTransaction {
 	}
 
 }
-
-

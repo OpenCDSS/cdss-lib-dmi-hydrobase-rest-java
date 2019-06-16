@@ -57,7 +57,7 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Channel Width 
 	 */
-	private double channelWidth;
+	private Double channelWidth;
 
 	/** 
 	 * County where the well is located
@@ -67,7 +67,7 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Discharge 
 	 */
-	private double discharge;
+	private Double discharge;
 	
 	/** 
 	 * DWR Water Division 
@@ -77,17 +77,17 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Gage Height 
 	 */
-	private double gageHeight;
+	private Double gageHeight;
 
 	/** 
 	 * Gage height Change 
 	 */
-	private double gageHeightChange;
+	private Double gageHeightChange;
 
 	/** 
 	 * Mean Velocity 
 	 */
-	private double meanVelocity;
+	private Double meanVelocity;
 
 	/** 
 	 * Measurement Date Time 
@@ -97,7 +97,7 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Measurement Duration 
 	 */
-	private double measDuration;
+	private Double measDuration;
 
 	/** 
 	 * Measurement Made By 
@@ -122,7 +122,7 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Measurement Sections 
 	 */
-	private int measSections;
+	private Integer measSections;
 
 	/** 
 	 * Meter Number 
@@ -137,17 +137,17 @@ public class TelemetryDischargeMeasurement {
 	/** 
 	 * Percent Difference 
 	 */
-	private double percentDifference;
+	private Double percentDifference;
 
 	/** 
 	 * Section Area 
 	 */
-	private double sectionArea;
+	private Double sectionArea;
 	
 	/**
 	 * Shift Adjustments 
 	 */
-	private double shiftAdjustment;
+	private Double shiftAdjustment;
 	
 	/** 
 	 * DWR Water District 
@@ -161,7 +161,7 @@ public class TelemetryDischargeMeasurement {
 		return abbrev;
 	}
 
-	public double getChannelWidth() {
+	public Double getChannelWidth() {
 		return channelWidth;
 	}
 
@@ -169,7 +169,7 @@ public class TelemetryDischargeMeasurement {
 		return county;
 	}
 
-	public double getDischarge() {
+	public Double getDischarge() {
 		return discharge;
 	}
 
@@ -177,15 +177,15 @@ public class TelemetryDischargeMeasurement {
 		return division;
 	}
 
-	public double getGageHeight() {
+	public Double getGageHeight() {
 		return gageHeight;
 	}
 
-	public double getGageHeightChange() {
+	public Double getGageHeightChange() {
 		return gageHeightChange;
 	}
 
-	public double getMeanVelocity() {
+	public Double getMeanVelocity() {
 		return meanVelocity;
 	}
 
@@ -193,7 +193,7 @@ public class TelemetryDischargeMeasurement {
 		return measDateTime;
 	}
 
-	public double getMeasDuration() {
+	public Double getMeasDuration() {
 		return measDuration;
 	}
 
@@ -213,7 +213,7 @@ public class TelemetryDischargeMeasurement {
 		return measRemarks;
 	}
 
-	public int getMeasSections() {
+	public Integer getMeasSections() {
 		return measSections;
 	}
 
@@ -225,15 +225,15 @@ public class TelemetryDischargeMeasurement {
 		return modified;
 	}
 
-	public double getPercentDifference() {
+	public Double getPercentDifference() {
 		return percentDifference;
 	}
 
-	public double getSectionArea() {
+	public Double getSectionArea() {
 		return sectionArea;
 	}
 
-	public double getShiftAdjustment() {
+	public Double getShiftAdjustment() {
 		return shiftAdjustment;
 	}
 
@@ -245,7 +245,7 @@ public class TelemetryDischargeMeasurement {
 		this.abbrev = abbrev;
 	}
 
-	public void setChannelWidth(double channelWidth) {
+	public void setChannelWidth(Double channelWidth) {
 		this.channelWidth = channelWidth;
 	}
 
@@ -253,7 +253,7 @@ public class TelemetryDischargeMeasurement {
 		this.county = county;
 	}
 
-	public void setDischarge(double discharge) {
+	public void setDischarge(Double discharge) {
 		this.discharge = discharge;
 	}
 
@@ -261,15 +261,15 @@ public class TelemetryDischargeMeasurement {
 		this.division = division;
 	}
 
-	public void setGageHeight(double gageHeight) {
+	public void setGageHeight(Double gageHeight) {
 		this.gageHeight = gageHeight;
 	}
 
-	public void setGageHeightChange(double gageHeightChange) {
+	public void setGageHeightChange(Double gageHeightChange) {
 		this.gageHeightChange = gageHeightChange;
 	}
 
-	public void setMeanVelocity(double meanVelocity) {
+	public void setMeanVelocity(Double meanVelocity) {
 		this.meanVelocity = meanVelocity;
 	}
 
@@ -277,7 +277,7 @@ public class TelemetryDischargeMeasurement {
 		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, true);
 	}
 
-	public void setMeasDuration(double measDuration) {
+	public void setMeasDuration(Double measDuration) {
 		this.measDuration = measDuration;
 	}
 
@@ -297,7 +297,7 @@ public class TelemetryDischargeMeasurement {
 		this.measRemarks = measRemarks;
 	}
 
-	public void setMeasSections(int measSections) {
+	public void setMeasSections(Integer measSections) {
 		this.measSections = measSections;
 	}
 
@@ -309,15 +309,15 @@ public class TelemetryDischargeMeasurement {
 		this.modified = TimeToolkit.getInstance().toDateTime(modified, true);
 	}
 
-	public void setPercentDifference(double precentDifference) {
+	public void setPercentDifference(Double precentDifference) {
 		this.percentDifference = precentDifference;
 	}
 
-	public void setSectionArea(double sectionArea) {
+	public void setSectionArea(Double sectionArea) {
 		this.sectionArea = sectionArea;
 	}
 
-	public void setShiftAdjustment(double shiftAdjustment) {
+	public void setShiftAdjustment(Double shiftAdjustment) {
 		this.shiftAdjustment = shiftAdjustment;
 	}
 

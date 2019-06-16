@@ -82,7 +82,7 @@ public class Structure {
 	/**
 	 * Distance and direction from east/west section line (feet) 
 	 */
-	private int coordsew;
+	private Integer coordsew;
 
 	/** 
 	 * Direction of measurement from east/west section line 
@@ -92,7 +92,7 @@ public class Structure {
 	/** 
 	 * Distance and direction from north/south section line 
 	 */
-	private int coordsns;
+	private Integer coordsns;
 
 	/** 
 	 * Direction of measurement from north/south section line 
@@ -123,7 +123,7 @@ public class Structure {
 	/**
 	 * Latitude value in decimal degrees 
 	 */
-	private double latdecdeg;
+	private Double latdecdeg;
 
 	/** 
 	 * Accuracy of location coordiantes
@@ -133,7 +133,7 @@ public class Structure {
 	/** 
 	 * Longitude in decimal degrees 
 	 */
-	private double longdecdeg;
+	private Double longdecdeg;
 
 	/**
 	 * Thirteen local districts, within the Designated Basins, with 
@@ -194,7 +194,7 @@ public class Structure {
 	 * Distance in miles to the confluence with the next downstream water source 
 	 * (or distance to state line)
 	 */
-	private double streamMile;
+	private Double streamMile;
 
 	/** 
 	 * Name of Structure 
@@ -220,13 +220,13 @@ public class Structure {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 
 	/** 
 	 * The y (Northing) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum) 
 	 */
-	private double utmY;
+	private Double utmY;
 
 	/**
 	 * DWR Water District 
@@ -270,7 +270,7 @@ public class Structure {
 		return ciuCode;
 	}
 
-	public int getCoordsew() {
+	public Integer getCoordsew() {
 		return coordsew;
 	}
 
@@ -278,7 +278,7 @@ public class Structure {
 		return coordsewDir;
 	}
 
-	public int getCoordsns() {
+	public Integer getCoordsns() {
 		return coordsns;
 	}
 
@@ -302,7 +302,7 @@ public class Structure {
 		return gnisId;
 	}
 
-	public double getLatdecdeg() {
+	public Double getLatdecdeg() {
 		return latdecdeg;
 	}
 
@@ -310,7 +310,7 @@ public class Structure {
 		return locationAccuracy;
 	}
 
-	public double getLongdecdeg() {
+	public Double getLongdecdeg() {
 		return longdecdeg;
 	}
 
@@ -354,7 +354,7 @@ public class Structure {
 		return section;
 	}
 
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 
@@ -374,11 +374,11 @@ public class Structure {
 		return township;
 	}
 
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
 
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 
@@ -418,7 +418,7 @@ public class Structure {
 		this.ciuCode = ciuCode;
 	}
 
-	public void setCoordsew(int coordsew) {
+	public void setCoordsew(Integer coordsew) {
 		this.coordsew = coordsew;
 	}
 
@@ -426,7 +426,7 @@ public class Structure {
 		this.coordsewDir = coordsewDir;
 	}
 
-	public void setCoordsns(int coordsns) {
+	public void setCoordsns(Integer coordsns) {
 		this.coordsns = coordsns;
 	}
 
@@ -450,7 +450,7 @@ public class Structure {
 		this.gnisId = gnisID;
 	}
 
-	public void setLatdecdeg(double latdecdeg) {
+	public void setLatdecdeg(Double latdecdeg) {
 		this.latdecdeg = latdecdeg;
 	}
 
@@ -458,7 +458,7 @@ public class Structure {
 		this.locationAccuracy = locationAccuracy;
 	}
 
-	public void setLongdecdeg(double longdecdeg) {
+	public void setLongdecdeg(Double longdecdeg) {
 		this.longdecdeg = longdecdeg;
 	}
 
@@ -502,7 +502,7 @@ public class Structure {
 		this.section = section;
 	}
 
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 
@@ -522,11 +522,11 @@ public class Structure {
 		this.township = township;
 	}
 
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
 
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 
@@ -561,7 +561,6 @@ public class Structure {
 				coordsewDir + ", coordsns: " + coordsns + ", coordsnsDir: " + coordsnsDir + ", utmX: " + utmX + ", utmY: " +
 				utmY + ", latdecdeg: " + latdecdeg + ", longdecdeg: " + longdecdeg + ", locationAccuracy: " 
 				+ locationAccuracy + ", modified: " + modified + " ]\n";
-				
 	}
 	
 }
