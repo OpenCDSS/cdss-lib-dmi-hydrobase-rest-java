@@ -80,7 +80,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Distance and direction from East/West section line (feet)
 	 */
-	private int coordinatesEw;
+	private Integer coordinatesEw;
 	
 	/**
 	 * Direction of measurement from East/West section line
@@ -90,7 +90,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Distance and direction from North/South section line (feet)
 	 */
-	private int coordinatesNs;
+	private Integer coordinatesNs;
 	
 	/**
 	 * Direction of measurement from North/South section line
@@ -136,7 +136,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latitude;
+	private Double latitude;
 	
 	/**
 	 * Accuracy of location coordinates
@@ -146,7 +146,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Longitude (decimal degrees)
 	 */
-	private double longitude;
+	private Double longitude;
 	
 	/**
 	 * Hyperlink to additional details
@@ -176,7 +176,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Used to distinguish the priority of multiple water rights with identical dates
 	 */
-	private int orderNumber;
+	private Integer orderNumber;
 	
 	/**
 	 * Well permit number
@@ -235,7 +235,7 @@ public class WaterRightsNetAmount {
 	/**
 	 * Distance in miles to the confluence with the next downstream water source (or distance to state line)
 	 */
-	private double streamMile;
+	private Double streamMile;
 	
 	/**
 	 * Name of Structure
@@ -255,12 +255,12 @@ public class WaterRightsNetAmount {
 	/**
 	 * The x (Easting) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 	
 	/**
 	 * The y (Northing) component of the Universal Transverse Mercator system. (Zone 12, NAD83 datum)
 	 */
-	private double utmY;
+	private Double utmY;
 	
 	/**
 	 * DWR Water District
@@ -309,11 +309,11 @@ public class WaterRightsNetAmount {
 		return coordinatesEwDir;
 	}
 
-	public int getCoordinatesEw() {
+	public Integer getCoordinatesEw() {
 		return coordinatesEw;
 	}
 
-	public int getCoordinatesNs() {
+	public Integer getCoordinatesNs() {
 		return coordinatesNs;
 	}
 
@@ -345,7 +345,7 @@ public class WaterRightsNetAmount {
 		return lastModified;
 	}
 
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 
@@ -353,7 +353,7 @@ public class WaterRightsNetAmount {
 		return locationAccuracy;
 	}
 
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 
@@ -377,7 +377,7 @@ public class WaterRightsNetAmount {
 		return netConditional;
 	}
 
-	public int getOrderNumber() {
+	public Integer getOrderNumber() {
 		return orderNumber;
 	}
 
@@ -421,7 +421,7 @@ public class WaterRightsNetAmount {
 		return section;
 	}
 
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 
@@ -437,11 +437,11 @@ public class WaterRightsNetAmount {
 		return township;
 	}
 
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
 
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 
@@ -485,11 +485,11 @@ public class WaterRightsNetAmount {
 		this.coordinatesEwDir = coordiantesEwDir;
 	}
 
-	public void setCoordinatesEw(int coordinatesEw) {
+	public void setCoordinatesEw(Integer coordinatesEw) {
 		this.coordinatesEw = coordinatesEw;
 	}
 
-	public void setCoordinatesNs(int coordinatesNs) {
+	public void setCoordinatesNs(Integer coordinatesNs) {
 		this.coordinatesNs = coordinatesNs;
 	}
 
@@ -521,7 +521,7 @@ public class WaterRightsNetAmount {
 		this.lastModified = TimeToolkit.getInstance().toDateTime(lastModified, true);
 	}
 
-	public void setLatitude(double latitiude) {
+	public void setLatitude(Double latitiude) {
 		this.latitude = latitiude;
 	}
 
@@ -529,7 +529,7 @@ public class WaterRightsNetAmount {
 		this.locationAccuracy = locationAccuracy;
 	}
 
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 
@@ -553,7 +553,7 @@ public class WaterRightsNetAmount {
 		this.netConditional = netConditional;
 	}
 
-	public void setOrderNumber(int orderNumber) {
+	public void setOrderNumber(Integer orderNumber) {
 		this.orderNumber = orderNumber;
 	}
 
@@ -597,7 +597,7 @@ public class WaterRightsNetAmount {
 		this.section = section;
 	}
 
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 
@@ -613,11 +613,11 @@ public class WaterRightsNetAmount {
 		this.township = township;
 	}
 
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
 
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 

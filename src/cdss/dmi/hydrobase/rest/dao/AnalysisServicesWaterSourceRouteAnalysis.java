@@ -59,7 +59,7 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	/**
 	 * Stream Mile Number
 	 */
-	private double streamMile;
+	private Double streamMile;
 	
 	/**
 	 * Structure Name
@@ -85,7 +85,7 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	public String getGnisId() {
 		return gnisId;
 	}
-	public double getStreamMile() {
+	public Double getStreamMile() {
 		return streamMile;
 	}
 	public String getStructureName() {
@@ -103,7 +103,7 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	public void setGnisId(String gnisId) {
 		this.gnisId = gnisId;
 	}
-	public void setStreamMile(double streamMile) {
+	public void setStreamMile(Double streamMile) {
 		this.streamMile = streamMile;
 	}
 	public void setStructureName(String structureName) {
@@ -115,7 +115,6 @@ public class AnalysisServicesWaterSourceRouteAnalysis {
 	public void setWdid(String wdid) {
 		this.wdid = wdid;
 	}
-	
 	
 	/**
 	 * To string method for testing purposes:

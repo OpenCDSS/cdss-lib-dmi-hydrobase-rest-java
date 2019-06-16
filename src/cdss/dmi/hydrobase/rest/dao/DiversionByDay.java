@@ -62,7 +62,7 @@ public class DiversionByDay {
 	/**
 	 * Data Value 
 	 */
-	private double dataValue;
+	private Double dataValue;
 	
 	/**
 	 *  Measurement Interval 
@@ -87,7 +87,7 @@ public class DiversionByDay {
 	/** 
 	 * WaterClass Number 
 	 */
-	private int waterClassNum;
+	private Integer waterClassNum;
 	
 	/** 
 	 * WaterCalss Identifier 
@@ -110,7 +110,7 @@ public class DiversionByDay {
 		return dataMeasDate;
 	}
 
-	public double getDataValue() {
+	public Double getDataValue() {
 		return dataValue;
 	}
 
@@ -138,7 +138,7 @@ public class DiversionByDay {
 		return obsCode;
 	}
 
-	public int getWaterClassNum() {
+	public Integer getWaterClassNum() {
 		return waterClassNum;
 	}
 
@@ -166,7 +166,7 @@ public class DiversionByDay {
 				null : DateTime.parse(dataMeasDate);
 	}
 
-	public void setDataValue(double dataValue) {
+	public void setDataValue(Double dataValue) {
 		this.dataValue = dataValue;
 	}
 
@@ -186,7 +186,7 @@ public class DiversionByDay {
 		this.obsCode = obsCode;
 	}
 	
-	public void setWaterClassNum(int waterClassNum) {
+	public void setWaterClassNum(Integer waterClassNum) {
 		this.waterClassNum = waterClassNum;
 	}
 

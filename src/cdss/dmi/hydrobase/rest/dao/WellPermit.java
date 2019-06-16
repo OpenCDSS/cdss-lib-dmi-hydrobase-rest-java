@@ -65,7 +65,7 @@ public class WellPermit {
 	/**
 	 * Depth from surface to bottom of perforated casing (feet)
 	 */
-	private int bottomPerforatedCasing;
+	private Integer bottomPerforatedCasing;
 	
 	/**
 	 * Contact Address
@@ -95,7 +95,7 @@ public class WellPermit {
 	/**
 	 * Distance and direction from East/West section line (feet)
 	 */
-	private int coordsEw;
+	private Integer coordsEw;
 	
 	/**
 	 * Direction of measurement from East/West section line
@@ -105,7 +105,7 @@ public class WellPermit {
 	/**
 	 * Distance and direction from North/South section line (feet)
 	 */
-	private int coordsNs;
+	private Integer coordsNs;
 	
 	/**
 	 * Direction of measurement from North/South section line 
@@ -160,7 +160,7 @@ public class WellPermit {
 	/**
 	 * Depth Total (ft)
 	 */
-	private int depthTotal;
+	private Integer depthTotal;
 	
 	/**
 	 * Eight established geographic areas in Colorado's Eastern Plains where users rely 
@@ -186,12 +186,12 @@ public class WellPermit {
 	/**
 	 * Elevation (feet)
 	 */
-	private double elevation;
+	private Double elevation;
 	
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latitude;
+	private Double latitude;
 	
 	/**
 	 * Accuracy of location coordinates
@@ -206,7 +206,7 @@ public class WellPermit {
 	/**
 	 * Longitude (decimal degrees)
 	 */
-	private double longitude;
+	private Double longitude;
 	
 	/**
 	 * Thirteen local districts, within the Designated Basins, 
@@ -283,7 +283,7 @@ public class WellPermit {
 	/**
 	 * Pump Test Yield
 	 */
-	private double pumpTestYield;
+	private Double pumpTestYield;
 	
 	/**
 	 * Legal Location: 10 acre quarter section
@@ -301,8 +301,7 @@ public class WellPermit {
 	private String q40;
 	
 	/**
-	 * Legal location: A number in the format “nnnd” where “nnn” is the range number and “d” 
-	 * is the direction either East or West
+	 * Legal location: A number is the direction either East or West
 	 */
 	private String range;
 	
@@ -312,15 +311,15 @@ public class WellPermit {
 	private String receipt;
 	
 	/**
-	 * Section number - township, range divided into 36 one square mile sections; 
-	 * “U” indicates location in Ute Correction (Division 7 only)
+	 * Section number - township, range divided into 36 one square mile sections;
+	 * may indicate location in Ute Correction (Division 7 only)
 	 */
 	private String section;
 	
 	/**
 	 * Static Water level (feet)
 	 */
-	private double staticWaterLevel;
+	private Double staticWaterLevel;
 	
 	/**
 	 * Static Water Level Date
@@ -330,7 +329,7 @@ public class WellPermit {
 	/**
 	 * Depth from surface to top of perforated casing (feet)
 	 */
-	private int topPerforatedCasing;
+	private Integer topPerforatedCasing;
 	
 	/**
 	 * Legal Location: Township number and direction
@@ -341,13 +340,13 @@ public class WellPermit {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmX;
+	private Double utmX;
 	
 	/**
 	 * The y (Northing) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum)
 	 */
-	private double utmY;
+	private Double utmY;
 	
 	/**
 	 * DWR Water District
@@ -371,7 +370,7 @@ public class WellPermit {
 	public String getAssociatedUses() {
 		return associatedUses;
 	}
-	public int getBottomPerforatedCasing() {
+	public Integer getBottomPerforatedCasing() {
 		return bottomPerforatedCasing;
 	}
 	public String getContactAddress() {
@@ -389,13 +388,13 @@ public class WellPermit {
 	public String getContactStateOrProvince() {
 		return contactStateOrProvince;
 	}
-	public int getCoordsEw() {
+	public Integer getCoordsEw() {
 		return coordsEw;
 	}
 	public String getCoordsEwDir() {
 		return coordsEwDir;
 	}
-	public int getCoordsNs() {
+	public Integer getCoordsNs() {
 		return coordsNs;
 	}
 	public String getCoordsNsDir() {
@@ -428,7 +427,7 @@ public class WellPermit {
 	public String getDenverBasinAquifer() {
 		return denverBasinAquifer;
 	}
-	public int getDepthTotal() {
+	public Integer getDepthTotal() {
 		return depthTotal;
 	}
 	public String getDesignatedBasinName() {
@@ -443,10 +442,10 @@ public class WellPermit {
 	public String getDrillerLic() {
 		return drillerLic;
 	}
-	public double getElevation() {
+	public Double getElevation() {
 		return elevation;
 	}
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 	public String getLocationAccuracy() {
@@ -455,7 +454,7 @@ public class WellPermit {
 	public String getLocationType() {
 		return locationType;
 	}
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 	public String getManagementDistrictName() {
@@ -500,7 +499,7 @@ public class WellPermit {
 	public String getPumpLic() {
 		return pumpLic;
 	}
-	public double getPumpTestYield() {
+	public Double getPumpTestYield() {
 		return pumpTestYield;
 	}
 	public String getQ10() {
@@ -521,22 +520,22 @@ public class WellPermit {
 	public String getSection() {
 		return section;
 	}
-	public double getStaticWaterLevel() {
+	public Double getStaticWaterLevel() {
 		return staticWaterLevel;
 	}
 	public DateTime getStaticWaterLevelDate() {
 		return staticWaterLevelDate;
 	}
-	public int getTopPerforatedCasing() {
+	public Integer getTopPerforatedCasing() {
 		return topPerforatedCasing;
 	}
 	public String getTownship() {
 		return township;
 	}
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 	public int getWaterDistrict() {
@@ -554,7 +553,7 @@ public class WellPermit {
 	public void setAssociatedUses(String associatedUses) {
 		this.associatedUses = associatedUses;
 	}
-	public void setBottomPerforatedCasing(int bottomPerforatedCasing) {
+	public void setBottomPerforatedCasing(Integer bottomPerforatedCasing) {
 		this.bottomPerforatedCasing = bottomPerforatedCasing;
 	}
 	public void setContactAddress(String contactAddress) {
@@ -572,13 +571,13 @@ public class WellPermit {
 	public void setContactStateOrProvince(String contactStateorProvince) {
 		this.contactStateOrProvince = contactStateorProvince;
 	}
-	public void setCoordsEw(int coordsEw) {
+	public void setCoordsEw(Integer coordsEw) {
 		this.coordsEw = coordsEw;
 	}
 	public void setCoordsEwDir(String coordsEwDir) {
 		this.coordsEwDir = coordsEwDir;
 	}
-	public void setCoordsNs(int coordsNs) {
+	public void setCoordsNs(Integer coordsNs) {
 		this.coordsNs = coordsNs;
 	}
 	public void setCoordsNsDir(String coordsNsDir) {
@@ -611,13 +610,13 @@ public class WellPermit {
 	public void setDenverBasinAquifer(String denverBasinAquifer) {
 		this.denverBasinAquifer = denverBasinAquifer;
 	}
-	public void setDepthTotal(int depthTotal) {
+	public void setDepthTotal(Integer depthTotal) {
 		this.depthTotal = depthTotal;
 	}
 	public void setDesignatedBasinName(String designatedBasinName) {
 		this.designatedBasinName = designatedBasinName;
 	}
-	public void setDivision(int division) {
+	public void setDivision(Integer division) {
 		this.division = division;
 	}
 	public void setDriller(String driller) {
@@ -626,10 +625,10 @@ public class WellPermit {
 	public void setDrillerLic(String drillerLic) {
 		this.drillerLic = drillerLic;
 	}
-	public void setElevation(double elevation) {
+	public void setElevation(Double elevation) {
 		this.elevation = elevation;
 	}
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
 	public void setLocationAccuracy(String locationAccuracy) {
@@ -638,7 +637,7 @@ public class WellPermit {
 	public void setLocationType(String locationType) {
 		this.locationType = locationType;
 	}
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 	public void setManagementDistrictName(String managementDistrictName) {
@@ -683,7 +682,7 @@ public class WellPermit {
 	public void setPumpLic(String pumpLic) {
 		this.pumpLic = pumpLic;
 	}
-	public void setPumpTestYield(double pumpTestYield) {
+	public void setPumpTestYield(Double pumpTestYield) {
 		this.pumpTestYield = pumpTestYield;
 	}
 	public void setQ10(String q10) {
@@ -704,22 +703,22 @@ public class WellPermit {
 	public void setSection(String section) {
 		this.section = section;
 	}
-	public void setStaticWaterLevel(double staticWaterLevel) {
+	public void setStaticWaterLevel(Double staticWaterLevel) {
 		this.staticWaterLevel = staticWaterLevel;
 	}
 	public void setStaticWaterLevelDate(String staticWaterLevelDate) {
 		this.staticWaterLevelDate = TimeToolkit.getInstance().toDateTime(staticWaterLevelDate, false);
 	}
-	public void setTopPerforatedCasing(int topPerforatedCasing) {
+	public void setTopPerforatedCasing(Integer topPerforatedCasing) {
 		this.topPerforatedCasing = topPerforatedCasing;
 	}
 	public void setTownship(String township) {
 		this.township = township;
 	}
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 	public void setWaterDistrict(int waterDistrict) {

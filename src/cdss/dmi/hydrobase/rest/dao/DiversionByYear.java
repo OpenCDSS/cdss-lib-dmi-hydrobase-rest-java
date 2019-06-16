@@ -62,12 +62,12 @@ public class DiversionByYear {
 	/**
 	 * Data Value 
 	 */
-	private double dataValue;
+	private Double dataValue;
 	
 	/**
 	 * Measurement Count
 	 */
-	private int measCount;
+	private Integer measCount;
 	
 	/**
 	 *  Measurement Interval 
@@ -92,7 +92,7 @@ public class DiversionByYear {
 	/** 
 	 * WaterClass Number 
 	 */
-	private int waterClassNum;
+	private Integer waterClassNum;
 	
 	/** 
 	 * WaterCalss Identifier 
@@ -114,10 +114,10 @@ public class DiversionByYear {
 		return dataMeasDate;
 	}
 
-	public double getDataValue() {
+	public Double getDataValue() {
 		return dataValue;
 	}
-	public int getMeasCount() {
+	public Integer getMeasCount() {
 		return measCount;
 	}
 
@@ -135,7 +135,7 @@ public class DiversionByYear {
 		return obsCode;
 	}
 
-	public int getWaterClassNum() {
+	public Integer getWaterClassNum() {
 		return waterClassNum;
 	}
 	public String getWcIdentifier() {
@@ -160,10 +160,10 @@ public class DiversionByYear {
 				null : DateTime.parse(dataMeasDate);
 	}
 
-	public void setDataValue(double dataValue) {
+	public void setDataValue(Double dataValue) {
 		this.dataValue = dataValue;
 	}
-	public void setMeasCount(int measCount) {
+	public void setMeasCount(Integer measCount) {
 		this.measCount = measCount;
 	}
 
@@ -181,7 +181,7 @@ public class DiversionByYear {
 		this.obsCode = obsCode;
 	}
 
-	public void setWaterClassNum(int waterClassNum) {
+	public void setWaterClassNum(Integer waterClassNum) {
 		this.waterClassNum = waterClassNum;
 	}
 	public void setWcIdentifier(String wcIdentifier) {

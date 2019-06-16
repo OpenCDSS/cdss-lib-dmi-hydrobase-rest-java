@@ -57,7 +57,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	/**
 	 * Analysis Out Of Priority Percent Of Day
 	 */
-	private double analysisOutOfPriorityOfDay;
+	private Double analysisOutOfPriorityOfDay;
 	
 	/**
 	 * Analysis Structure Name
@@ -72,7 +72,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	/**
 	 * Analysis Water Right Administration Number
 	 */
-	private double analysisWrAdminNo;
+	private Double analysisWrAdminNo;
 	
 	/**
 	 * Bounding Structure Name
@@ -117,12 +117,12 @@ public class AnalysisServicesCallAnalysisByWdid {
 	/**
 	 * Location WDID Stream Mile
 	 */
-	private double locationWdidStreamMile;
+	private Double locationWdidStreamMile;
 	
 	/**
 	 * Priority Administration Number
 	 */
-	private double priorityAdminNo;
+	private Double priorityAdminNo;
 	
 	/**
 	 * Priority Date
@@ -137,7 +137,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	/**
 	 * Priority Order Number
 	 */
-	private int priorityOrderNo;
+	private Integer priorityOrderNo;
 	
 	/**
 	 * Priority Structure
@@ -170,7 +170,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	public DateTime getAnalysisDate() {
 		return analysisDate;
 	}
-	public double getAnalysisOutOfPriorityOfDay() {
+	public Double getAnalysisOutOfPriorityOfDay() {
 		return analysisOutOfPriorityOfDay;
 	}
 	
@@ -181,7 +181,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 		return analysisWdid;
 	}
 	
-	public double getAnalysisWrAdminNo() {
+	public Double getAnalysisWrAdminNo() {
 		return analysisWrAdminNo;
 	}
 	public String getBoundingStructureName() {
@@ -212,11 +212,11 @@ public class AnalysisServicesCallAnalysisByWdid {
 	public String getLocationWdid() {
 		return locationWdid;
 	}
-	public double getLocationWdidStreamMile() {
+	public Double getLocationWdidStreamMile() {
 		return locationWdidStreamMile;
 	}
 	
-	public double getPriorityAdminNo() {
+	public Double getPriorityAdminNo() {
 		return priorityAdminNo;
 	}
 	public DateTime getPriorityDate() {
@@ -226,7 +226,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	public String getPriorityNo() {
 		return priorityNo;
 	}
-	public int getPriorityOrderNo() {
+	public Integer getPriorityOrderNo() {
 		return priorityOrderNo;
 	}
 	
@@ -251,7 +251,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 		this.analysisDate = TimeToolkit.getInstance().toDateTime(analysisDate, true);
 	}
 	
-	public void setAnalysisOutOfPriorityOfDay(double analysisOutOfPriorityOfDay) {
+	public void setAnalysisOutOfPriorityOfDay(Double analysisOutOfPriorityOfDay) {
 		this.analysisOutOfPriorityOfDay = analysisOutOfPriorityOfDay;
 	}
 	public void setAnalysisStructureName(String analysisStructureName) {
@@ -261,7 +261,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 	public void setAnalysisWdid(String analysisWdid) {
 		this.analysisWdid = analysisWdid;
 	}
-	public void setAnalysisWrAdminNo(double analysisWrAdminNo) {
+	public void setAnalysisWrAdminNo(Double analysisWrAdminNo) {
 		this.analysisWrAdminNo = analysisWrAdminNo;
 	}
 	
@@ -293,10 +293,10 @@ public class AnalysisServicesCallAnalysisByWdid {
 		this.locationWdid = locationWdid;
 	}
 	
-	public void setLocationWdidStreamMile(double locationWdidStreamMile) {
+	public void setLocationWdidStreamMile(Double locationWdidStreamMile) {
 		this.locationWdidStreamMile = locationWdidStreamMile;
 	}
-	public void setPriorityAdminNo(double priorityAdminNo) {
+	public void setPriorityAdminNo(Double priorityAdminNo) {
 		this.priorityAdminNo = priorityAdminNo;
 	}
 	
@@ -307,7 +307,7 @@ public class AnalysisServicesCallAnalysisByWdid {
 		this.priorityNo = priorityNo;
 	}
 	
-	public void setPriorityOrderNo(int priorityOrderNo) {
+	public void setPriorityOrderNo(Integer priorityOrderNo) {
 		this.priorityOrderNo = priorityOrderNo;
 	}
 	public void setPriorityStructure(String priorityStructure) {

@@ -62,12 +62,12 @@ public class DiversionByMonth {
 	/**
 	 * Data Value 
 	 */
-	private double dataValue;
+	private Double dataValue;
 	
 	/**
 	 * Measurement Count
 	 */
-	private int measCount;
+	private Integer measCount;
 	
 	/**
 	 *  Measurement Interval 
@@ -92,7 +92,7 @@ public class DiversionByMonth {
 	/** 
 	 * WaterClass Number 
 	 */
-	private int waterClassNum;
+	private Integer waterClassNum;
 	
 	/** 
 	 * WaterCalss Identifier 
@@ -114,10 +114,10 @@ public class DiversionByMonth {
 		return dataMeasDate;
 	}
 	
-	public double getDataValue() {
+	public Double getDataValue() {
 		return dataValue;
 	}
-	public int getMeasCount() {
+	public Integer getMeasCount() {
 		return measCount;
 	}
 	
@@ -138,7 +138,7 @@ public class DiversionByMonth {
 	public String getObsCode() {
 		return obsCode;
 	}
-	public int getWaterClassNum() {
+	public Integer getWaterClassNum() {
 		return waterClassNum;
 	}
 	
@@ -163,11 +163,11 @@ public class DiversionByMonth {
 		this.dataMeasDate = (dataMeasDate == null | dataMeasDate == "" || dataMeasDate == "N/A") ?
 				null : DateTime.parse(dataMeasDate);
 	}
-	public void setDataValue(double dataValue) {
+	public void setDataValue(Double dataValue) {
 		this.dataValue = dataValue;
 	}
 	
-	public void setMeasCount(int measCount) {
+	public void setMeasCount(Integer measCount) {
 		this.measCount = measCount;
 	}
 	public void setMeasInterval(String measInterval) {
@@ -184,7 +184,7 @@ public class DiversionByMonth {
 	public void setObsCode(String obsCode) {
 		this.obsCode = obsCode;
 	}
-	public void setWaterClassNum(int waterClassNum) {
+	public void setWaterClassNum(Integer waterClassNum) {
 		this.waterClassNum = waterClassNum;
 	}
 	

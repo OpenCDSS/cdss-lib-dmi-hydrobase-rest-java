@@ -306,10 +306,10 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		
 		String wdid = "2000505";
 		int parcelId = 32004373;
-		List<ParcelUseTimeSeries> resultsList = chrds.getParcelUseTSListFromParcelId(wdid, parcelId);
+		List<ParcelUseTimeSeries> resultsList = chrds.readParcelUseTSListForParcelId(wdid, parcelId);
 		resultsList.get(0).setModified(null);
 		
-		writeToFile("results/ParcelUseTSListFromParcelId.txt", Arrays.asList(resultsList).toString());
+		writeToFile("results/ParcelUseTSListForParcelId.txt", Arrays.asList(resultsList).toString());
 		
 		assertThat(Arrays.asList(expectedResultsList).toString(), equalTo(Arrays.asList(resultsList).toString()));
 	}

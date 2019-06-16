@@ -63,17 +63,17 @@ public class WaterLevelsWellMeasurement {
 	 * Elevation of water in well on this date minus elevation 
 	 * on the most recent prior date (feet)
 	 */
-	private double delta;
+	private Double delta;
 
 	/**
 	 * Depth from measure point to water level in well (feet)
 	 */
-	private double depthToWater;
+	private Double depthToWater;
 
 	/**
 	 * Depth to Water Below Land Surface (ft)
 	 */
-	private double depthWaterBelowLandSurface;
+	private Double depthWaterBelowLandSurface;
 
 	/**
 	 * Eight established geographic areas in Colorado's Eastern Plains where users 
@@ -89,7 +89,7 @@ public class WaterLevelsWellMeasurement {
 	/**
 	 * Elevation of water level in well (feet above mean sea level)
 	 */
-	private double elevationOfWater;
+	private Double elevationOfWater;
 
 	/**
 	 * Thirteen local districts, within the Designated Basins, 
@@ -105,7 +105,7 @@ public class WaterLevelsWellMeasurement {
 	/**
 	 * Height of measure point above surface (feet)
 	 */
-	private double measuringPointAboveLandSurface;
+	private Double measuringPointAboveLandSurface;
 
 	/**
 	 * Last date time that this record was modified in the DWR database
@@ -150,13 +150,13 @@ public class WaterLevelsWellMeasurement {
 	public int getDay(){
 		return measurementDate.getDay();
 	}
-	public double getDelta() {
+	public Double getDelta() {
 		return delta;
 	}
-	public double getDepthToWater() {
+	public Double getDepthToWater() {
 		return depthToWater;
 	}
-	public double getDepthWaterBelowLandSurface() {
+	public Double getDepthWaterBelowLandSurface() {
 		return depthWaterBelowLandSurface;
 	}
 	public String getDesignatedBasin() {
@@ -165,7 +165,7 @@ public class WaterLevelsWellMeasurement {
 	public int getDivision() {
 		return division;
 	}
-	public double getElevationOfWater() {
+	public Double getElevationOfWater() {
 		return elevationOfWater;
 	}
 	public String getManagementDistrict() {
@@ -207,13 +207,13 @@ public class WaterLevelsWellMeasurement {
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
 	}
-	public void setDelta(double delta) {
+	public void setDelta(Double delta) {
 		this.delta = delta;
 	}
-	public void setDepthToWater(double depthToWater) {
+	public void setDepthToWater(Double depthToWater) {
 		this.depthToWater = depthToWater;
 	}
-	public void setDepthWaterBelowLandSurface(double depthWaterBelowLandSurface) {
+	public void setDepthWaterBelowLandSurface(Double depthWaterBelowLandSurface) {
 		this.depthWaterBelowLandSurface = depthWaterBelowLandSurface;
 	}
 	public void setDesignatedBasin(String designatedBasin) {
@@ -222,7 +222,7 @@ public class WaterLevelsWellMeasurement {
 	public void setDivision(int division) {
 		this.division = division;
 	}
-	public void setElevationOfWater(double elevationOfWater) {
+	public void setElevationOfWater(Double elevationOfWater) {
 		this.elevationOfWater = elevationOfWater;
 	}
 	public void setManagementDistrict(String managementDistrict) {
@@ -231,7 +231,7 @@ public class WaterLevelsWellMeasurement {
 	public void setMeasurementDate(String measurementDate) {
 		this.measurementDate = TimeToolkit.getInstance().toDateTime(measurementDate, true);
 	}
-	public void setMeasuringPointAboveLandSurface(double measuringPointAboveLandSurface) {
+	public void setMeasuringPointAboveLandSurface(Double measuringPointAboveLandSurface) {
 		this.measuringPointAboveLandSurface = measuringPointAboveLandSurface;
 	}
 	public void setModified(String modified) {

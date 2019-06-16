@@ -58,12 +58,12 @@ public class WaterLevelsWell {
 	/**
 	 * Depth from surface to base of grout (feet) 
 	 */
-	private int baseOfGrout;
+	private Integer baseOfGrout;
 
 	/**
 	 * Depth from surface to bottom of perforated casing (feet) 
 	 */
-	private int bottomPerforatedCasing;
+	private Integer bottomPerforatedCasing;
 
 	/**
 	 * Person(s) or entity associated with well either 
@@ -74,7 +74,7 @@ public class WaterLevelsWell {
 	/**
 	 * Distance and direction from East/West section line (feet)
 	 */
-	private int coordinatesEw;
+	private Integer coordinatesEw;
 
 	/**
 	 * Direction of measurement from east/west section line 
@@ -84,7 +84,7 @@ public class WaterLevelsWell {
 	/** 
 	 * Distance from north/south section line (feet) 
 	 */
-	private int coordinatesNs;
+	private Integer coordinatesNs;
 
 	/**
 	 * Direction of measurement from north/south section line 
@@ -122,7 +122,7 @@ public class WaterLevelsWell {
 	 * Surface elevation at the location of the well (feet above 
 	 * mean sea level)
 	 */
-	private double elevation;
+	private Double elevation;
 
 	/**
 	 * Accuracy of the ground surface elevation
@@ -132,7 +132,7 @@ public class WaterLevelsWell {
 	/**
 	 * Latitude value in decimal degrees
 	 */
-	private double latitude;
+	private Double latitude;
 
 	/**
 	 * Accuracy of location coordinates
@@ -148,7 +148,7 @@ public class WaterLevelsWell {
 	/** 
 	 * Longitude in decimal degrees 
 	 */
-	private double longitude;
+	private Double longitude;
 
 	/**
 	 * Thirteen local districts, within the Designated Basins, 
@@ -191,7 +191,7 @@ public class WaterLevelsWell {
 	/**
 	 * Count of measurements in the wellâ€™s period of record
 	 */
-	private int porCount;
+	private Integer porCount;
 
 	/**
 	 * Date of last measurement in the wellâ€™s period of record
@@ -249,7 +249,7 @@ public class WaterLevelsWell {
 	/**
 	 * Depth from surface to top of perforated casing (feet)
 	 */
-	private int topPerforatedCasing;
+	private Integer topPerforatedCasing;
 
 	/**
 	 * Legal Location: Township number and direction
@@ -265,13 +265,13 @@ public class WaterLevelsWell {
 	 * The x (Easting) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum) 
 	 */
-	private double utmX;
+	private Double utmX;
 
 	/** 
 	 * The y (Northing) component of the Universal Transverse Mercator system. 
 	 * (Zone 12, NAD83 datum) 
 	 */
-	private double utmY;
+	private Double utmY;
 
 	/** 
 	 * DWR Water District 
@@ -281,12 +281,12 @@ public class WaterLevelsWell {
 	/** 
 	 * Depth to water below land surface (ft) on measurement date
 	 */
-	private double waterLevelDepth;
+	private Double waterLevelDepth;
 
 	/** 
 	 * Elevation of water above mean sea level (feet)
 	 */
-	private double waterLevelElevation;
+	private Double waterLevelElevation;
 
 	/**
 	 * DWR unique structure identifier
@@ -296,12 +296,12 @@ public class WaterLevelsWell {
 	/**
 	 * Completed depth of well (ft)
 	 */
-	private int wellDepth;
+	private Integer wellDepth;
 	
 	/**
 	 * Unique ID of well in DWR database
 	 */
-	private int wellId;
+	private Integer wellId;
 	
 	/**
 	 * Name of well in DWR database
@@ -314,23 +314,23 @@ public class WaterLevelsWell {
 	public String getAquifers() {
 		return aquifers;
 	}
-	public int getBaseOfGrout() {
+	public Integer getBaseOfGrout() {
 		return baseOfGrout;
 	}
 	
-	public int getBottomPerforatedCasing() {
+	public Integer getBottomPerforatedCasing() {
 		return bottomPerforatedCasing;
 	}
 	public String getContact() {
 		return contact;
 	}
-	public int getCoordinatesEw() {
+	public Integer getCoordinatesEw() {
 		return coordinatesEw;
 	}
 	public String getCoordinatesEwDir() {
 		return coordinatesEwDir;
 	}
-	public int getCoordinatesNs() {
+	public Integer getCoordinatesNs() {
 		return coordinatesNs;
 	}
 	public String getCoordinatesNsDir() {
@@ -351,13 +351,13 @@ public class WaterLevelsWell {
 	public int getDivision() {
 		return division;
 	}
-	public double getElevation() {
+	public Double getElevation() {
 		return elevation;
 	}
 	public String getElevationAccuracy() {
 		return elevationAccuracy;
 	}
-	public double getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
 	public String getLocationAccuracy() {
@@ -366,7 +366,7 @@ public class WaterLevelsWell {
 	public String getLocationNumber() {
 		return locationNumber;
 	}
-	public double getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
 	public String getManagementDistrict() {
@@ -390,7 +390,7 @@ public class WaterLevelsWell {
 	public String getPm() {
 		return pm;
 	}
-	public int getPorCount() {
+	public Integer getPorCount() {
 		return porCount;
 	}
 	public DateTime getPorEnd() {
@@ -423,7 +423,7 @@ public class WaterLevelsWell {
 	public String getTimeStep() {
 		return timeStep;
 	}
-	public int getTopPerforatedCasing() {
+	public Integer getTopPerforatedCasing() {
 		return topPerforatedCasing;
 	}
 	public String getTownship() {
@@ -432,28 +432,28 @@ public class WaterLevelsWell {
 	public String getUsgsSiteId() {
 		return usgsSiteId;
 	}
-	public double getUtmX() {
+	public Double getUtmX() {
 		return utmX;
 	}
-	public double getUtmY() {
+	public Double getUtmY() {
 		return utmY;
 	}
 	public int getWaterDistrict() {
 		return waterDistrict;
 	}
-	public double getWaterLevelDepth() {
+	public Double getWaterLevelDepth() {
 		return waterLevelDepth;
 	}
-	public double getWaterLevelElevation() {
+	public Double getWaterLevelElevation() {
 		return waterLevelElevation;
 	}
 	public String getWdid() {
 		return wdid;
 	}
-	public int getWellDepth() {
+	public Integer getWellDepth() {
 		return wellDepth;
 	}
-	public int getWellId() {
+	public Integer getWellId() {
 		return wellId;
 	}
 	public String getWellName() {
@@ -462,22 +462,22 @@ public class WaterLevelsWell {
 	public void setAquifers(String aquifers) {
 		this.aquifers = aquifers;
 	}
-	public void setBaseOfGrout(int baseOfGrout) {
+	public void setBaseOfGrout(Integer baseOfGrout) {
 		this.baseOfGrout = baseOfGrout;
 	}
-	public void setBottomPerforatedCasing(int bottomPerforatedCasing) {
+	public void setBottomPerforatedCasing(Integer bottomPerforatedCasing) {
 		this.bottomPerforatedCasing = bottomPerforatedCasing;
 	}
 	public void setContact(String contact) {
 		this.contact = contact;
 	}
-	public void setCoordinatesEw(int coordinatesEw) {
+	public void setCoordinatesEw(Integer coordinatesEw) {
 		this.coordinatesEw = coordinatesEw;
 	}
 	public void setCoordinatesEwDir(String coordinatesEwDir) {
 		this.coordinatesEwDir = coordinatesEwDir;
 	}
-	public void setCoordinatesNs(int coordinatesNs) {
+	public void setCoordinatesNs(Integer coordinatesNs) {
 		this.coordinatesNs = coordinatesNs;
 	}
 	public void setCoordinatesNsDir(String coordinatesNsDir) {
@@ -498,13 +498,13 @@ public class WaterLevelsWell {
 	public void setDivision(int division) {
 		this.division = division;
 	}
-	public void setElevation(double elevation) {
+	public void setElevation(Double elevation) {
 		this.elevation = elevation;
 	}
 	public void setElevationAccuracy(String elevationAccuracy) {
 		this.elevationAccuracy = elevationAccuracy;
 	}
-	public void setLatitude(double latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
 	}
 	public void setLocationAccuracy(String locationAccuracy) {
@@ -513,7 +513,7 @@ public class WaterLevelsWell {
 	public void setLocationNumber(String locationNumber) {
 		this.locationNumber = locationNumber;
 	}
-	public void setLongitude(double longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
 	public void setManagementDistrict(String managementDistrict) {
@@ -537,7 +537,7 @@ public class WaterLevelsWell {
 	public void setPm(String pm) {
 		this.pm = pm;
 	}
-	public void setPorCount(int porCount) {
+	public void setPorCount(Integer porCount) {
 		this.porCount = porCount;
 	}
 	public void setPorEnd(String porEnd) {
@@ -570,7 +570,7 @@ public class WaterLevelsWell {
 	public void setTimeStep(String timeStep) {
 		this.timeStep = timeStep;
 	}
-	public void setTopPerforatedCasing(int topPerforatedCasing) {
+	public void setTopPerforatedCasing(Integer topPerforatedCasing) {
 		this.topPerforatedCasing = topPerforatedCasing;
 	}
 	public void setTownship(String township) {
@@ -579,28 +579,28 @@ public class WaterLevelsWell {
 	public void setUsgsSiteId(String usgsSiteId) {
 		this.usgsSiteId = usgsSiteId;
 	}
-	public void setUtmX(double utmX) {
+	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
-	public void setUtmY(double utmY) {
+	public void setUtmY(Double utmY) {
 		this.utmY = utmY;
 	}
 	public void setWaterDistrict(int waterDistrict) {
 		this.waterDistrict = waterDistrict;
 	}
-	public void setWaterLevelDepth(double waterLevelDepth) {
+	public void setWaterLevelDepth(Double waterLevelDepth) {
 		this.waterLevelDepth = waterLevelDepth;
 	}
-	public void setWaterLevelElevation(double waterLevelElevation) {
+	public void setWaterLevelElevation(Double waterLevelElevation) {
 		this.waterLevelElevation = waterLevelElevation;
 	}
 	public void setWdid(String wdid) {
 		this.wdid = wdid;
 	}
-	public void setWellDepth(int wellDepth) {
+	public void setWellDepth(Integer wellDepth) {
 		this.wellDepth = wellDepth;
 	}
-	public void setWellId(int wellId) {
+	public void setWellId(Integer wellId) {
 		this.wellId = wellId;
 	}
 	public void setWellName(String wellName) {

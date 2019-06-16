@@ -64,7 +64,7 @@ public class AnalysisServicesWaterSourceRouteFramework {
 	/**
 	 * Stream Length
 	 */
-	private double streamLength;
+	private Double streamLength;
 	
 	/**
 	 * Tributary GNIS Name
@@ -79,12 +79,12 @@ public class AnalysisServicesWaterSourceRouteFramework {
 	/**
 	 * Tributary To Level
 	 */
-	private int tributaryToLevel;
+	private Integer tributaryToLevel;
 	
 	/**
 	 * Tributary To Stream Mile
 	 */
-	private double tributaryToStreamMile;
+	private Double tributaryToStreamMile;
 	
 	/**
 	 * DWR Water District
@@ -104,7 +104,7 @@ public class AnalysisServicesWaterSourceRouteFramework {
 	public String getGnisName() {
 		return gnisName;
 	}
-	public double getStreamLength() {
+	public Double getStreamLength() {
 		return streamLength;
 	}
 	
@@ -115,10 +115,10 @@ public class AnalysisServicesWaterSourceRouteFramework {
 		return TributaryToGnisId;
 	}
 	
-	public int getTributaryToLevel() {
+	public Integer getTributaryToLevel() {
 		return tributaryToLevel;
 	}
-	public double getTributaryToStreamMile() {
+	public Double getTributaryToStreamMile() {
 		return tributaryToStreamMile;
 	}
 	
@@ -136,7 +136,7 @@ public class AnalysisServicesWaterSourceRouteFramework {
 		this.gnisName = gnisName;
 	}
 	
-	public void setStreamLength(double streamLength) {
+	public void setStreamLength(Double streamLength) {
 		this.streamLength = streamLength;
 	}
 	public void setTribGnisName(String tribGnisName) {
@@ -146,11 +146,11 @@ public class AnalysisServicesWaterSourceRouteFramework {
 	public void setTributaryToGnisId(String tributaryToGnisId) {
 		TributaryToGnisId = tributaryToGnisId;
 	}
-	public void setTributaryToLevel(int tributaryToLevel) {
+	public void setTributaryToLevel(Integer tributaryToLevel) {
 		this.tributaryToLevel = tributaryToLevel;
 	}
 	
-	public void setTributaryToStreamMile(double tributaryToStreamMile) {
+	public void setTributaryToStreamMile(Double tributaryToStreamMile) {
 		this.tributaryToStreamMile = tributaryToStreamMile;
 	}
 	public void setWaterDistrict(int waterDistrict) {

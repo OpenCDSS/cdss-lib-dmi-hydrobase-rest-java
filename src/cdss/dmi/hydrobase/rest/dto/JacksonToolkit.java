@@ -206,8 +206,13 @@ public class JacksonToolkit {
 	
 	/**
 	 * Deserializes a JsonNode to a POJO class.
+	 * This has the advantage of providing control over the process.
+	 * null values are handled by setting to null in the POJO object if values are defined
+	 * as classes (Integer, Double, etc.), but will be set to 0 if primitives are used.
+	 * Therefore, if zeros are being used where not expected, define as an object and not primitive
+	 * in the class.
 	 * @param node - JsonNode to deserialize to POJO.
-	 * @param objClass - The class that the JsonNOde is to be deserialized to.
+	 * @param objClass - The class that the JsonNode is to be deserialized to.
 	 * @return the POJO that has been initialized via Jackson deserialization 
 	 * from the JsonNode data.
 	 */
@@ -217,15 +222,18 @@ public class JacksonToolkit {
 			return mapper.treeToValue(node, objClass);
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(2, routine, "Error converting response to value from. " + e);
+			Message.printWarning(3, routine, "Error converting JSON response to class instance (" + e + ").");
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(2, routine, "Error converting response to value from. " + e);
+			Message.printWarning(3, routine, "Error converting JSON response to class instance (" + e + ").");
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 		catch (IOException e) { 
-			Message.printWarning(2, routine, "IOExpection: " + e);
+			Message.printWarning(3, routine, "IOException ("+ e + ").");
+			Message.printWarning(3, routine, e);
 			return null;
 		}
 	}
