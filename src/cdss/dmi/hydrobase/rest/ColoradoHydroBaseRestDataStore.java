@@ -2059,64 +2059,35 @@ throws MalformedURLException, Exception
 		
 		/* Get first and last date */
 		// First Date
-		DateTime firstDate = null;
-		if(interval_base == TimeInterval.DAY){ 
-			firstDate = new DateTime(DateTime.PRECISION_DAY); 
-			firstDate.setYear(struct.getPorStart().getYear());
-			firstDate.setMonth(struct.getPorStart().getMonth());
-			firstDate.setDay(struct.getPorStart().getDay());
-			ts.setDate1Original(firstDate);
+		DateTime firstDate = waterClassForWdid.getPorStart();
+		if ( firstDate != null ) {
+			if ( interval_base == TimeInterval.DAY ) {
+				firstDate.setPrecision(DateTime.PRECISION_DAY); 
+			}
+			else if ( interval_base == TimeInterval.MONTH ) { 
+				firstDate.setPrecision(DateTime.PRECISION_MONTH); 
+			}
+			else if ( interval_base == TimeInterval.YEAR ) { 
+				firstDate.setPrecision(DateTime.PRECISION_YEAR); 
+			}
 		}
-		if(interval_base == TimeInterval.MONTH){ 
-			firstDate = new DateTime(DateTime.PRECISION_MONTH); 
-			firstDate.setYear(struct.getPorStart().getYear());
-			firstDate.setMonth(struct.getPorStart().getMonth());
-			ts.setDate1Original(firstDate);
-		}
-		if(interval_base == TimeInterval.YEAR){ 
-			firstDate = new DateTime(DateTime.PRECISION_YEAR); 
-			firstDate.setYear(struct.getPorStart().getYear());
-			ts.setDate1Original(firstDate);
-		}
+		ts.setDate1Original(firstDate);
 		
 		// Last Date
-		DateTime lastDate = null;
-		if(interval_base == TimeInterval.DAY){ 
-			lastDate = new DateTime(DateTime.PRECISION_DAY); 
-			lastDate.setYear(struct.getPorEnd().getYear());
-			lastDate.setMonth(struct.getPorEnd().getMonth());
-			lastDate.setDay(struct.getPorEnd().getDay());
-			ts.setDate2Original(lastDate);
-			/*ts.setDataUnits(struct.getU); // TODO @jurentie 06/26/2018: setDataUnits
-			ts.setDataUnitsOriginal(divRecFirst.getMeasUnits());*/
+		DateTime lastDate = waterClassForWdid.getPorEnd();
+		if ( lastDate != null ) {
+			if ( interval_base == TimeInterval.DAY ) {
+				lastDate.setPrecision(DateTime.PRECISION_DAY); 
+			}
+			else if ( interval_base == TimeInterval.MONTH ) { 
+				lastDate.setPrecision(DateTime.PRECISION_MONTH); 
+			}
+			else if ( interval_base == TimeInterval.YEAR ) { 
+				lastDate.setPrecision(DateTime.PRECISION_YEAR); 
+			}
 		}
-		if(interval_base == TimeInterval.MONTH){ 
-			lastDate = new DateTime(DateTime.PRECISION_MONTH); 
-			lastDate.setYear(struct.getPorEnd().getYear());
-			lastDate.setMonth(struct.getPorEnd().getMonth());
-			ts.setDate2Original(lastDate);
-		}
-		if(interval_base == TimeInterval.YEAR){ 
-			lastDate = new DateTime(DateTime.PRECISION_YEAR); 
-			lastDate.setYear(struct.getPorEnd().getYear());
-			ts.setDate2Original(lastDate);
-		}
+		ts.setDate2Original(lastDate);
 			
-		// Set start and end date
-		if(readStart == null){
-			ts.setDate1(ts.getDate1Original());
-		}else{
-			ts.setDate1(readStart);
-		}
-		if(readEnd == null){
-			ts.setDate2(ts.getDate2Original());
-		}else{
-			ts.setDate2(readEnd);
-		}
-			
-		// Allocate data space
-		ts.allocateDataSpace();
-		
 		/* TODO smalers 2019-06-15 need to use web service URL here
 		if(interval_base == TimeInterval.DAY){
 			ts.setInputName ( "HydroBase daily_amt.amt_*, daily_amt.obs_*");
@@ -2128,8 +2099,6 @@ throws MalformedURLException, Exception
 			ts.setInputName ( "HydroBase annual_amt.ann_amt");
 		}
 		*/
-		
-		TSIterator iterator = ts.iterator();
 		
 		// 4. Set Properties:
 		//FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
@@ -2143,7 +2112,9 @@ throws MalformedURLException, Exception
 		if(!readData){
 			return ts;
 		}
-		else{
+		else {
+			// Read the data
+			
 			// Get the data from web services
 			String divRecRequest = null;
 			if(interval_base == TimeInterval.DAY){
@@ -2169,11 +2140,50 @@ throws MalformedURLException, Exception
 			}
 			// Get JsonNode results give the request URL
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
-			if(results == null){
+			if ( (results == null) || (results.size() == 0) ){
 				return ts;
 			}
+
+			// Set the original start and end date to the parameter period
+			if ( readStart == null ) {
+				if (interval_base == TimeInterval.DAY ) {
+					DiversionByDay divRecCurrDay = (DiversionByDay)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByDay.class);
+					ts.setDate1(divRecCurrDay.getDataMeasDate());
+				}
+				if (interval_base == TimeInterval.MONTH ) {
+					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByMonth.class);
+					ts.setDate1(divRecCurrMonth.getDataMeasDate());
+				}
+				if (interval_base == TimeInterval.YEAR ) {
+					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByYear.class);
+					ts.setDate1(divRecCurrYear.getDataMeasDate());
+				}
+			}
+			else {
+				ts.setDate1(readStart);
+			}
+			if ( readEnd == null ) {
+				if (interval_base == TimeInterval.DAY ) {
+					DiversionByDay divRecCurrDay = (DiversionByDay)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByDay.class);
+					ts.setDate2(divRecCurrDay.getDataMeasDate());
+				}
+				if (interval_base == TimeInterval.MONTH ) {
+					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
+					ts.setDate2(divRecCurrMonth.getDataMeasDate());
+				}
+				if (interval_base == TimeInterval.YEAR ) {
+					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByYear.class);
+					ts.setDate2(divRecCurrYear.getDataMeasDate());
+				}
+			}
+			else {
+				ts.setDate2(readEnd);
+			}
 			
-			// Pass Data into TS Object
+			// Allocate data space
+			ts.allocateDataSpace();
+			
+			// Transfer data into TS object
 			if(interval_base == TimeInterval.DAY){
 				for(int i = 0; i < results.size(); i++){
 					
@@ -2202,8 +2212,10 @@ throws MalformedURLException, Exception
 					date.setDay(divRecCurrDay.getDay());
 					
 					// Get Data
-					double value = divRecCurrDay.getDataValue();
-					ts.setDataValue(date, value);
+					Double value = divRecCurrDay.getDataValue();
+					if ( value != null ) {
+						ts.setDataValue(date, value);
+					}
 				}
 			}
 			if(interval_base == TimeInterval.MONTH){
@@ -2232,9 +2244,11 @@ throws MalformedURLException, Exception
 					date.setMonth(divRecCurrMonth.getMonth());
 					
 					// Get Data
-					double value = divRecCurrMonth.getDataValue();
+					Double value = divRecCurrMonth.getDataValue();
 					
-					ts.setDataValue(date, value);
+					if ( value != null ) {
+						ts.setDataValue(date, value);
+					}
 				}
 			}
 			if(interval_base == TimeInterval.YEAR){
@@ -2262,9 +2276,11 @@ throws MalformedURLException, Exception
 					date.setYear(divRecCurrYear.getYear());
 					
 					// Get Data
-					double value = divRecCurrYear.getDataValue();
+					Double value = divRecCurrYear.getDataValue();
 					
-					ts.setDataValue(date, value);
+					if ( value != null ) {
+						ts.setDataValue(date, value);
+					}
 				}
 			}
 			
@@ -2290,6 +2306,7 @@ throws MalformedURLException, Exception
 			/**
 			 * Fill years with diversion comments. Currently defaults to not fill.
 			 */
+			TSIterator iterator = ts.iterator();
 			if(interval_base == TimeInterval.DAY ||
 				interval_base == TimeInterval.MONTH || 
 				interval_base == TimeInterval.YEAR ){
@@ -2402,18 +2419,6 @@ throws MalformedURLException, Exception
 		lastDate.setPrecision(DateTime.PRECISION_DAY); 
 		ts.setDate2Original(lastDate);
 			
-		// Set start and end date
-		if(readStart == null){
-			ts.setDate1(ts.getDate1Original());
-		}else{
-			ts.setDate1(readStart);
-		}
-		if(readEnd == null){
-			ts.setDate2(ts.getDate2Original());
-		}else{
-			ts.setDate2(readEnd);
-		}
-
 		// TODO smalers 2019-06-15 hard-code units
 		if ( data_type.equalsIgnoreCase("Stage") ) {
 			ts.setDataUnitsOriginal("FT");
@@ -2422,9 +2427,6 @@ throws MalformedURLException, Exception
 			ts.setDataUnitsOriginal("AF");
 		}
 			
-		// Allocate data space
-		ts.allocateDataSpace();
-		
 		/* TODO smalers 2019-06-15 maybe set the web service here?
 		if(interval_base == TimeInterval.DAY){
 			ts.setInputName ( "HydroBase daily_amt.amt_*, daily_amt.obs_*");
@@ -2449,7 +2451,9 @@ throws MalformedURLException, Exception
 		if(!readData){
 			return ts;
 		}
-		else{
+		else {
+			// Read the data
+			
 			// Get the data from web services
 			String divRecRequest = null;
 			// Create request URL for web services API
@@ -2460,6 +2464,29 @@ throws MalformedURLException, Exception
 				System.out.println("divRecRequest: " + divRecRequest);
 			}
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
+			
+			if ( (results == null) || (results.size() == 0) ) {
+				return ts;
+			}
+
+			// Set start and end date
+			if(readStart == null){
+				DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionStageVolume.class);
+				ts.setDate1(divStageVol.getDataMeasDate());
+			}
+			else {
+				ts.setDate1(readStart);
+			}
+			if ( readEnd == null) {
+				DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionStageVolume.class);
+				ts.setDate2(divStageVol.getDataMeasDate());
+			}
+			else {
+				ts.setDate2(readEnd);
+			}
+
+			// Allocate data space
+			ts.allocateDataSpace();
 				
 			// Create date to iterate through the data
 			DateTime date = new DateTime(DateTime.PRECISION_DAY);
@@ -2489,8 +2516,22 @@ throws MalformedURLException, Exception
 	else if(isTelemetryStationTimeSeriesDataType(data_type)){
 		String abbrev = locid;
 		String parameter = ts.getDataType();
+
+		// Round the times and also remove time zone since not returned from web services
+		if ( readStart != null ) {
+			// Round to 15-minute so that allocated time series will align with data
+			readStart = new DateTime(readStart);
+			readStart.round(1, TimeInterval.MINUTE, 15);
+			readStart.setTimeZone("");
+		}
+		if ( readEnd != null ) {
+			// Round to 15-minute so that allocated time series will align with data
+			readEnd = new DateTime(readEnd);
+			readEnd.round(-1, TimeInterval.MINUTE, 15);
+			readEnd.setTimeZone("");
+		}
 		
-		// Get Telemetry
+		// Get the Telemetry station
 		String telemetryRequest = getServiceRootURI() + "/telemetrystations/telemetrystation?format=json&includeThirdParty=true&abbrev=" + abbrev + getApiKeyString();
 		if(debug){
 			System.out.println("telemetryRequest: " + telemetryRequest);
@@ -2507,187 +2548,173 @@ throws MalformedURLException, Exception
 		
 		TelemetryStation telStation = (TelemetryStation)JacksonToolkit.getInstance().treeToValue(telemetryResult, TelemetryStation.class);
 		Message.printStatus(2, routine, "Retrieve telemetry stations from DWR REST API request url: " + telemetryRequest);
+
+		// Get the Telemetry station data type (TODO smalers 2019-06-16 might be able to not query station if have enough overlap)
+		String telemetryStationDataTypeRequest = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes?format=json&includeThirdParty=true&abbrev=" + abbrev + 
+			"&parameter=" + parameter + getApiKeyString();
+		if(debug){
+			System.out.println("telemetryStationDataTypeRequest: " + telemetryStationDataTypeRequest);
+		}
+		results0 = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telemetryStationDataTypeRequest);
+		JsonNode telemetryStationDataTypeResult = null;
+		if ( results0 == null ) {
+			Message.printWarning(3, routine, "No data returned for:  " + telemetryStationDataTypeRequest);
+			return ts;
+		}
+		else {
+			telemetryStationDataTypeResult = results0.get(0);
+		}
+		
+		TelemetryStationDataTypes telStationDataType = (TelemetryStationDataTypes)JacksonToolkit.getInstance().treeToValue(telemetryStationDataTypeResult, TelemetryStationDataTypes.class);
+		Message.printStatus(2, routine, "Retrieve telemetry station data types from DWR REST API request url: " + telemetryStationDataTypeRequest);
 		
 		// Set Description
+		// - use the station name since nothing suitable on data type/parameter
 		ts.setDescription(telStation.getStationName());
 		
-		// FIXME @jurentie 06/26/2018 - Try to more efficiently get the first and last dates so I can move the following code inside readData() 
+		// Set data units
+		ts.setDataUnitsOriginal(telStationDataType.getParameterUnit());
+		ts.setDataUnits(telStationDataType.getParameterUnit());
 		
+		// Set available start and end date to the time series parameter period
+		ts.setDate1Original(telStationDataType.getParameterPorStart());
+		ts.setDate2Original(telStationDataType.getParameterPorEnd());
+		Message.printStatus(2,routine,"Date1Original=" + ts.getDate1Original() + " Date2Original=" + ts.getDate2Original());
+
+		setTimeSeriesPropertiesTelemetry(ts, telStation);
+		setCommentsTelemetry(ts, telStation);
+
+		// If not reading the data, return the time series with only header information
+		if(!readData){
+			return ts;
+		}
+
+		// Read the time series records
 		String telRequest = null;
 
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw?includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter + getApiKeyString();
-			//System.out.println(telRequest);
-			Message.printStatus(2, routine, "Retrieve telemetry time series 15 min intervals from DWR REST API request url: " + telRequest);
+			// Note that this is 15-minute, not instantaneous
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter + getApiKeyString();
 		}
-		if(interval_base == DateTime.PRECISION_HOUR){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour?includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
-			//System.out.println(telRequest);
-			Message.printStatus(2, routine, "Retrieve telemetry time series hourly intervals from DWR REST API request url: " + telRequest);
+		else if(interval_base == DateTime.PRECISION_HOUR){
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
 		}
-		if(interval_base == DateTime.PRECISION_DAY){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday?includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
-			//System.out.println(telRequest);
-			Message.printStatus(2, routine, "Retrieve telemetry time series daily intervals from DWR REST API request url: " + telRequest);
+		else if(interval_base == DateTime.PRECISION_DAY){
+			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
 		}
-		
-		if(debug){
-			System.out.println("telRequest: " + telRequest);
+		// Date/time format is the same regardless of interval
+		if ( readStart != null ) {
+			telRequest += "&startDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readStart.getMonth(), readStart.getDay(), readStart.getYear(), readStart.getHour(), readStart.getMinute() ), "UTF-8");
 		}
+		if ( readEnd != null ) {
+			telRequest += "&endDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear(), readEnd.getHour(), readEnd.getMinute() ), "UTF-8");
+		}
+		Message.printStatus(2, routine, "Retrieve telemetry time series from DWR REST API request url: " + telRequest);
 		
 		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telRequest);
-		if(results == null){
+		if ( (results == null) || (results.size() == 0) ){
 			return ts;
 		}
-		
-		//System.out.println(results);
-		
-		/* Get first and last date */
-		// First Date / Also set ts.setDataUnits() and ts.setDataUnitsOriginal() //
-		DateTime firstDate = null;
-		if(interval_base == TimeInterval.MINUTE){
-			TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(0), TelemetryTimeSeries.class);
-			firstDate = new DateTime(DateTime.PRECISION_MINUTE);
-			firstDate.setYear(telTSMinute.getYear());
-			firstDate.setMonth(telTSMinute.getMonth());
-			firstDate.setDay(telTSMinute.getDay());
-			firstDate.setHour(telTSMinute.getHour());
-			firstDate.setMinute(telTSMinute.getMinute());
-			ts.setDate1Original(firstDate);
-			ts.setDataUnits(telStation.getUnits());
-			ts.setDataUnitsOriginal(telStation.getUnits());
+
+		// Set the actual data period to the requested period if specified,
+		// or the actual period if the requested period was not specified.
+		if ( readStart == null ) {
+			TelemetryTimeSeries telTS = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(0), TelemetryTimeSeries.class);
+			DateTime firstDate = null;
+			if(interval_base == TimeInterval.DAY) {
+				firstDate = telTS.getMeasDate();
+			}
+			else {
+				firstDate = telTS.getMeasDateTime();
+			}
+			ts.setDate1(firstDate);
 		}
-		if(interval_base == TimeInterval.HOUR){
-			TelemetryTimeSeries telTSHour = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(0), TelemetryTimeSeries.class);
-			firstDate = new DateTime(DateTime.PRECISION_HOUR);
-			firstDate.setYear(telTSHour.getYear());
-			firstDate.setMonth(telTSHour.getMonth());
-			firstDate.setDay(telTSHour.getDay());
-			firstDate.setHour(telTSHour.getHour());
-			ts.setDate1Original(firstDate);
-			ts.setDataUnits(telStation.getUnits());
-			ts.setDataUnitsOriginal(telStation.getUnits());
-		}
-		if(interval_base == TimeInterval.DAY){ 
-			TelemetryTimeSeries telTSDay = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(0), TelemetryTimeSeries.class);
-			firstDate = new DateTime(DateTime.PRECISION_DAY);
-			//System.out.println(telTSDay);
-			firstDate.setYear(telTSDay.getYear());
-			firstDate.setMonth(telTSDay.getMonth());
-			firstDate.setDay(telTSDay.getDay());
-			ts.setDate1Original(firstDate);
-			ts.setDataUnits(telStation.getUnits());
-			ts.setDataUnitsOriginal(telStation.getUnits());
-		}
-		
-		// Last Date
-		DateTime lastDate = null;
-		if(interval_base == TimeInterval.MINUTE){
-			TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
-			lastDate = new DateTime(DateTime.PRECISION_MINUTE);
-			lastDate.setYear(telTSMinute.getYear());
-			lastDate.setMonth(telTSMinute.getMonth());
-			lastDate.setDay(telTSMinute.getDay());
-			lastDate.setHour(telTSMinute.getHour());
-			lastDate.setMinute(telTSMinute.getMinute());
-			ts.setDate2Original(lastDate);
-		}
-		if(interval_base == TimeInterval.HOUR){
-			TelemetryTimeSeries telTSHour = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
-			lastDate = new DateTime(DateTime.PRECISION_HOUR);
-			lastDate.setYear(telTSHour.getYear());
-			lastDate.setMonth(telTSHour.getMonth());
-			lastDate.setDay(telTSHour.getDay());
-			lastDate.setHour(telTSHour.getHour());
-			ts.setDate2Original(lastDate);
-		}
-		if(interval_base == TimeInterval.DAY){ 
-			TelemetryTimeSeries telTSDay = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
-			lastDate = new DateTime(DateTime.PRECISION_DAY);
-			lastDate.setYear(telTSDay.getYear());
-			lastDate.setMonth(telTSDay.getMonth());
-			lastDate.setDay(telTSDay.getDay());
-			ts.setDate2Original(lastDate);
-		}
-			
-		// Set start and end date
-		if(readStart == null){
-			ts.setDate1(ts.getDate1Original());
-		}else{
+		else {
 			ts.setDate1(readStart);
 		}
-		if(readEnd == null){
-			ts.setDate2(ts.getDate2Original());
-		}else{
+		if ( readEnd == null ) {
+			TelemetryTimeSeries telTS = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			DateTime lastDate = null;
+			if(interval_base == TimeInterval.DAY) {
+				lastDate = telTS.getMeasDate();
+			}
+			else {
+				lastDate = telTS.getMeasDateTime();
+			}
+			ts.setDate2(lastDate);
+		}
+		else {
 			ts.setDate2(readEnd);
 		}
-			
+
 		// Allocate data space
 		ts.allocateDataSpace();
+		Message.printStatus(2, routine, "Allocated memory for " + ts.getDate1() + " to " + ts.getDate2() );
 		
 		// FIXME @jurentie 06/20/2018 change name of telemetryRequest/telRequest
 		// Set Properties
 		ts.addToGenesis("read data from web services " + telemetryRequest + " and " + telRequest + ".");
-		setTimeSeriesPropertiesTelemetry(ts, telStation);
-		setCommentsTelemetry(ts, telStation);
 		
-		if(!readData){
-			return ts;
-		}
 		// Read Data
-		else{
-			// Pass Data into TS Object
-			if(interval_base == TimeInterval.MINUTE){
-				for(int i = 0; i < results.size(); i++){
-					TelemetryTimeSeries telTSRaw = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+		// Pass Data into TS Object
+		if(interval_base == TimeInterval.MINUTE){
+			// Can declare DateTime outside of loop because time series stores in an array
+			DateTime date = new DateTime(DateTime.PRECISION_MINUTE);
+			for(int i = 0; i < results.size(); i++){
+				TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				
+				// Set date
+				date.setYear(telTSMinute.getYear());
+				date.setMonth(telTSMinute.getMonth());
+				date.setDay(telTSMinute.getDay());
+				date.setHour(telTSMinute.getHour());
+				date.setMinute(telTSMinute.getMinute());
 					
-					// Set Date
-					DateTime date = new DateTime(DateTime.PRECISION_MINUTE);
-					date.setYear(telTSRaw.getYear());
-					date.setMonth(telTSRaw.getMonth());
-					date.setDay(telTSRaw.getDay());
-					date.setHour(telTSRaw.getHour());
-					date.setMinute(telTSRaw.getMinute());
-					
-					// Get Data
-					double value = telTSRaw.getMeasValue();
-					ts.setDataValue(date, value);
-				}
-			}
-			if(interval_base == TimeInterval.HOUR){
-				for(int i = 0; i < results.size(); i++){
-					TelemetryTimeSeries telTSRaw = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
-					
-					// Set Date
-					DateTime date = new DateTime(DateTime.PRECISION_HOUR);
-					date.setYear(telTSRaw.getYear());
-					date.setMonth(telTSRaw.getMonth());
-					date.setDay(telTSRaw.getDay());
-					date.setHour(telTSRaw.getHour());
-
-					// Get Data
-					double value = telTSRaw.getMeasValue();
-					ts.setDataValue(date, value);
-				}
-			}
-			if(interval_base == TimeInterval.DAY){
-				for(int i = 0; i < results.size(); i++){
-					TelemetryTimeSeries telTSRaw = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
-					
-					// Set Date
-					DateTime date = new DateTime(DateTime.PRECISION_DAY);
-					date.setYear(telTSRaw.getYear());
-					date.setMonth(telTSRaw.getMonth());
-					date.setDay(telTSRaw.getDay());
-
-					// Get Data
-					double value = telTSRaw.getMeasValue();
+				// Get data
+				Double value = telTSMinute.getMeasValue();
+				if ( value != null ) {
 					ts.setDataValue(date, value);
 				}
 			}
 		}
-		
+		if(interval_base == TimeInterval.HOUR){
+			// Can declare DateTime outside of loop because time series stores in an array
+			DateTime date = new DateTime(DateTime.PRECISION_HOUR);
+			for(int i = 0; i < results.size(); i++){
+				TelemetryTimeSeries telTSHour = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				
+				// Set Date
+				date.setYear(telTSHour.getYear());
+				date.setMonth(telTSHour.getMonth());
+				date.setDay(telTSHour.getDay());
+				date.setHour(telTSHour.getHour());
+
+				// Get Data
+				Double value = telTSHour.getMeasValue();
+				if ( value != null ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+		if(interval_base == TimeInterval.DAY){
+			// Can declare DateTime outside of loop because time series stores in an array
+			DateTime date = new DateTime(DateTime.PRECISION_DAY);
+			for(int i = 0; i < results.size(); i++){
+				TelemetryTimeSeries telTSDay = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				
+				// Set Date
+				date.setYear(telTSDay.getYear());
+				date.setMonth(telTSDay.getMonth());
+				date.setDay(telTSDay.getDay());
+
+				// Get Data
+				Double value = telTSDay.getMeasValue();
+				if ( value != null ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
 	}
 	else if(data_type.equalsIgnoreCase("WaterLevelDepth") || data_type.equalsIgnoreCase("WaterLevelElev")){
 		String wellid = locid;
@@ -2726,21 +2753,6 @@ throws MalformedURLException, Exception
 		lastDate.setDay(well.getPorEnd().getDay());
 		ts.setDate2Original(lastDate);
 			
-		// Set start and end date
-		if(readStart == null){
-			ts.setDate1(ts.getDate1Original());
-		}else{
-			ts.setDate1(readStart);
-		}
-		if(readEnd == null){
-			ts.setDate2(ts.getDate2Original());
-		}else{
-			ts.setDate2(readEnd);
-		}
-			
-		// Allocate data space
-		ts.allocateDataSpace();
-		
 		// Set Properties
 		// FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
 		//ts.addToGenesis("read data from web services " + wellRequest + " and " + wellMeasurementRequest + ".");
@@ -2748,7 +2760,7 @@ throws MalformedURLException, Exception
 		setCommentsWell(ts, well);
 		
 		// Read Data
-		if(readData){
+		if ( readData ) {
 			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + getApiKeyString();
 			if(debug){
 				System.out.println("wellMeasurementRequest: " + wellMeasurementRequest);
@@ -2756,11 +2768,35 @@ throws MalformedURLException, Exception
 			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(wellMeasurementRequest);
 			//System.out.println(wellMeasurementRequest);
 			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
+			
+			if ( (results == null) || (results.size() == 0) ) {
+				return ts;
+			}
+
+			// Set start and end date for data for the allocated space
+			if ( readStart == null ) {
+				WaterLevelsWellMeasurement wellMeasFirst = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(0), WaterLevelsWellMeasurement.class);
+				ts.setDate1(wellMeasFirst.getMeasurementDate());
+			}
+			else {
+				ts.setDate1(readStart);
+			}
+			if ( readEnd == null ) {
+				WaterLevelsWellMeasurement wellMeasLast = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), WaterLevelsWellMeasurement.class);
+				ts.setDate2(wellMeasLast.getMeasurementDate());
+			}
+			else {
+				ts.setDate2(readEnd);
+			}	
+			// Allocate data space based on the dates
+			ts.allocateDataSpace();
+		
+			// Can create the date outside the loop because time series data are stored in an array
+			DateTime date = new DateTime(DateTime.PRECISION_DAY);
 			for(int i = 0; i < results.size(); i++){
 				WaterLevelsWellMeasurement wellMeas = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterLevelsWellMeasurement.class);
 				
 				// Set Date
-				DateTime date = new DateTime(DateTime.PRECISION_DAY);
 				date.setYear(wellMeas.getMeasurementDate().getYear());
 				date.setMonth(wellMeas.getMeasurementDate().getMonth());
 				date.setDay(wellMeas.getMeasurementDate().getDay());
@@ -2780,10 +2816,10 @@ throws MalformedURLException, Exception
 				}
 			}
 		}
-		
 	}
 	
-	// Return Time Series Object
+	// Return the time series
+	// - may have returned before here if missing data or not reading data
     return ts;
 }
 

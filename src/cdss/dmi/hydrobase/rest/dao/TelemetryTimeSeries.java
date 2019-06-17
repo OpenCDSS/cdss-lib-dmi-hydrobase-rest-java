@@ -86,7 +86,7 @@ public class TelemetryTimeSeries {
 	/** 
 	 * Measurement Value 
 	 */
-	private double measValue;
+	private Double measValue;
 
 	/** 
 	 * Date record last modified 
@@ -141,7 +141,7 @@ public class TelemetryTimeSeries {
 		return measDateTime;
 	}
 
-	public double getMeasValue() {
+	public Double getMeasValue() {
 		return measValue;
 	}
 	
@@ -201,7 +201,7 @@ public class TelemetryTimeSeries {
 		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, false);
 	}
 
-	public void setMeasValue(double measValue) {
+	public void setMeasValue(Double measValue) {
 		this.measValue = measValue;
 	}
 
