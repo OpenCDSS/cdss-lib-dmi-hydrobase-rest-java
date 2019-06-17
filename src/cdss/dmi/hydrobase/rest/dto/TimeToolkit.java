@@ -63,11 +63,19 @@ public class TimeToolkit {
 	 * @return DateTime object 
 	 */
 	public DateTime toDateTime(String s, boolean zoned){
-		if(s == null || s == "" || s == "N/A") return null;
+		if(s == null || s == "" || s == "N/A") {
+			return null;
+		}
 		LocalDateTime ldt;
-		if(zoned) ldt = timeZonedToLocalDateTime(s);
-		else ldt = toLocalDateTime(s);
-		if(ldt == null) return null;
+		if(zoned) {
+			ldt = timeZonedToLocalDateTime(s);
+		}
+		else {
+			ldt = toLocalDateTime(s);
+		}
+		if(ldt == null) {
+			return null;
+		}
 		DateTime date = new DateTime(DateTime.PRECISION_SECOND);
 		date.setYear(ldt.getYear());
 		date.setMonth(ldt.getMonthValue());
