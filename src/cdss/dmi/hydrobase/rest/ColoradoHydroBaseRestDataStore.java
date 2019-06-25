@@ -36,6 +36,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import riverside.datastore.AbstractWebServiceDataStore;
+import RTi.TS.DayTS;
 import RTi.TS.TS;
 import RTi.TS.TSData;
 import RTi.TS.TSDataFlagMetadata;
@@ -49,6 +50,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
+import RTi.Util.Time.TimeUtil;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Station_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel;
@@ -232,9 +234,11 @@ public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 	if( ts == null ){
 		return;
 	}
-	/*if( !(ts instanceof DayTS |) ){
+	if( !(ts instanceof DayTS ) ) {
+		// Fill carry forward only applies to daily time series
+		// - monthly time series should have complete records
 		return;
-	}*/
+	}
 	
 	DateTime FillStart_DateTime = new DateTime(ts.getDate1());
 	DateTime FillEnd_DateTime = new DateTime(ts.getDate2());
@@ -1705,6 +1709,29 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
 }
 
 /**
+ * Determine whether a time series value is missing.
+ * @param value the time series data value
+ * @param check999 if true, then -999 is considered to be missing.
+ * @return true if the data value is null or a missing numerical value:  NaN or -999 if checkMinus999=true.
+ */
+private boolean isTimeSeriesValueMissing ( Double value, boolean checkMinus999 ) {
+	if ( value == null ) {
+		return true;
+	}
+	else if ( Double.isNaN(value) ) {
+		return true;
+	}
+	if ( checkMinus999 ) {
+		double value2 = value;
+		// Pad the -999 value to account for roundoff
+		if ( (value2 < -998.9999)  && (value2 > -999.00001) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Returns true if the datatype is a waterclass structure 
  * @param dataType - the datatype portion of the TSID<br>
  * ex. 'WaterClass-0102411 S:3 F:0110319.001 U:A T: G:0102552 To:'
@@ -1950,6 +1977,7 @@ public List<ParcelUseTimeSeries> readParcelUseTSListForParcelId(String wdid, int
 
 /**
  * Read telemetry params from web services. Convert to POJO.
+ * This is the list of available parameters that can be displayed in TSTool.
  */
 private void readTelemetryParams(){
 	String telemetryParamsRequest = getServiceRootURI() + "/referencetables/telemetryparams?format=json" + getApiKeyString();
@@ -1976,6 +2004,8 @@ public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime re
 throws MalformedURLException, Exception
 {   
 	String routine = "ColoradoHydroBaseRestDataStore.readTimeSeries";
+
+	JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
 	
 	boolean debug = false;
 	
@@ -2014,12 +2044,17 @@ throws MalformedURLException, Exception
 		
 		// Get Structure
 		String structRequest = getServiceRootURI() + "/structures?format=json&wdid=" + wdid + getApiKeyString();
-		JsonNode structResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(structRequest).get(0);
+		JsonNode structResult = jacksonToolkit.getJsonNodeFromWebServices(structRequest).get(0);
 		// Log structure request for debugging properties
 		//System.out.println(structRequest);
 		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
 		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
-		Structure struct = (Structure)JacksonToolkit.getInstance().treeToValue(structResult, Structure.class);
+		Structure struct = (Structure)jacksonToolkit.treeToValue(structResult, Structure.class);
+		if ( struct == null ) {
+			// Structure identifier not found
+			// - return minimal time series
+			return ts;
+		}
 		
 		// Set structure name as TS Description
 		ts.setDescription(struct.getStructureName());
@@ -2027,34 +2062,41 @@ throws MalformedURLException, Exception
 		int waterClassNumForWdid = 0;
 		
 		DiversionWaterClass waterClassForWdid = null;
-		if(data_type.equalsIgnoreCase("DivTotal")){
-			// Diversion records - total through diversion
-			// locid is the WDID in this case
-			String waterClassReqString = null;
-			
-			// Retrieve water class num for given wdid
-			waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
-			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+		try {
+			if(data_type.equalsIgnoreCase("DivTotal")){
+				// Diversion records - total through diversion
+				// locid is the WDID in this case
+				String waterClassReqString = null;
+				
+				// Retrieve water class num for given wdid
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
+				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+			}
+			else if(data_type.equalsIgnoreCase("RelTotal")){
+				// Release records - total through release
+				// locid is the WDID in this case
+				String waterClassReqString = null;
+						
+				// Retrieve water class num for given wdid
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
+				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+			}
+			else if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
+				// Water class, possibly quoted if it contains a period
+				// locid is the WDID in this case
+				String waterClassReqString = getWCIdentStringFromDataType(data_type);
+				
+				//System.out.println("water class: " + waterClassReqString);
+									
+				// Retrieve water class num for given wdid
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,null);
+				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+			}
 		}
-		else if(data_type.equalsIgnoreCase("RelTotal")){
-			// Release records - total through release
-			// locid is the WDID in this case
-			String waterClassReqString = null;
-					
-			// Retrieve water class num for given wdid
-			waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
-			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
-		}
-		else if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
-			// Release records - total through release
-			// locid is the WDID in this case
-			String waterClassReqString = getWCIdentStringFromDataType(data_type);
-			
-			//System.out.println("water class: " + waterClassReqString);
-								
-			// Retrieve water class num for given wdid
-			waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,null);
-			waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
+		catch ( Exception e ) {
+			// Error getting back a single matching water class
+			// - return minimal time series
+			return ts;
 		}
 		
 		/* Get first and last date */
@@ -2119,43 +2161,74 @@ throws MalformedURLException, Exception
 			String divRecRequest = null;
 			if(interval_base == TimeInterval.DAY){
 				// Create request URL for web services API
-				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + getApiKeyString();
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
+				// Add dates to limit query, to day precision
+				if ( readStart != null ) {
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), readStart.getDay(), readStart.getYear()), "UTF-8");
+				}
+				if ( readEnd != null ) {
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear()), "UTF-8");
+				}
 				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.MONTH){
 				// Create request URL for web services API
-				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + getApiKeyString();
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
+				// Add dates to limit query, to day precision
+				/* Period specifier does not seem to work well
+				if ( readStart != null ) {
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), 1, readStart.getYear()), "UTF-8");
+				}
+				if ( readEnd != null ) {
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(),
+						TimeUtil.numDaysInMonth(readEnd.getMonth(), readEnd.getYear()), readEnd.getYear()), "UTF-8");
+				}
+				*/
 				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.YEAR){
 				// Create request URL for web services API
-				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid + getApiKeyString();
+				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
+				// Add dates to limit query, to day precision
+				/* Period specifier does not seem to work well
+				if ( readStart != null ) {
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", 1, 1, readStart.getYear()), "UTF-8");
+				}
+				if ( readEnd != null ) {
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", 12,
+						TimeUtil.numDaysInMonth(readEnd.getMonth(), readEnd.getYear()), readEnd.getYear()), "UTF-8");
+				}
+				*/
 				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
 			}
 			if(debug){ 
 				System.out.println("DivRecRequest: " + divRecRequest);
 			}
+			// Save the URL without API key as a property to help with troubleshooting
+			ts.setProperty("dataUrl", divRecRequest.toString().replace("format=json", "format=jsonprettyprint"));
+			divRecRequest += getApiKeyString();
 			// Get JsonNode results give the request URL
-			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
+			JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(divRecRequest);
 			if ( (results == null) || (results.size() == 0) ){
 				return ts;
 			}
 
 			// Set the original start and end date to the parameter period
 			if ( readStart == null ) {
+				// Set the time series start to the first data record
 				if (interval_base == TimeInterval.DAY ) {
-					DiversionByDay divRecCurrDay = (DiversionByDay)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByDay.class);
+					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(0), DiversionByDay.class);
 					ts.setDate1(divRecCurrDay.getDataMeasDate());
 				}
 				if (interval_base == TimeInterval.MONTH ) {
-					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByMonth.class);
+					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(0), DiversionByMonth.class);
 					ts.setDate1(divRecCurrMonth.getDataMeasDate());
 				}
 				if (interval_base == TimeInterval.YEAR ) {
-					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionByYear.class);
+					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(0), DiversionByYear.class);
 					ts.setDate1(divRecCurrYear.getDataMeasDate());
 				}
 			}
@@ -2163,16 +2236,17 @@ throws MalformedURLException, Exception
 				ts.setDate1(readStart);
 			}
 			if ( readEnd == null ) {
+				// Set the time series start to the last data record
 				if (interval_base == TimeInterval.DAY ) {
-					DiversionByDay divRecCurrDay = (DiversionByDay)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByDay.class);
+					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByDay.class);
 					ts.setDate2(divRecCurrDay.getDataMeasDate());
 				}
 				if (interval_base == TimeInterval.MONTH ) {
-					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
+					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
 					ts.setDate2(divRecCurrMonth.getDataMeasDate());
 				}
 				if (interval_base == TimeInterval.YEAR ) {
-					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionByYear.class);
+					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByYear.class);
 					ts.setDate2(divRecCurrYear.getDataMeasDate());
 				}
 			}
@@ -2184,14 +2258,18 @@ throws MalformedURLException, Exception
 			ts.allocateDataSpace();
 			
 			// Transfer data into TS object
+			String units;
+			String obsCode;
+			Double value;
+			boolean valueIsMissing;
 			if(interval_base == TimeInterval.DAY){
 				for(int i = 0; i < results.size(); i++){
 					
-					DiversionByDay divRecCurrDay = (DiversionByDay)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionByDay.class);
+					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(i), DiversionByDay.class);
 					
 					// 1. Check to see if units have been set
 					// if not, set them.
-					String units = divRecCurrDay.getMeasUnits();
+					units = divRecCurrDay.getMeasUnits();
 					if(tsUnits == null){
 						tsUnits = units;
 						ts.setDataUnits(tsUnits);
@@ -2212,19 +2290,36 @@ throws MalformedURLException, Exception
 					date.setDay(divRecCurrDay.getDay());
 					
 					// Get Data
-					Double value = divRecCurrDay.getDataValue();
-					if ( value != null ) {
-						ts.setDataValue(date, value);
+					value = divRecCurrDay.getDataValue();
+					obsCode = divRecCurrDay.getObsCode();
+					if ( obsCode != null ) {
+						obsCode = obsCode.trim();
+					}
+					valueIsMissing = isTimeSeriesValueMissing(value, true);
+					if ( !valueIsMissing || ((obsCode != null) && !obsCode.isEmpty()) ) {
+						// Have a data value and/or observation code to set
+						if ( valueIsMissing ) {
+							// Use the missing value for the time series
+							value = ts.getMissing();
+						}
+						if ( (obsCode != null) && !obsCode.isEmpty() ) {
+							// Set the data value with the flag
+							ts.setDataValue(date, value, obsCode, -1);
+						}
+						else {
+							// No observation code so just set the value
+							ts.setDataValue(date, value);
+						}
 					}
 				}
 			}
 			if(interval_base == TimeInterval.MONTH){
 				for(int i = 0; i < results.size(); i++){
-					DiversionByMonth divRecCurrMonth = (DiversionByMonth)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionByMonth.class);
+					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(i), DiversionByMonth.class);
 					
 					// 1. Check to see if units have been set
 					// if not, set them.
-					String units = divRecCurrMonth.getMeasUnits();
+					units = divRecCurrMonth.getMeasUnits();
 					if(tsUnits == null){
 						tsUnits = units;
 						ts.setDataUnits(tsUnits);
@@ -2244,20 +2339,20 @@ throws MalformedURLException, Exception
 					date.setMonth(divRecCurrMonth.getMonth());
 					
 					// Get Data
-					Double value = divRecCurrMonth.getDataValue();
+					value = divRecCurrMonth.getDataValue();
 					
-					if ( value != null ) {
+					if ( !isTimeSeriesValueMissing(value, true) ) {
 						ts.setDataValue(date, value);
 					}
 				}
 			}
 			if(interval_base == TimeInterval.YEAR){
 				for(int i = 0; i < results.size(); i++){
-					DiversionByYear divRecCurrYear = (DiversionByYear)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionByYear.class);
+					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(i), DiversionByYear.class);
 					
 					// 1. Check to see if units have been set
 					// if not, set them.
-					String units = divRecCurrYear.getMeasUnits();
+					units = divRecCurrYear.getMeasUnits();
 					if(tsUnits == null){
 						tsUnits = units;
 						ts.setDataUnits(tsUnits);
@@ -2276,9 +2371,9 @@ throws MalformedURLException, Exception
 					date.setYear(divRecCurrYear.getYear());
 					
 					// Get Data
-					Double value = divRecCurrYear.getDataValue();
+					value = divRecCurrYear.getDataValue();
 					
-					if ( value != null ) {
+					if ( !isTimeSeriesValueMissing(value, true) ) {
 						ts.setDataValue(date, value);
 					}
 				}
@@ -2288,8 +2383,7 @@ throws MalformedURLException, Exception
 			 * If any data is set within the irrigation year then fill the rest of the data
 			 * forward or fill empty data with 0.0
 			 */
-			if(interval_base == TimeInterval.DAY || 
-					interval_base == TimeInterval.MONTH){
+			if(interval_base == TimeInterval.DAY || interval_base == TimeInterval.MONTH){
 				String FillDailyDiv = null;
 				if((FillDailyDiv == null) || FillDailyDiv.equals("")){
 					FillDailyDiv = "true";
@@ -2323,15 +2417,14 @@ throws MalformedURLException, Exception
 							for(int i = 0; i < divComments.size(); i++){
 								DiversionComments divComment = divComments.get(i);
 								int irrYear = divComment.getIrrYear();
-								if(irrYear >= ts.getDate1().getYear() &&
-										irrYear <= ts.getDate2().getYear()){
+								if(irrYear >= ts.getDate1().getYear() && irrYear <= ts.getDate2().getYear()){
 									DateTime start;
 									DateTime end;
 									if(interval_base == TimeInterval.DAY){
 										start = new DateTime(DateTime.PRECISION_DAY);
 										start.setYear(irrYear);
 										start.setMonth(11);
-										start.setDay(01);
+										start.setDay(1);
 										end = new DateTime(DateTime.PRECISION_DAY);
 										end.setYear(irrYear + 1);
 										end.setMonth(10);
@@ -2340,7 +2433,8 @@ throws MalformedURLException, Exception
 										iterator.setEndTime(end);
 										while(iterator.hasNext()){
 											it = iterator.next();
-											if(ts.isDataMissing(it.getDataValue())){
+											value = it.getDataValue();
+											if ( !isTimeSeriesValueMissing(value, true) ) {
 												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
 											}
 										}
@@ -2354,7 +2448,8 @@ throws MalformedURLException, Exception
 										end.setMonth(10);
 										while(iterator.hasNext()){
 											it = iterator.next();
-											if(ts.isDataMissing(it.getDataValue())){
+											value = it.getDataValue();
+											if ( !isTimeSeriesValueMissing(value, true) ) {
 												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
 											}
 										}
@@ -2366,7 +2461,8 @@ throws MalformedURLException, Exception
 										end.setYear(irrYear);
 										while(iterator.hasNext()){
 											it = iterator.next();
-											if(ts.isDataMissing(it.getDataValue())){
+											value = it.getDataValue();
+											if ( !isTimeSeriesValueMissing(value, true) ) {
 												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
 											}
 										}
@@ -2387,12 +2483,12 @@ throws MalformedURLException, Exception
 		if(debug){
 			System.out.println("structRequest: " + structRequest);
 		}
-		JsonNode structResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(structRequest).get(0);
+		JsonNode structResult = jacksonToolkit.getJsonNodeFromWebServices(structRequest).get(0);
 		// Log structure request for debugging properties
 		//System.out.println(structRequest);
 		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
 		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
-		Structure struct = (Structure)JacksonToolkit.getInstance().treeToValue(structResult, Structure.class);
+		Structure struct = (Structure)jacksonToolkit.treeToValue(structResult, Structure.class);
 		if(struct == null){
 			return ts;
 		}
@@ -2419,12 +2515,14 @@ throws MalformedURLException, Exception
 		lastDate.setPrecision(DateTime.PRECISION_DAY); 
 		ts.setDate2Original(lastDate);
 			
-		// TODO smalers 2019-06-15 hard-code units
+		// TODO smalers 2019-06-15 hard-code units since only specified in documentation
 		if ( data_type.equalsIgnoreCase("Stage") ) {
 			ts.setDataUnitsOriginal("FT");
+			ts.setDataUnits("FT");
 		}
 		else if ( data_type.equalsIgnoreCase("Volume") ) {
 			ts.setDataUnitsOriginal("AF");
+			ts.setDataUnits("AF");
 		}
 			
 		/* TODO smalers 2019-06-15 maybe set the web service here?
@@ -2457,13 +2555,23 @@ throws MalformedURLException, Exception
 			// Get the data from web services
 			String divRecRequest = null;
 			// Create request URL for web services API
-			divRecRequest = getServiceRootURI() + "/structures/divrec/stagevolume/" + wdid + "?format=json" + getApiKeyString();
+			divRecRequest = getServiceRootURI() + "/structures/divrec/stagevolume/" + wdid + "?format=json";
+			// Add dates to limit query, to day precision
+			if ( readStart != null ) {
+				divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), readStart.getDay(), readStart.getYear()), "UTF-8");
+			}
+			if ( readEnd != null ) {
+				divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear()), "UTF-8");
+			}
 			//System.out.println(divRecRequest);
 			// Get JsonNode results give the request URL
+			// Save the URL without API key as property for troubleshooting
+			ts.setProperty("dataUrl", divRecRequest.toString().replace("format=json", "format=jsonprettyprint"));
+			divRecRequest += getApiKeyString();
 			if(debug){
 				System.out.println("divRecRequest: " + divRecRequest);
 			}
-			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divRecRequest);
+			JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(divRecRequest);
 			
 			if ( (results == null) || (results.size() == 0) ) {
 				return ts;
@@ -2471,14 +2579,14 @@ throws MalformedURLException, Exception
 
 			// Set start and end date
 			if(readStart == null){
-				DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(0), DiversionStageVolume.class);
+				DiversionStageVolume divStageVol = (DiversionStageVolume)jacksonToolkit.treeToValue(results.get(0), DiversionStageVolume.class);
 				ts.setDate1(divStageVol.getDataMeasDate());
 			}
 			else {
 				ts.setDate1(readStart);
 			}
 			if ( readEnd == null) {
-				DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), DiversionStageVolume.class);
+				DiversionStageVolume divStageVol = (DiversionStageVolume)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionStageVolume.class);
 				ts.setDate2(divStageVol.getDataMeasDate());
 			}
 			else {
@@ -2491,7 +2599,7 @@ throws MalformedURLException, Exception
 			// Create date to iterate through the data
 			DateTime date = new DateTime(DateTime.PRECISION_DAY);
 			for(int i = 0; i < results.size(); i++){
-				DiversionStageVolume divStageVol = (DiversionStageVolume)JacksonToolkit.getInstance().treeToValue(results.get(i), DiversionStageVolume.class);
+				DiversionStageVolume divStageVol = (DiversionStageVolume)jacksonToolkit.treeToValue(results.get(i), DiversionStageVolume.class);
 					
 				//Set Date
 				date.setYear(divStageVol.getYear());
@@ -2507,7 +2615,7 @@ throws MalformedURLException, Exception
 					value = divStageVol.getVolume();
 				}
 				
-				if ( value != null ) {
+				if ( !isTimeSeriesValueMissing(value, true) ) {
 					ts.setDataValue(date, value);
 				}
 			}
@@ -2521,13 +2629,13 @@ throws MalformedURLException, Exception
 		if ( readStart != null ) {
 			// Round to 15-minute so that allocated time series will align with data
 			readStart = new DateTime(readStart);
-			readStart.round(1, TimeInterval.MINUTE, 15);
+			readStart.round(-1, TimeInterval.MINUTE, 15);
 			readStart.setTimeZone("");
 		}
 		if ( readEnd != null ) {
 			// Round to 15-minute so that allocated time series will align with data
 			readEnd = new DateTime(readEnd);
-			readEnd.round(-1, TimeInterval.MINUTE, 15);
+			readEnd.round(1, TimeInterval.MINUTE, 15);
 			readEnd.setTimeZone("");
 		}
 		
@@ -2536,7 +2644,7 @@ throws MalformedURLException, Exception
 		if(debug){
 			System.out.println("telemetryRequest: " + telemetryRequest);
 		}
-		JsonNode results0 = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telemetryRequest);
+		JsonNode results0 = jacksonToolkit.getJsonNodeFromWebServices(telemetryRequest);
 		JsonNode telemetryResult = null;
 		if ( results0 == null ) {
 			Message.printWarning(3, routine, "No data returned for:  " + telemetryRequest);
@@ -2546,7 +2654,7 @@ throws MalformedURLException, Exception
 			telemetryResult = results0.get(0);
 		}
 		
-		TelemetryStation telStation = (TelemetryStation)JacksonToolkit.getInstance().treeToValue(telemetryResult, TelemetryStation.class);
+		TelemetryStation telStation = (TelemetryStation)jacksonToolkit.treeToValue(telemetryResult, TelemetryStation.class);
 		Message.printStatus(2, routine, "Retrieve telemetry stations from DWR REST API request url: " + telemetryRequest);
 
 		// Get the Telemetry station data type (TODO smalers 2019-06-16 might be able to not query station if have enough overlap)
@@ -2555,7 +2663,7 @@ throws MalformedURLException, Exception
 		if(debug){
 			System.out.println("telemetryStationDataTypeRequest: " + telemetryStationDataTypeRequest);
 		}
-		results0 = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telemetryStationDataTypeRequest);
+		results0 = jacksonToolkit.getJsonNodeFromWebServices(telemetryStationDataTypeRequest);
 		JsonNode telemetryStationDataTypeResult = null;
 		if ( results0 == null ) {
 			Message.printWarning(3, routine, "No data returned for:  " + telemetryStationDataTypeRequest);
@@ -2565,7 +2673,7 @@ throws MalformedURLException, Exception
 			telemetryStationDataTypeResult = results0.get(0);
 		}
 		
-		TelemetryStationDataTypes telStationDataType = (TelemetryStationDataTypes)JacksonToolkit.getInstance().treeToValue(telemetryStationDataTypeResult, TelemetryStationDataTypes.class);
+		TelemetryStationDataTypes telStationDataType = (TelemetryStationDataTypes)jacksonToolkit.treeToValue(telemetryStationDataTypeResult, TelemetryStationDataTypes.class);
 		Message.printStatus(2, routine, "Retrieve telemetry station data types from DWR REST API request url: " + telemetryStationDataTypeRequest);
 		
 		// Set Description
@@ -2573,15 +2681,24 @@ throws MalformedURLException, Exception
 		ts.setDescription(telStation.getStationName());
 		
 		// Set data units
+		// - also set a boolean to allow checking the records because some time series don't seem to have units in metadata
 		ts.setDataUnitsOriginal(telStationDataType.getParameterUnit());
 		ts.setDataUnits(telStationDataType.getParameterUnit());
+		boolean dataUnitsSet = false;
+		boolean dataUnitsOriginalSet = false;
+		if ( !ts.getDataUnitsOriginal().isEmpty() ) {
+			dataUnitsOriginalSet = true;
+		}
+		if ( !ts.getDataUnits().isEmpty() ) {
+			dataUnitsSet = true;
+		}
 		
 		// Set available start and end date to the time series parameter period
 		ts.setDate1Original(telStationDataType.getParameterPorStart());
 		ts.setDate2Original(telStationDataType.getParameterPorEnd());
 		Message.printStatus(2,routine,"Date1Original=" + ts.getDate1Original() + " Date2Original=" + ts.getDate2Original());
 
-		setTimeSeriesPropertiesTelemetry(ts, telStation);
+		setTimeSeriesPropertiesTelemetry(ts, telStation, telStationDataType);
 		setCommentsTelemetry(ts, telStation);
 
 		// If not reading the data, return the time series with only header information
@@ -2590,29 +2707,32 @@ throws MalformedURLException, Exception
 		}
 
 		// Read the time series records
-		String telRequest = null;
+		StringBuilder telRequest = new StringBuilder();
 
 		// Retrieve Telemetry based on date interval
 		if(interval_base == DateTime.PRECISION_MINUTE){
 			// Note that this is 15-minute, not instantaneous
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter + getApiKeyString();
+			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
 		else if(interval_base == DateTime.PRECISION_HOUR){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
+			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
 		else if(interval_base == DateTime.PRECISION_DAY){
-			telRequest = getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter +  getApiKeyString();
+			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
 		// Date/time format is the same regardless of interval
 		if ( readStart != null ) {
-			telRequest += "&startDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readStart.getMonth(), readStart.getDay(), readStart.getYear(), readStart.getHour(), readStart.getMinute() ), "UTF-8");
+			telRequest.append("&startDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readStart.getMonth(), readStart.getDay(), readStart.getYear(), readStart.getHour(), readStart.getMinute() ), "UTF-8"));
 		}
 		if ( readEnd != null ) {
-			telRequest += "&endDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear(), readEnd.getHour(), readEnd.getMinute() ), "UTF-8");
+			telRequest.append("&endDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d_%02d:%02d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear(), readEnd.getHour(), readEnd.getMinute() ), "UTF-8"));
 		}
+		// Add URL without key, to help with troubleshooting
+		ts.setProperty("dataUrl", telRequest.toString().replace("format=json", "format=jsonprettyprint"));
+		telRequest.append(getApiKeyString());
 		Message.printStatus(2, routine, "Retrieve telemetry time series from DWR REST API request url: " + telRequest);
 		
-		JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(telRequest);
+		JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(telRequest.toString());
 		if ( (results == null) || (results.size() == 0) ){
 			return ts;
 		}
@@ -2620,9 +2740,9 @@ throws MalformedURLException, Exception
 		// Set the actual data period to the requested period if specified,
 		// or the actual period if the requested period was not specified.
 		if ( readStart == null ) {
-			TelemetryTimeSeries telTS = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(0), TelemetryTimeSeries.class);
+			TelemetryTimeSeries telTS = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(0), TelemetryTimeSeries.class);
 			DateTime firstDate = null;
-			if(interval_base == TimeInterval.DAY) {
+			if ( (interval_base == DateTime.PRECISION_DAY) || (interval_base == DateTime.PRECISION_HOUR) ) {
 				firstDate = telTS.getMeasDate();
 			}
 			else {
@@ -2634,9 +2754,9 @@ throws MalformedURLException, Exception
 			ts.setDate1(readStart);
 		}
 		if ( readEnd == null ) {
-			TelemetryTimeSeries telTS = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
+			TelemetryTimeSeries telTS = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
 			DateTime lastDate = null;
-			if(interval_base == TimeInterval.DAY) {
+			if ( (interval_base == DateTime.PRECISION_DAY) || (interval_base == DateTime.PRECISION_HOUR) ) {
 				lastDate = telTS.getMeasDate();
 			}
 			else {
@@ -2658,11 +2778,24 @@ throws MalformedURLException, Exception
 		
 		// Read Data
 		// Pass Data into TS Object
+		String measUnit = null;
 		if(interval_base == TimeInterval.MINUTE){
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_MINUTE);
 			for(int i = 0; i < results.size(); i++){
-				TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(i), TelemetryTimeSeries.class);
+				// If units were not set in the telemetry data types, set here
+				measUnit = telTSMinute.getMeasUnit();
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
 				
 				// Set date
 				date.setYear(telTSMinute.getYear());
@@ -2673,7 +2806,7 @@ throws MalformedURLException, Exception
 					
 				// Get data
 				Double value = telTSMinute.getMeasValue();
-				if ( value != null ) {
+				if ( !isTimeSeriesValueMissing(value, true) ) {
 					ts.setDataValue(date, value);
 				}
 			}
@@ -2682,7 +2815,19 @@ throws MalformedURLException, Exception
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_HOUR);
 			for(int i = 0; i < results.size(); i++){
-				TelemetryTimeSeries telTSHour = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				TelemetryTimeSeries telTSHour = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(i), TelemetryTimeSeries.class);
+				// If units were not set in the telemetry data types, set here
+				measUnit = telTSHour.getMeasUnit();
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
 				
 				// Set Date
 				date.setYear(telTSHour.getYear());
@@ -2692,7 +2837,7 @@ throws MalformedURLException, Exception
 
 				// Get Data
 				Double value = telTSHour.getMeasValue();
-				if ( value != null ) {
+				if ( !isTimeSeriesValueMissing(value, true) ) {
 					ts.setDataValue(date, value);
 				}
 			}
@@ -2701,7 +2846,19 @@ throws MalformedURLException, Exception
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_DAY);
 			for(int i = 0; i < results.size(); i++){
-				TelemetryTimeSeries telTSDay = (TelemetryTimeSeries)JacksonToolkit.getInstance().treeToValue(results.get(i), TelemetryTimeSeries.class);
+				TelemetryTimeSeries telTSDay = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(i), TelemetryTimeSeries.class);
+				// If units were not set in the telemetry data types, set here
+				measUnit = telTSDay.getMeasUnit();
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
 				
 				// Set Date
 				date.setYear(telTSDay.getYear());
@@ -2710,7 +2867,7 @@ throws MalformedURLException, Exception
 
 				// Get Data
 				Double value = telTSDay.getMeasValue();
-				if ( value != null ) {
+				if ( !isTimeSeriesValueMissing(value, true) ) {
 					ts.setDataValue(date, value);
 				}
 			}
@@ -2719,17 +2876,17 @@ throws MalformedURLException, Exception
 	else if(data_type.equalsIgnoreCase("WaterLevelDepth") || data_type.equalsIgnoreCase("WaterLevelElev")){
 		String wellid = locid;
 		
-		// Get Well 
+		// Get Well
 		String wellRequest = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid + getApiKeyString();
 		if(debug){
 			System.out.println("wellRequest: " + wellRequest);
 		}
-		JsonNode wellResults = JacksonToolkit.getInstance().getJsonNodeFromWebServices(wellRequest).get(0);
+		JsonNode wellResults = jacksonToolkit.getJsonNodeFromWebServices(wellRequest).get(0);
 		
 		//System.out.println(wellRequest);
 		Message.printStatus(2, routine, "Get wells from DWR REST API request url: " + wellRequest);
 		
-		WaterLevelsWell well = (WaterLevelsWell)JacksonToolkit.getInstance().treeToValue(wellResults, WaterLevelsWell.class);
+		WaterLevelsWell well = (WaterLevelsWell)jacksonToolkit.treeToValue(wellResults, WaterLevelsWell.class);
 		if(well == null){
 			return ts;
 		}
@@ -2752,6 +2909,10 @@ throws MalformedURLException, Exception
 		lastDate.setMonth(well.getPorEnd().getMonth());
 		lastDate.setDay(well.getPorEnd().getDay());
 		ts.setDate2Original(lastDate);
+		
+		// Units are ft based on API documentation
+		ts.setDataUnitsOriginal("ft");
+		ts.setDataUnits("ft");
 			
 		// Set Properties
 		// FIXME @jurentie 06/26/2018 - move add to genesis elsewhere
@@ -2761,11 +2922,21 @@ throws MalformedURLException, Exception
 		
 		// Read Data
 		if ( readData ) {
-			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json" + getApiKeyString();
+			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json";
 			if(debug){
 				System.out.println("wellMeasurementRequest: " + wellMeasurementRequest);
 			}
-			JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(wellMeasurementRequest);
+			// Add dates to limit query
+			if ( readStart != null ) {
+				wellMeasurementRequest += "&min-measurementDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), readStart.getDay(), readStart.getYear()), "UTF-8");
+			}
+			if ( readEnd != null ) {
+				wellMeasurementRequest += "&max-measurementDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear()), "UTF-8");
+			}
+			// Add property without key for troubleshooting
+			ts.setProperty("dataUrl", wellMeasurementRequest);
+			wellMeasurementRequest += getApiKeyString();
+			JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(wellMeasurementRequest);
 			//System.out.println(wellMeasurementRequest);
 			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
 			
@@ -2775,14 +2946,14 @@ throws MalformedURLException, Exception
 
 			// Set start and end date for data for the allocated space
 			if ( readStart == null ) {
-				WaterLevelsWellMeasurement wellMeasFirst = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(0), WaterLevelsWellMeasurement.class);
+				WaterLevelsWellMeasurement wellMeasFirst = (WaterLevelsWellMeasurement)jacksonToolkit.treeToValue(results.get(0), WaterLevelsWellMeasurement.class);
 				ts.setDate1(wellMeasFirst.getMeasurementDate());
 			}
 			else {
 				ts.setDate1(readStart);
 			}
 			if ( readEnd == null ) {
-				WaterLevelsWellMeasurement wellMeasLast = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(results.size() - 1), WaterLevelsWellMeasurement.class);
+				WaterLevelsWellMeasurement wellMeasLast = (WaterLevelsWellMeasurement)jacksonToolkit.treeToValue(results.get(results.size() - 1), WaterLevelsWellMeasurement.class);
 				ts.setDate2(wellMeasLast.getMeasurementDate());
 			}
 			else {
@@ -2794,7 +2965,7 @@ throws MalformedURLException, Exception
 			// Can create the date outside the loop because time series data are stored in an array
 			DateTime date = new DateTime(DateTime.PRECISION_DAY);
 			for(int i = 0; i < results.size(); i++){
-				WaterLevelsWellMeasurement wellMeas = (WaterLevelsWellMeasurement)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterLevelsWellMeasurement.class);
+				WaterLevelsWellMeasurement wellMeas = (WaterLevelsWellMeasurement)jacksonToolkit.treeToValue(results.get(i), WaterLevelsWellMeasurement.class);
 				
 				// Set Date
 				date.setYear(wellMeas.getMeasurementDate().getYear());
@@ -2811,7 +2982,7 @@ throws MalformedURLException, Exception
 					value = wellMeas.getElevationOfWater();
 				}
 				
-				if ( value != null ) {
+				if ( !isTimeSeriesValueMissing(value, true) ) {
 					ts.setDataValue(date, value);
 				}
 			}
@@ -2832,11 +3003,12 @@ throws MalformedURLException, Exception
  * If "WaterClass", the waterClassReqString is required.
  * @return
  */
-public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterClassReqString,String divrectypeReq){
+public DiversionWaterClass readWaterClassNumForWdid ( String wdid, String waterClassReqString, String divrectypeReq ) {
 	String routine = getClass().getSimpleName() + ".readWaterClassNumForWdid";
 	DiversionWaterClass waterClass = null;
 
 	try {
+		JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
 		String request = getServiceRootURI() + "/structures/divrec/waterclasses?format=json&wdid=" + URLEncoder.encode(wdid, "UTF-8") + getApiKeyString();
 		if ( (waterClassReqString != null) && !waterClassReqString.isEmpty() ) {
 			request += "&divrectype=WaterClass&wcIdentifier=" + URLEncoder.encode(waterClassReqString, "UTF-8");
@@ -2846,9 +3018,20 @@ public DiversionWaterClass readWaterClassNumForWdid(String wdid, String waterCla
 			request += "&divrectype=" + divrectypeReq;
 		}
 		//System.out.println(request);
-		JsonNode resultList = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
-		for(int i = 0; i < resultList.size(); i++){
-			waterClass = (DiversionWaterClass)JacksonToolkit.getInstance().treeToValue(resultList.get(i), DiversionWaterClass.class);
+		JsonNode resultList = jacksonToolkit.getJsonNodeFromWebServices(request);
+		if ( resultList == null ) {
+			throw new RuntimeException("No waterclasses returned for :  " + request );
+		}
+		else if ( resultList.size() != 1 ) {
+			for(int i = 0; i < resultList.size(); i++){
+				waterClass = (DiversionWaterClass)jacksonToolkit.treeToValue(resultList.get(i), DiversionWaterClass.class);
+				Message.printStatus(3, routine, "waterclass returned:  " + waterClass );
+			}
+			throw new RuntimeException("More than one waterclasses returned for :  " + request );
+		}
+		else {
+			// Exactly one match
+			waterClass = (DiversionWaterClass)jacksonToolkit.treeToValue(resultList.get(0), DiversionWaterClass.class);
 		}
 	} 
 	catch (IOException e) {
@@ -2866,8 +3049,9 @@ private void readWaterDistricts(){
 	String districtRequest = getServiceRootURI() + "/referencetables/waterdistrict?format=json" + getApiKeyString();
 	this.waterDistrictList = new ArrayList<ReferenceTablesWaterDistrict>();
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(districtRequest);
+	JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
 	for(int i = 0; i < results.size(); i++){
-		this.waterDistrictList.add((ReferenceTablesWaterDistrict)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDistrict.class));
+		this.waterDistrictList.add((ReferenceTablesWaterDistrict)jacksonToolkit.treeToValue(results.get(i), ReferenceTablesWaterDistrict.class));
 	}
 }
 
@@ -2878,8 +3062,9 @@ private void readWaterDivisions(){
 	String divisionRequest = getServiceRootURI() + "/referencetables/waterdivision?format=json" + getApiKeyString();
 	this.waterDivisionList = new ArrayList<ReferenceTablesWaterDivision>();
 	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(divisionRequest);
+	JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
 	for(int i = 0; i < results.size(); i++){
-		this.waterDivisionList.add((ReferenceTablesWaterDivision)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
+		this.waterDivisionList.add((ReferenceTablesWaterDivision)jacksonToolkit.treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
 	}
 }
 
@@ -2987,18 +3172,18 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct, D
 		precision = dt.getPrecision();
 	}
 	// Start with Structure
-	ts.setProperty("wdid", struct.getWdid());
-	ts.setProperty("structureName", struct.getStructureName());
-	ts.setProperty("associatedAkas", struct.getAssociatedAkas());
-	ts.setProperty("ciuCode" , struct.getCiuCode());
-	ts.setProperty("structureType", struct.getStructureType());
-	ts.setProperty("waterSource", struct.getWaterSource());
-	ts.setProperty("gnisId", struct.getGnisId());
-	ts.setProperty("streamMile", struct.getStreamMile());
-	ts.setProperty("associatedCaseNumbers", struct.getAssociatedCaseNumbers());
-	ts.setProperty("associatedPermits", struct.getAssociatedPermits());
-	ts.setProperty("associatedMeters", struct.getAssociatedMeters());
-	ts.setProperty("associatedContacts", struct.getAssociatedContacts());
+	ts.setProperty("structure.wdid", struct.getWdid());
+	ts.setProperty("structure.structureName", struct.getStructureName());
+	ts.setProperty("structure.associatedAkas", struct.getAssociatedAkas());
+	ts.setProperty("structure.ciuCode" , struct.getCiuCode());
+	ts.setProperty("structure.structureType", struct.getStructureType());
+	ts.setProperty("structure.waterSource", struct.getWaterSource());
+	ts.setProperty("structure.gnisId", struct.getGnisId());
+	ts.setProperty("structure.streamMile", struct.getStreamMile());
+	ts.setProperty("structure.associatedCaseNumbers", struct.getAssociatedCaseNumbers());
+	ts.setProperty("structure.associatedPermits", struct.getAssociatedPermits());
+	ts.setProperty("structure.associatedMeters", struct.getAssociatedMeters());
+	ts.setProperty("structure.associatedContacts", struct.getAssociatedContacts());
 	dt = struct.getPorStart();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3006,7 +3191,7 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct, D
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porStart", dt);
+	ts.setProperty("structure.porStart", dt);
 	dt = struct.getPorEnd();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3014,50 +3199,50 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct, D
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porEnd", dt);
-	ts.setProperty("ciuCode", struct.getCiuCode());
-	ts.setProperty("division", struct.getDivision());
-	ts.setProperty("waterDistrict", struct.getWaterDistrict());
-	ts.setProperty("subdistrict", struct.getSubdistrict());
-	ts.setProperty("county", struct.getCounty());
-	ts.setProperty("designatedBasinName", struct.getDesignatedBasinName());
-	ts.setProperty("managementDistrictName", struct.getManagementDistrictName());
-	ts.setProperty("pm", struct.getPm());
-	ts.setProperty("township", struct.getTownship());
-	ts.setProperty("range", struct.getRange());
-	ts.setProperty("section", struct.getSection());
-	ts.setProperty("q10", struct.getQ10());
-	ts.setProperty("q40", struct.getQ40());
-	ts.setProperty("q160", struct.getQ160());
-	ts.setProperty("coordsEw", struct.getCoordsew());
-	ts.setProperty("coordsEwDir", struct.getCoordsew());
-	ts.setProperty("coordsNs", struct.getCoordsns());
-	ts.setProperty("coordsNsDir", struct.getCoordsnsDir());
-	ts.setProperty("gnisId", struct.getGnisId());
-	ts.setProperty("streamMile", struct.getStreamMile());
-	ts.setProperty("utmX", struct.getUtmX());
-	ts.setProperty("utmY", struct.getUtmY());
-	ts.setProperty("latdecdeg", struct.getLatdecdeg());
-	ts.setProperty("longdecdeg", struct.getLongdecdeg());
-	ts.setProperty("locationAccuracy", struct.getLocationAccuracy());
-	ts.setProperty("modified", (struct.getModified() == null) ? "" : new DateTime(struct.getModified()));
+	ts.setProperty("structure.porEnd", dt);
+	ts.setProperty("structure.ciuCode", struct.getCiuCode());
+	ts.setProperty("structure.division", struct.getDivision());
+	ts.setProperty("structure.waterDistrict", struct.getWaterDistrict());
+	ts.setProperty("structure.subdistrict", struct.getSubdistrict());
+	ts.setProperty("structure.county", struct.getCounty());
+	ts.setProperty("structure.designatedBasinName", struct.getDesignatedBasinName());
+	ts.setProperty("structure.managementDistrictName", struct.getManagementDistrictName());
+	ts.setProperty("structure.pm", struct.getPm());
+	ts.setProperty("structure.township", struct.getTownship());
+	ts.setProperty("structure.range", struct.getRange());
+	ts.setProperty("structure.section", struct.getSection());
+	ts.setProperty("structure.q10", struct.getQ10());
+	ts.setProperty("structure.q40", struct.getQ40());
+	ts.setProperty("structure.q160", struct.getQ160());
+	ts.setProperty("structure.coordsEw", struct.getCoordsew());
+	ts.setProperty("structure.coordsEwDir", struct.getCoordsew());
+	ts.setProperty("structure.coordsNs", struct.getCoordsns());
+	ts.setProperty("structure.coordsNsDir", struct.getCoordsnsDir());
+	ts.setProperty("structure.gnisId", struct.getGnisId());
+	ts.setProperty("structure.streamMile", struct.getStreamMile());
+	ts.setProperty("structure.utmX", struct.getUtmX());
+	ts.setProperty("structure.utmY", struct.getUtmY());
+	ts.setProperty("structure.latdecdeg", struct.getLatdecdeg());
+	ts.setProperty("structure.longdecdeg", struct.getLongdecdeg());
+	ts.setProperty("structure.locationAccuracy", struct.getLocationAccuracy());
+	ts.setProperty("structure.modified", (struct.getModified() == null) ? "" : new DateTime(struct.getModified()));
 	// Add additional DiversionWaterClass, mainly if water class record
 	if ( (waterClass != null) && waterClass.getDivrectype().equalsIgnoreCase("WaterClass") ) {
-		ts.setProperty("wdidAcctName", waterClass.getWdidAcctName());
-		ts.setProperty("sourceCode", waterClass.getSourceCode());
-		ts.setProperty("sourceDescr", waterClass.getSourceDescr());
-		ts.setProperty("typeCode", waterClass.getTypeCode());
-		ts.setProperty("typeDescr", waterClass.getTypeDescr());
-		ts.setProperty("groupWdid", waterClass.getGroupWdid());
-		ts.setProperty("groupStructureName", waterClass.getGroupStructureName());
-		ts.setProperty("toWdid", waterClass.getToWdid());
-		ts.setProperty("toWdidAcctId", waterClass.getToWdidAcctId());
-		ts.setProperty("toStructureName", waterClass.getToStructureName());
-		ts.setProperty("toWdidAcctName", waterClass.getToWdidAcctName());
-		ts.setProperty("wcDescr", waterClass.getWcDescr());
-		ts.setProperty("availableTimesteps", waterClass.getAvailableTimesteps());
+		ts.setProperty("waterclass.wdidAcctName", waterClass.getWdidAcctName());
+		ts.setProperty("waterclass.sourceCode", waterClass.getSourceCode());
+		ts.setProperty("waterclass.sourceDescr", waterClass.getSourceDescr());
+		ts.setProperty("waterclass.typeCode", waterClass.getTypeCode());
+		ts.setProperty("waterclass.typeDescr", waterClass.getTypeDescr());
+		ts.setProperty("waterclass.groupWdid", waterClass.getGroupWdid());
+		ts.setProperty("waterclass.groupStructureName", waterClass.getGroupStructureName());
+		ts.setProperty("waterclass.toWdid", waterClass.getToWdid());
+		ts.setProperty("waterclass.toWdidAcctId", waterClass.getToWdidAcctId());
+		ts.setProperty("waterclass.toStructureName", waterClass.getToStructureName());
+		ts.setProperty("waterclass.toWdidAcctName", waterClass.getToWdidAcctName());
+		ts.setProperty("waterclass.wcDescr", waterClass.getWcDescr());
+		ts.setProperty("waterclass.availableTimesteps", waterClass.getAvailableTimesteps());
 		// ciu handled in structure but not long
-		ts.setProperty("ciuCodeLong", waterClass.getCiuCodeLong());
+		ts.setProperty("waterclass.ciuCodeLong", waterClass.getCiuCodeLong());
 	}
 }
 
@@ -3067,8 +3252,10 @@ public static void setTimeSeriesPropertiesStructure ( TS ts, Structure struct, D
  * {@link RTi.TS.TS}
  * @param tel - The TelemetryStation object containing data used in setting the properties.<br>
  * {@link cdss.dmi.hydrobase.rest.dao.TelemetryStation}
+ * @param telDataType the TelementryStationDataType to set properties.<br>
+ * {@link cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes}
  */
-public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel)
+public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel, TelemetryStationDataTypes telDataType)
 {   // Use the same names as the database view columns, same order as view
 	// - all of the following are immutable objects other than DateTime
 	// Get the precision for period
@@ -3077,41 +3264,41 @@ public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel
 	if ( dt != null ) {
 		precision = dt.getPrecision();
 	}
-	ts.setProperty("div", tel.getDivision());
-	ts.setProperty("wd", tel.getWaterDistrict());
-	ts.setProperty("county", tel.getCounty());
-	ts.setProperty("stationName", tel.getStationName());
-	ts.setProperty("dataSourceAbbrev", tel.getDataSourceAbbrev());
-	ts.setProperty("dataSource", tel.getDataSource());
-	ts.setProperty("waterSource", tel.getWaterSource());
-	ts.setProperty("gnisId", tel.getGnisId());
-	ts.setProperty("streamMile", tel.getStreamMile());
-	ts.setProperty("abbrev", tel.getAbbrev());
-	ts.setProperty("usgsStationId", tel.getUsgsStationId());
-	ts.setProperty("stationStatus", tel.getStationStatus());
-	ts.setProperty("stationType", tel.getStationType());
-	ts.setProperty("structureType", tel.getStructureType());
-	ts.setProperty("measDateTime", (tel.getMeasDateTime() == null) ? null : new DateTime(tel.getMeasDateTime()));
-	ts.setProperty("parameter", tel.getParameter());
-	ts.setProperty("stage", tel.getStage());
+	ts.setProperty("telemetrystation.div", tel.getDivision());
+	ts.setProperty("telemetrystation.wd", tel.getWaterDistrict());
+	ts.setProperty("telemetrystation.county", tel.getCounty());
+	ts.setProperty("telemetrystation.stationName", tel.getStationName());
+	ts.setProperty("telemetrystation.dataSourceAbbrev", tel.getDataSourceAbbrev());
+	ts.setProperty("telemetrystation.dataSource", tel.getDataSource());
+	ts.setProperty("telemetrystation.waterSource", tel.getWaterSource());
+	ts.setProperty("telemetrystation.gnisId", tel.getGnisId());
+	ts.setProperty("telemetrystation.streamMile", tel.getStreamMile());
+	ts.setProperty("telemetrystation.abbrev", tel.getAbbrev());
+	ts.setProperty("telemetrystation.usgsStationId", tel.getUsgsStationId());
+	ts.setProperty("telemetrystation.stationStatus", tel.getStationStatus());
+	ts.setProperty("telemetrystation.stationType", tel.getStationType());
+	ts.setProperty("telemetrystation.structureType", tel.getStructureType());
+	ts.setProperty("telemetrystation.measDateTime", (tel.getMeasDateTime() == null) ? null : new DateTime(tel.getMeasDateTime()));
+	ts.setProperty("telemetrystation.parameter", tel.getParameter());
+	ts.setProperty("telemetrystation.stage", tel.getStage());
 	// Don't include measValue because it is confusing if the last measurement is not the same parameter
 	// - similarly for units
 	//ts.setProperty("measValue", tel.getMeasValue());
 	//ts.setProperty("units", tel.getUnits());
-	ts.setProperty("units", tel.getUnits());
-	ts.setProperty("flagA", tel.getFlagA());
-	ts.setProperty("flagB", tel.getFlagB());
-	ts.setProperty("contrArea", tel.getContrArea());
-	ts.setProperty("drainArea", tel.getDrainArea());
-	ts.setProperty("huc10", tel.getHuc10());
-	ts.setProperty("utmX", tel.getUtmX());
-	ts.setProperty("utmY", tel.getUtmY());
-	ts.setProperty("latitude", tel.getLatitude());
-	ts.setProperty("longitude", tel.getLongitude());
-	ts.setProperty("locationAccuracy", tel.getLocationAccuracy());
-	ts.setProperty("wdid", tel.getWdid());
-	ts.setProperty("modified", (tel.getModified() == null) ? null : new DateTime(tel.getModified()));
-	ts.setProperty("moreInformation", tel.getMoreInformation());
+	ts.setProperty("telemetrystation.units", tel.getUnits());
+	ts.setProperty("telemetrystation.flagA", tel.getFlagA());
+	ts.setProperty("telemetrystation.flagB", tel.getFlagB());
+	ts.setProperty("telemetrystation.contrArea", tel.getContrArea());
+	ts.setProperty("telemetrystation.drainArea", tel.getDrainArea());
+	ts.setProperty("telemetrystation.huc10", tel.getHuc10());
+	ts.setProperty("telemetrystation.utmX", tel.getUtmX());
+	ts.setProperty("telemetrystation.utmY", tel.getUtmY());
+	ts.setProperty("telemetrystation.latitude", tel.getLatitude());
+	ts.setProperty("telemetrystation.longitude", tel.getLongitude());
+	ts.setProperty("telemetrystation.locationAccuracy", tel.getLocationAccuracy());
+	ts.setProperty("telemetrystation.wdid", tel.getWdid());
+	ts.setProperty("telemetrystation.modified", (tel.getModified() == null) ? null : new DateTime(tel.getModified()));
+	ts.setProperty("telemetrystation.moreInformation", tel.getMoreInformation());
 	dt = tel.getStationPorStart();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3119,7 +3306,7 @@ public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porStart", dt);
+	ts.setProperty("telemetrystation.porStart", dt);
 	dt = tel.getStationPorEnd();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3127,8 +3314,15 @@ public static void setTimeSeriesPropertiesTelemetry (TS ts, TelemetryStation tel
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porEnd", dt);
-	ts.setProperty("thirdParty", tel.getThirdParty());
+	ts.setProperty("telemetrystation.porEnd", dt);
+	ts.setProperty("telemetrystation.thirdParty", tel.getThirdParty());
+	if ( telDataType != null ) {
+		// Include data type properties, but only those not redundant with telemetry station
+		ts.setProperty("telemetrystationdatatypes.parameter", telDataType.getParameter());
+		ts.setProperty("telemetrystationdatatypes.parameterPorStart", telDataType.getParameterPorStart());
+		ts.setProperty("telemetrystationdatatypes.parameterPorEnd", telDataType.getParameterPorEnd());
+		ts.setProperty("telemetrystationdatatypes.parameterUnit", telDataType.getParameterUnit());
+	}
 }
 
 /**
@@ -3147,15 +3341,15 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 	if ( dt != null ) {
 		precision = dt.getPrecision();
 	}
-	ts.setProperty("wellId", well.getWellId());
-	ts.setProperty("wellName", well.getWellName());
-	ts.setProperty("receipt", well.getReceipt());
-	ts.setProperty("permit", well.getPermit());
-	ts.setProperty("wellDepth", well.getWellDepth());
-	ts.setProperty("measurementDate", well.getMeasurementDate());
-	ts.setProperty("waterLevelDepth", well.getWaterLevelDepth());
-	ts.setProperty("waterLevelElevation", well.getWaterLevelElevation());
-	ts.setProperty("measurementBy", well.getMeasurementBy());
+	ts.setProperty("well.wellId", well.getWellId());
+	ts.setProperty("well.wellName", well.getWellName());
+	ts.setProperty("well.receipt", well.getReceipt());
+	ts.setProperty("well.permit", well.getPermit());
+	ts.setProperty("well.wellDepth", well.getWellDepth());
+	ts.setProperty("well.measurementDate", well.getMeasurementDate());
+	ts.setProperty("well.waterLevelDepth", well.getWaterLevelDepth());
+	ts.setProperty("well.waterLevelElevation", well.getWaterLevelElevation());
+	ts.setProperty("well.measurementBy", well.getMeasurementBy());
 	dt = well.getPorStart();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3163,7 +3357,7 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porStart", dt);
+	ts.setProperty("well.porStart", dt);
 	dt = well.getPorEnd();
 	if ( dt != null ) {
 		dt = new DateTime(dt);
@@ -3171,43 +3365,43 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
 			dt.setPrecision(precision);
 		}
 	}
-	ts.setProperty("porEnd", dt);
-	ts.setProperty("porCount", well.getPorCount());
-	ts.setProperty("publicationName", well.getPublicationName());
-	ts.setProperty("aquifers", well.getAquifers());
-	ts.setProperty("elevation", well.getElevation());
-	ts.setProperty("elevationAccuracy", well.getElevationAccuracy());
-	ts.setProperty("topPerforatedCasing", well.getTopPerforatedCasing());
-	ts.setProperty("bottomPerforatedCasing", well.getBottomPerforatedCasing());
-	ts.setProperty("baseOfGrout", well.getBaseOfGrout());
-	ts.setProperty("wdid", well.getWdid());
-	ts.setProperty("locationNumber", well.getLocationNumber());
-	ts.setProperty("usgsSiteId", well.getUsgsSiteId());
-	ts.setProperty("contact", well.getContact());
-	ts.setProperty("division", well.getDivision());
-	ts.setProperty("waterDistrict", well.getWaterDistrict());
-	ts.setProperty("county", well.getCounty());
-	ts.setProperty("designatedBasin", well.getDesignatedBasin());
-	ts.setProperty("managementDistrict", well.getManagementDistrict());
-	ts.setProperty("q10", well.getQ10());
-	ts.setProperty("q40", well.getQ40());
-	ts.setProperty("q160", well.getQ160());
-	ts.setProperty("section", well.getSection());
-	ts.setProperty("township", well.getTownship());
-	ts.setProperty("range", well.getRange());
-	ts.setProperty("pm", well.getPm());
-	ts.setProperty("coordiantesEw", well.getCoordinatesEw());
-	ts.setProperty("coordiantesEwDir", well.getCoordinatesEwDir());
-	ts.setProperty("coordinatesNs", well.getCoordinatesNs());
-	ts.setProperty("coordinatesNsDir", well.getCoordinatesNsDir());
-	ts.setProperty("utmX", well.getUtmX());
-	ts.setProperty("utmY", well.getUtmY());
-	ts.setProperty("latitude", well.getLatitude());
-	ts.setProperty("longitude", well.getLongitude());
-	ts.setProperty("locationAccuracy", well.getLocationAccuracy());
-	ts.setProperty("dataSource", well.getDataSource());
-	ts.setProperty("modified", (well.getModified() == null) ? null : new DateTime(well.getModified()));
-	ts.setProperty("moreInformation", well.getMoreInformation());
+	ts.setProperty("well.porEnd", dt);
+	ts.setProperty("well.porCount", well.getPorCount());
+	ts.setProperty("well.publicationName", well.getPublicationName());
+	ts.setProperty("well.aquifers", well.getAquifers());
+	ts.setProperty("well.elevation", well.getElevation());
+	ts.setProperty("well.elevationAccuracy", well.getElevationAccuracy());
+	ts.setProperty("well.topPerforatedCasing", well.getTopPerforatedCasing());
+	ts.setProperty("well.bottomPerforatedCasing", well.getBottomPerforatedCasing());
+	ts.setProperty("well.baseOfGrout", well.getBaseOfGrout());
+	ts.setProperty("well.wdid", well.getWdid());
+	ts.setProperty("well.locationNumber", well.getLocationNumber());
+	ts.setProperty("well.usgsSiteId", well.getUsgsSiteId());
+	ts.setProperty("well.contact", well.getContact());
+	ts.setProperty("well.division", well.getDivision());
+	ts.setProperty("well.waterDistrict", well.getWaterDistrict());
+	ts.setProperty("well.county", well.getCounty());
+	ts.setProperty("well.designatedBasin", well.getDesignatedBasin());
+	ts.setProperty("well.managementDistrict", well.getManagementDistrict());
+	ts.setProperty("well.q10", well.getQ10());
+	ts.setProperty("well.q40", well.getQ40());
+	ts.setProperty("well.q160", well.getQ160());
+	ts.setProperty("well.section", well.getSection());
+	ts.setProperty("well.township", well.getTownship());
+	ts.setProperty("well.range", well.getRange());
+	ts.setProperty("well.pm", well.getPm());
+	ts.setProperty("well.coordiantesEw", well.getCoordinatesEw());
+	ts.setProperty("well.coordiantesEwDir", well.getCoordinatesEwDir());
+	ts.setProperty("well.coordinatesNs", well.getCoordinatesNs());
+	ts.setProperty("well.coordinatesNsDir", well.getCoordinatesNsDir());
+	ts.setProperty("well.utmX", well.getUtmX());
+	ts.setProperty("well.utmY", well.getUtmY());
+	ts.setProperty("well.latitude", well.getLatitude());
+	ts.setProperty("well.longitude", well.getLongitude());
+	ts.setProperty("well.locationAccuracy", well.getLocationAccuracy());
+	ts.setProperty("well.dataSource", well.getDataSource());
+	ts.setProperty("well.modified", (well.getModified() == null) ? null : new DateTime(well.getModified()));
+	ts.setProperty("well.moreInformation", well.getMoreInformation());
 }
 
 /**
