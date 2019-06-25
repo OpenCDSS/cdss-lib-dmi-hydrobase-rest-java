@@ -79,9 +79,14 @@ public class TelemetryTimeSeries {
 	private DateTime measDate;
 
 	/** 
-	 * Measurement Date Time - for raw 
+	 * Measurement Date Time - for raw, use measDate for hour and day
 	 */
 	private DateTime measDateTime;
+
+	/** 
+	 * Measurement units 
+	 */
+	private String measUnit;
 
 	/** 
 	 * Measurement Value 
@@ -108,7 +113,8 @@ public class TelemetryTimeSeries {
 	public int getDay(){
 		if(measDateTime != null){
 			return measDateTime.getDay();
-		}else{
+		}
+		else{
 			return measDate.getDay();
 		}
 	}
@@ -124,7 +130,8 @@ public class TelemetryTimeSeries {
 	public int getHour(){
 		if(measDateTime != null){
 			return measDateTime.getHour();
-		}else{
+		}
+		else{
 			return measDate.getHour();
 		}
 	}
@@ -141,6 +148,10 @@ public class TelemetryTimeSeries {
 		return measDateTime;
 	}
 
+	public String getMeasUnit() {
+		return measUnit;
+	}
+	
 	public Double getMeasValue() {
 		return measValue;
 	}
@@ -148,7 +159,8 @@ public class TelemetryTimeSeries {
 	public int getMinute(){
 		if(measDateTime != null){
 			return measDateTime.getMinute();
-		}else{
+		}
+		else {
 			return measDate.getMinute();
 		}
 	}
@@ -160,10 +172,10 @@ public class TelemetryTimeSeries {
 	public int getMonth(){
 		if(measDateTime != null){
 			return measDateTime.getMonth();
-		}else{
+		}
+		else{
 			return measDate.getMonth();
 		}
-		
 	}
 	
 	public String getParameter() {
@@ -173,10 +185,10 @@ public class TelemetryTimeSeries {
 	public int getYear(){
 		if(measDateTime != null){
 			return measDateTime.getYear();
-		}else{
+		}
+		else{
 			return measDate.getYear();
 		}
-		
 	}
 	
 	public void setAbbrev(String abbrev) {
@@ -201,6 +213,10 @@ public class TelemetryTimeSeries {
 		this.measDateTime = TimeToolkit.getInstance().toDateTime(measDateTime, false);
 	}
 
+	public void setMeasUnit(String measUnit) {
+		this.measUnit = measUnit;
+	}
+
 	public void setMeasValue(Double measValue) {
 		this.measValue = measValue;
 	}
@@ -221,7 +237,7 @@ public class TelemetryTimeSeries {
 	@Override
 	public String toString(){
 		return "TelemetryTimeSeriesRaw: [ abbrev: " + abbrev + ", parameter: " + parameter + 
-				", measDateTime: " + measDateTime + ", measValue: " + measValue + ", flagA: " + 
+				", measDateTime: " + measDateTime + ", measValue: " + measValue + ", measUnit: " + measUnit + ", flagA: " + 
 				flagA + ", flagB: " + flagB + ", measCount: " + measCount + ", modified: " + modified + " ]\n";
 	}
 

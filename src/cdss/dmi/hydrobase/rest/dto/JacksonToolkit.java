@@ -116,7 +116,6 @@ public class JacksonToolkit {
 			return null;
 		}
 		
-		
 		return results;
 	}
 	
