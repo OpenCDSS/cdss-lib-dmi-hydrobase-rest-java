@@ -50,7 +50,6 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
-import RTi.Util.Time.TimeUtil;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Station_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel;
@@ -811,7 +810,11 @@ public String[] getTelemetryDataTypeParametersFromWebServices(){
 public String getTelemetryDataTypesRequestString(String dataType, List<String []> listOfTriplets){
 	// All telemetry data is assumed to be 15 minute, not searching by interval
 	// - also include third party archive data, such as for USGS and Northern Water
-	String tpRequestString = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes?format=json&includeThirdParty=true&parameter=" + dataType;
+	StringBuilder tpRequestString = new StringBuilder(getServiceRootURI() +
+		"/telemetrystations/telemetrystationdatatypes?format=json&includeThirdParty=true");
+	if ( (dataType != null) && !dataType.isEmpty() && !dataType.equals("*") ) { 
+		tpRequestString.append ( "&parameter=" + dataType );
+	}
 	int newVal;
 	// Step through all Triplets
 	for(int i = 0; i < listOfTriplets.size(); i++){
@@ -825,77 +828,77 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 		try{
 			switch (argumentKey.toUpperCase()){
 				case "COUNTY":  
-						tpRequestString += "&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						tpRequestString.append("&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
 				case "LATITUDE":
-						tpRequestString += "&latitude=" + URLEncoder.encode(value, "UTF-8");
+						tpRequestString.append("&latitude=" + URLEncoder.encode(value, "UTF-8") );
 						break;
 				case "LONGITUDE":
-						tpRequestString += "&longitude=" + URLEncoder.encode(value, "UTF-8");
+						tpRequestString.append("&longitude=" + URLEncoder.encode(value, "UTF-8") );
 						break;
 				case "RADIUS":
-						tpRequestString += "&radius=" + URLEncoder.encode(value, "UTF-8");
+						tpRequestString.append("&radius=" + URLEncoder.encode(value, "UTF-8") );
 						break;
 				case "UNITS":
-						tpRequestString += "&units=" + URLEncoder.encode(value, "UTF-8");
+						tpRequestString.append("&units=" + URLEncoder.encode(value, "UTF-8") );
 						break;
 				case "ABBREV":
-						tpRequestString += "&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						tpRequestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
 				case "STATIONTYPE":
-						tpRequestString += "&stationType=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						tpRequestString.append("&stationType=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
 				case "USGSSTATIONID":
-						tpRequestString += "&usgsStationId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8");
+						tpRequestString.append("&usgsStationId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
 				case "WATERDISTRICT":
 						switch (operator.toUpperCase()){
 							case "EQ":
-								tpRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
 								newVal = new Integer(value) - 1;
 								value = Integer.toString(newVal);
-								tpRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LE":
-								tpRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
 								newVal = new Integer(value) + 1;
 								value = Integer.toString(newVal);
-								tpRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GE":
-								tpRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 						}
 						break;
 				case "WATERDIVISION":
 						switch (operator.toUpperCase()){
 							case "EQ":
-								tpRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
 								newVal = new Integer(value) - 1;
 								value = Integer.toString(newVal);
-								tpRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LE": 
-								tpRequestString += "&max-division" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&max-division" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
 								newVal = new Integer(value) + 1;
 								value = Integer.toString(newVal);
-								tpRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GE":
-								tpRequestString += "&min-division" + URLEncoder.encode(value, "UTF-8");
+								tpRequestString.append("&min-division" + URLEncoder.encode(value, "UTF-8") );
 								break;
 						}
 						break;
 				case "STR_NAME":
-						tpRequestString += "&wdid=" + URLEncoder.encode(value, "UTF-8");
+						tpRequestString.append("&wdid=" + URLEncoder.encode(value, "UTF-8") );
 						break;
 			}
 		}catch (UnsupportedEncodingException e) {
@@ -904,8 +907,8 @@ public String getTelemetryDataTypesRequestString(String dataType, List<String []
 			Message.printWarning(3,routine,e);
 		}
 	}
-	tpRequestString += getApiKeyString(tpRequestString);
-	return tpRequestString;
+	tpRequestString.append(getApiKeyString(tpRequestString.toString()));
+	return tpRequestString.toString();
 }
 
 /**
@@ -1062,14 +1065,15 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 }
 
 /**
- * Returns a list of data types that can be displayed in TSTool
- * @param group - if true return the group label in front of the 
+ * Returns a list of data types that can be displayed in TSTool.
+ * @param includeGroup - if true return the group label in front of the 
  * data types, otherwise just return data types.
+ * @param includeWildcard - if true include * for telemetry stations to return all parameters.
  * @return list of data types that can be accessed via datastore.
  */
-public List<String> getTimeSeriesDataTypes(boolean group){
+public List<String> getTimeSeriesDataTypes ( boolean includeGroup, boolean includeWildcard ) {
 	List<String> dataTypes = new ArrayList<String>();
-	if(group){
+	if ( includeGroup ) {
 		dataTypes.add("Structure - DivTotal");
 		dataTypes.add("Structure - RelTotal");
 		dataTypes.add("Structure - Stage");
@@ -1079,9 +1083,13 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 		for(int i = 0; i < this.telemetryParamsList.size(); i++){
 			dataTypes.add("Telemetry Station - " + this.telemetryParamsList.get(i).getParameter());
 		}
+		if ( includeWildcard ) {
+			dataTypes.add("Telemetry Station - *" );
+		}
 		dataTypes.add("Well - WaterLevelDepth");
 		dataTypes.add("Well - WaterLevelElev");
-	}else{
+	}
+	else {
 		dataTypes.add("DivTotal");
 		dataTypes.add("RelTotal");
 		dataTypes.add("Stage");
@@ -1098,8 +1106,7 @@ public List<String> getTimeSeriesDataTypes(boolean group){
 }
 
 /**
- * Return a list of time steps associated with different
- * data types
+ * Return a list of time steps associated with different data types.
  * @param selectedDataType - data type selected ex. "DivTotal".
  * @return List<String> of time steps
  */
@@ -1119,7 +1126,8 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 		timeSteps.add("Day");
 	}
 	// Will be Telemetry
-	else{ // FIXME @jurentie 06/22/2018 might need a more clever solution for telemetry stations
+	else {
+		// TODO smalers 2019-06-27 might need to include instantaneous
 		timeSteps.add("15Min");
 		timeSteps.add("Hour");
 		timeSteps.add("Day");
@@ -1746,10 +1754,14 @@ public boolean isWaterClassStructure(String dataType){
 
 /**
  * Indicate whether a time series data type corresponds to a telemetry station.
- * @param dataType - the datatype portion of the TSID ex. 'DO_SAT'
+ * @param dataType - the datatype portion of the TSID ex. 'DISCHRG'
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
+	if ( dataType.equals("*") ) {
+		// Allow wildcard
+		return true;
+	}
 	for ( int i = 0; i < this.telemetryParamsList.size(); i++ ) {
 		if ( dataType.equalsIgnoreCase(this.telemetryParamsList.get(i).getParameter()) ) {
 			return true;
