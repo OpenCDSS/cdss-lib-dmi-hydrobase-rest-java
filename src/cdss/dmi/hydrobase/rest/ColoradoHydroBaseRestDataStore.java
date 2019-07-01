@@ -1374,15 +1374,55 @@ public List<ReferenceTablesWaterDivision> getWaterDivisions(){
  * Retrieve water rights net amount from web services using wdid. Convert to POJO using
  * Jackson and sort by Admin Number.
  * @param wdid - The wdid to search by to retrieve water rights net amount from web services.
- * @return List<WaterRightsNetAmount> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount}.
+ * @return List<WaterRightsNetAmount> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount}, can be empty.
  */
 public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
 	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
 	String netAmtsRequest = getServiceRootURI() + "/waterrights/netamount?format=json&wdid=" + wdid + getApiKeyString();
 	JsonNode structResult = JacksonToolkit.getInstance().getJsonNodeFromWebServices(netAmtsRequest);
-	for(int i = 0; i < structResult.size(); i++){
-		WaterRightsNetAmount waterRight = (WaterRightsNetAmount) JacksonToolkit.getInstance().treeToValue(structResult.get(i), WaterRightsNetAmount.class);
-		waterRightsList.add(waterRight);
+	if ( (structResult != null) && (structResult.size() > 0) ) {
+		for(int i = 0; i < structResult.size(); i++){
+			WaterRightsNetAmount waterRight = (WaterRightsNetAmount) JacksonToolkit.getInstance().treeToValue(structResult.get(i), WaterRightsNetAmount.class);
+			waterRightsList.add(waterRight);
+		}
+		Collections.sort(waterRightsList, new ColoradoHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
+	}
+	return waterRightsList;
+}
+
+/**
+ * Retrieve water rights net amount from web services for rate (flow) using wdid.
+ * Water rights with decreedUnits starting with "C" (cfs) are returned since that is the only way to get flow rights.
+ * @param wdid - The wdid to search by to retrieve water rights net amount from web services.
+ * @return List<WaterRightsNetAmount> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount}, can be empty.
+ */
+public List<WaterRightsNetAmount> getWaterRightsNetAmountForRate(String wdid) {
+	List<WaterRightsNetAmount> waterRightsList0 = getWaterRightsNetAmount(wdid);
+	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
+	for ( WaterRightsNetAmount waterRight: waterRightsList0 ) {
+		if ( waterRight.getDecreedUnits().toUpperCase().startsWith("C") ) {
+			// CFS right so assume rate
+			waterRightsList.add(waterRight);
+		}
+	}
+	Collections.sort(waterRightsList, new ColoradoHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
+	return waterRightsList;
+}
+
+/**
+ * Retrieve water rights net amount from web services for volume using wdid.
+ * Water rights with decreedUnits starting with "A" (acre feet) are returned since that is the only way to get storage rights.
+ * @param wdid - The wdid to search by to retrieve water rights net amount from web services.
+ * @return List<WaterRightsNetAmount> of {@link cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount}, can be empty.
+ */
+public List<WaterRightsNetAmount> getWaterRightsNetAmountForVolume(String wdid) {
+	List<WaterRightsNetAmount> waterRightsList0 = getWaterRightsNetAmount(wdid);
+	List<WaterRightsNetAmount> waterRightsList = new ArrayList<WaterRightsNetAmount>();
+	for ( WaterRightsNetAmount waterRight: waterRightsList0 ) {
+		if ( waterRight.getDecreedUnits().toUpperCase().startsWith("A") ) {
+			// ACFT right so assume volume
+			waterRightsList.add(waterRight);
+		}
 	}
 	Collections.sort(waterRightsList, new ColoradoHydroBaseRest_WaterRightsNetAmount_Comparator_AdminNoOrderNo());
 	return waterRightsList;
@@ -1396,11 +1436,13 @@ public List<WaterRightsNetAmount> getWaterRightsNetAmount(String wdid) {
  */
 public List<WaterRightsTransaction> getWaterRightsTransaction(String wdid){
 	String request = getServiceRootURI() + "/waterrights/transaction?format=json" + "&wdid=" + wdid + getApiKeyString();
-	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	List<WaterRightsTransaction> waterRightsTransList = new ArrayList<WaterRightsTransaction>();
-	for(int i = 0; i < results.size(); i++){
-		WaterRightsTransaction wrt = (WaterRightsTransaction)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterRightsTransaction.class);
-		waterRightsTransList.add(wrt);
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
+	if ( (results != null) && (results.size() > 0) ) {
+		for(int i = 0; i < results.size(); i++){
+			WaterRightsTransaction wrt = (WaterRightsTransaction)JacksonToolkit.getInstance().treeToValue(results.get(i), WaterRightsTransaction.class);
+			waterRightsTransList.add(wrt);
+		}
 	}
 	return waterRightsTransList;
 }
