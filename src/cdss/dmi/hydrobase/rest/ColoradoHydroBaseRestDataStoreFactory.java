@@ -31,7 +31,7 @@ import riverside.datastore.DataStore;
 import riverside.datastore.DataStoreFactory;
 
 /**
- * Factory to instantiate ColoradoHydrobaseRestDataStore instances.
+ * Factory to instantiate ColoradoHydroBaseRestDataStore instances.
  * @author sam
  *
  */
