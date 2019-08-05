@@ -2223,39 +2223,30 @@ throws MalformedURLException, Exception
 				if ( readEnd != null ) {
 					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear()), "UTF-8");
 				}
-				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.MONTH){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision
-				/* Period specifier does not seem to work well
 				if ( readStart != null ) {
-					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), 1, readStart.getYear()), "UTF-8");
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readStart.getMonth(), readStart.getYear()), "UTF-8");
 				}
 				if ( readEnd != null ) {
-					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(),
-						TimeUtil.numDaysInMonth(readEnd.getMonth(), readEnd.getYear()), readEnd.getYear()), "UTF-8");
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readEnd.getMonth(), readEnd.getYear()), "UTF-8");
 				}
-				*/
-				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
 			}
 			if(interval_base == TimeInterval.YEAR){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision
-				/* Period specifier does not seem to work well
 				if ( readStart != null ) {
-					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", 1, 1, readStart.getYear()), "UTF-8");
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%04d", readStart.getYear()), "UTF-8");
 				}
 				if ( readEnd != null ) {
-					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", 12,
-						TimeUtil.numDaysInMonth(readEnd.getMonth(), readEnd.getYear()), readEnd.getYear()), "UTF-8");
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%04d", readEnd.getYear()), "UTF-8");
 				}
-				*/
-				//System.out.println(divRecRequest);
 				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
 			}
 			if(debug){ 
@@ -2393,10 +2384,27 @@ throws MalformedURLException, Exception
 					date.setMonth(divRecCurrMonth.getMonth());
 					
 					// Get Data
+					// - monthly data also have observation code
 					value = divRecCurrMonth.getDataValue();
-					
-					if ( !isTimeSeriesValueMissing(value, true) ) {
-						ts.setDataValue(date, value);
+					obsCode = divRecCurrMonth.getObsCode();
+					if ( obsCode != null ) {
+						obsCode = obsCode.trim();
+					}
+					valueIsMissing = isTimeSeriesValueMissing(value, true);
+					if ( !valueIsMissing || ((obsCode != null) && !obsCode.isEmpty()) ) {
+						// Have a data value and/or observation code to set
+						if ( valueIsMissing ) {
+							// Use the missing value for the time series
+							value = ts.getMissing();
+						}
+						if ( (obsCode != null) && !obsCode.isEmpty() ) {
+							// Set the data value with the flag
+							ts.setDataValue(date, value, obsCode, -1);
+						}
+						else {
+							// No observation code so just set the value
+							ts.setDataValue(date, value);
+						}
 					}
 				}
 			}
@@ -2575,8 +2583,8 @@ throws MalformedURLException, Exception
 			ts.setDataUnits("FT");
 		}
 		else if ( data_type.equalsIgnoreCase("Volume") ) {
-			ts.setDataUnitsOriginal("AF");
-			ts.setDataUnits("AF");
+			ts.setDataUnitsOriginal("ACFT");
+			ts.setDataUnits("ACFT");
 		}
 			
 		/* TODO smalers 2019-06-15 maybe set the web service here?
