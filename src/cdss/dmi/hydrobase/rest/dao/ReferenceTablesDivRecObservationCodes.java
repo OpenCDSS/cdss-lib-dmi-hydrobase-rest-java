@@ -47,61 +47,70 @@ public class ReferenceTablesDivRecObservationCodes {
 	 */
 	
 	/**
-	 * Ending Irrigation Year
+	 * Ending irrigation year (Nov-Oct) for obsCode use.
 	 */
-	private int endIyr;
+	private Integer endIyr;
 	
 	/**
-	 * Observation Code
+	 * Observation code (e.g., "E").
 	 */
 	private String obsCode;
 	
 	/**
-	 * Long version of the Observation Code
+	 * Long version of the observation code (e.g., "Estimated").
 	 */
 	private String obsCodeLong;
 	
 	/**
-	 * Observation Code Description
+	 * Observation code description, can vary depending on startIyr and endIyr.
 	 */
 	private String obsDescr;
 	
 	/**
-	 * Starting Irrigation Year
+	 * Starting irrigation year (Nov-Oct) for observation code.
 	 */
-	private int startIyr;
+	private Integer startIyr;
 	
 	/**
 	 * Getters and setters of defined variables
 	 */
-	public int getEndIyr() {
+	public Integer getEndIyr() {
 		return endIyr;
 	}
+
 	public String getObsCode() {
 		return obsCode;
 	}
+
 	public String getObsCodeLong() {
 		return obsCodeLong;
 	}
+
 	public String getObsDescr() {
 		return obsDescr;
 	}
-	public int getStartIyr() {
+
+	public Integer getStartIyr() {
 		return startIyr;
 	}
-	public void setEndIyr(int endIyr) {
+
+	public void setEndIyr(Integer endIyr) {
 		this.endIyr = endIyr;
 	}
+
 	public void setObsCode(String obsCode) {
 		this.obsCode = obsCode;
 	}
+
 	public void setObsCodeLong(String obsCodeLong) {
 		this.obsCodeLong = obsCodeLong;
 	}
+
 	public void setObsDescr(String obsDescr) {
 		this.obsDescr = obsDescr;
 	}
-	public void setStartIyr(int startIyr) {
+
+	public void setStartIyr(Integer startIyr) {
 		this.startIyr = startIyr;
 	}
 	
