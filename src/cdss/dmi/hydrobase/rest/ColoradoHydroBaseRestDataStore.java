@@ -37,15 +37,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import riverside.datastore.AbstractWebServiceDataStore;
 import RTi.TS.DayTS;
+import RTi.TS.MonthTS;
 import RTi.TS.TS;
 import RTi.TS.TSData;
 import RTi.TS.TSDataFlagMetadata;
 import RTi.TS.TSIdent;
 import RTi.TS.TSIterator;
 import RTi.TS.TSUtil;
+import RTi.TS.YearTS;
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
+import RTi.Util.Math.MathUtil;
 import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
@@ -207,6 +210,7 @@ private void determineAPIVersion()
 }
 
 /**
+THIS CODE SHOULD BE A COPY OF THE SAME METHOD IN HydroBase_Util.
 Fill a daily diversion (DivTotal or DivClass) or reservoir (RelTotal, RelClass)
 time series by carrying forward data.  This method is typically only called by internal database
 API code (should be part of data retrieval process, not user-driven data filling).
@@ -352,11 +356,242 @@ public void fillTSIrrigationYearCarryForward(TS ts, String fillDailyDivFlag){
 		}
 		if ( (fillDailyDivFlag != null) && !fillDailyDivFlag.equals("") ) {
 		    ts.addDataFlagMetadata(
-		        new TSDataFlagMetadata(fillDailyDivFlag, "Filled within irrigation year using DWR carry-forward approach because HydroBase daily data omits empty months."));
+		        new TSDataFlagMetadata(fillDailyDivFlag, "Filled within irrigation year using carry-forward because HydroBase daily data omits leading and repeating zeros."));
 		}
 	}
 }
 
+/**
+This code was copied from the HydroBaseDMI package and modified to work with the datastore,
+mainly changing the first few lines to read diversion comments time series from web services.
+Fill a daily, monthly, or yearly diversion (DivTotal, WaterClass) or reservoir (RelTotal, WaterClass) time series
+using diversion comment information.  Certain "not used" flags ("A", "B", "C", "D") indicate a value of
+zero for the irrigation year (Nov 1 to Oct 31).  Yearly time series are assumed
+to be in irrigation year, to match the diversion comments.
+@param ts Time series to fill.
+@param date1 Starting date to fill, or null to fill all.
+@param date2 Ending date to fill, or null to fill all.
+@param fillflag If specified (not null or zero length), the time series will be
+updated to allow data flags and filled values will be tagged with the specified
+string.  A value of null or "Auto" will result in a one-character fill flag, where
+the flag value is set to the "not used" flag value.
+@param fillFlagDesc description for fillflag, used in report legends.
+@param extend_period Indicate whether the time series period should be extended
+if diversion comment values are found outside the current time series period.
+This will only occur if the fill dates are null (indicating that all available
+data should be used, for example in general queries).
+A value of true will extend the period if necessary.
+@exception Exception if there is an error filling the time series (e.g., exception thrown querying HydroBase).
+*/
+private void fillTSUsingDiversionComments(TS ts, DateTime date1, DateTime date2,
+	String fillflag, String fillFlagDesc, boolean extend_period )
+throws Exception
+{	String routine = getClass().getSimpleName() + ".fillTSUsingDiversionComments";
+
+	if ( ts == null ) {
+		// Nothing to fill.
+		return;
+	}
+
+	TS divcomts = null;
+	int interval_base = ts.getDataIntervalBase();
+	int interval_mult = ts.getDataIntervalMult();
+	
+	// Get the diversion comments as a time series, where the year in the time series is irrigation year.
+	String dataType = ts.getDataType();
+	if ( dataType.equalsIgnoreCase("DivTotal") || dataType.equalsIgnoreCase("RelTotal") || dataType.toUpperCase().startsWith("WATERCLASS") ) {
+		// Diversion comments apply to the time series...
+		divcomts = readTimeSeries( ts.getLocation() + ".DWR.DivComment.Year", date1, date2, true, null);
+	}
+	if ( divcomts == null ) {
+		Message.printStatus(2, routine, "No diversion comments for " + ts.getIdentifierString() + ".  Not filling data.");
+		return;
+	}
+	
+	DateTime divcomdate = new DateTime(divcomts.getDate1());
+	DateTime divcomend = new DateTime(divcomts.getDate2()); // Period for diversion comments
+	// The following causes the precision to be set correctly...
+	DateTime tsdate1 = new DateTime(ts.getDate1());
+	DateTime tsdate2 = new DateTime(ts.getDate2()); // Period for time series to fill.
+	String zero_flags = "ABCD"; 	// "not used" single-character flags that indicates a zero value.
+
+	String not_used = null; // Flag in diversion comments indicating whether diversion was used in irrigation year.
+	TSData tsdata = new TSData(); // Single data point from a time series.
+	int fill_count = 0; // Number of data values filled in the irrigation year (or number of years with
+						// diversion comments below).
+	StringBuilder usedCommentFlags = new StringBuilder(); // Flags that are actually encountered
+	if ( (date1 == null) && (date2 == null) && extend_period ) {
+		// Loop through diversion comments once and determine whether
+		// the period needs to be extended.  This should only be done if
+		// the not_used flag is one of the zero values.
+		int yearmin = 3000;
+		int yearmax = -3000;
+		for ( ; divcomdate.lessThanOrEqualTo(divcomend); divcomdate.addYear(1)) {
+			tsdata = divcomts.getDataPoint(divcomdate,tsdata);
+			not_used = tsdata.getDataFlag();
+			if ( (not_used == null)|| (not_used.length() == 0) || (zero_flags.indexOf(not_used) < 0) ) {
+				// No need to process the flag because a zero water use flag is not specified...
+				continue;
+			}
+			if ( usedCommentFlags.indexOf(not_used) < 0 ) {
+				usedCommentFlags.append(not_used);
+			}
+			++fill_count;
+			// Save the min and max year.  Note that these are irrigation years since that is what is stored in
+			// the diversion comment time series.
+			yearmin = MathUtil.min ( yearmin, divcomdate.getYear());
+			yearmax = MathUtil.max ( yearmax, divcomdate.getYear());
+		}
+		// If the minimum and maximum year from the above indicate that
+		// the period should be longer, extend it.  Do the comparisons in calendar years.
+		DateTime min_DateTime = new DateTime();
+		min_DateTime.setYear ( yearmin - 1 );
+		min_DateTime.setMonth ( 11 );
+		min_DateTime.setDay ( 1 );
+		DateTime max_DateTime = new DateTime();
+		max_DateTime.setYear ( yearmax );
+		max_DateTime.setMonth ( 10 );
+		max_DateTime.setDay ( 31 );
+		if ( ts instanceof DayTS ) {
+			min_DateTime.setPrecision(DateTime.PRECISION_DAY);
+			max_DateTime.setPrecision(DateTime.PRECISION_DAY);
+		}
+		else if ( ts instanceof MonthTS ) {
+			min_DateTime.setPrecision( DateTime.PRECISION_MONTH);
+			max_DateTime.setPrecision( DateTime.PRECISION_MONTH);
+		}
+		else if ( ts instanceof YearTS ) {
+			min_DateTime.setPrecision(DateTime.PRECISION_YEAR);
+			max_DateTime.setPrecision(DateTime.PRECISION_YEAR);
+		}
+		if ( min_DateTime.lessThan(tsdate1) || max_DateTime.greaterThan(tsdate2) ) {
+			// Resize the time series, using the original date/time on an end if necessary...
+			if ( min_DateTime.greaterThan(tsdate1) ) {
+				min_DateTime = new DateTime ( tsdate1 );
+			}
+			if ( max_DateTime.lessThan(tsdate2) ) {
+				max_DateTime = new DateTime ( tsdate2 );
+			}
+			ts.addToGenesis("Change period because all data are requested and diversion comments are available.");
+			ts.changePeriodOfRecord ( min_DateTime, max_DateTime );
+		}
+	}
+
+	// Check how to handle flags and set some booleans to optimize code
+	boolean doFillFlag = false;
+	boolean doFillFlagAuto = false;
+	if ( (fillflag != null) && !fillflag.isEmpty() ) {
+		doFillFlag = true;
+		if ( fillflag.equalsIgnoreCase("Auto") ) {
+			doFillFlagAuto = true;
+		}
+	}
+	
+	DateTime tsdate;
+	int iyear = 0; // Irrigation year to process.
+	double dataValue = 0.0;	// Value from the time series.
+	String fillflag2 = fillflag; // String used to do filling, reflecting "Auto" value
+	TSData divcomTsData = new TSData();
+	for ( divcomdate = new DateTime(divcomts.getDate1());
+		divcomdate.lessThanOrEqualTo(divcomend); divcomdate.addYear(1)) {
+		divcomTsData = divcomts.getDataPoint(divcomdate,tsdata);
+		not_used = divcomTsData.getDataFlag();
+		if ( (not_used == null) || (not_used.length() == 0) || (zero_flags.indexOf(not_used) < 0) ) {
+			// No need to process the flag because a zero water use diversion comment flag is not specified.
+            continue;
+		}
+		// Have a valid "not used" flag to be used in filling.  The year for diversion comments time series is
+		// irrigation year.
+		// TODO SAM 2006-04-25 Always fill the missing values.  It is assumed that HydroBase
+		// has diversion comments only for irrigation years where no detailed observations occur.  This should
+		// be checked during HydroBase verification (but is not checked in this code).
+		iyear = divcomdate.getYear();
+		fill_count = 0;
+		if ( interval_base == TimeInterval.YEAR ) {
+			// Can check one date, corresponding to the diversion comment year...
+			dataValue = ts.getDataValue(divcomdate);
+			if ( ts.isDataMissing(dataValue) ) {
+				if ( doFillFlag ) {
+					// Set the data flag, appending to the old value...
+					if ( doFillFlagAuto ) {
+						// Automatically use the "not used" flag value...
+						fillflag2 = not_used;
+					}
+					tsdata = ts.getDataPoint(divcomdate,tsdata);
+					ts.setDataValue ( divcomdate, 0.0, (tsdata.getDataFlag().trim() + fillflag2), 1 );
+				}
+				else {
+				    // No data flag...
+					ts.setDataValue ( divcomdate, 0.0 );
+				}
+				++fill_count;
+			}
+		}
+		else if ( (interval_base == TimeInterval.MONTH) || (interval_base == TimeInterval.DAY) ) {
+			// Check every time series value in the irrigation year.
+			tsdate1.setDay(1);
+			tsdate1.setMonth(11);
+			// Diversion comments are in irrigation year, which
+			// corresponds to the end of the Nov-Oct period...
+			tsdate1.setYear(iyear - 1);
+			tsdate2.setDay(31);
+			tsdate2.setMonth(10);
+			tsdate2.setYear(iyear);
+			// The following will work for either daily or monthly because the precision on tsdate1 is set based
+			// on the time series interval (if monthly the day will be ignored)...
+			for ( tsdate = new DateTime(tsdate1); tsdate.lessThanOrEqualTo(tsdate2);
+				tsdate.addInterval(interval_base,interval_mult)) {
+				dataValue = ts.getDataValue(tsdate);
+				if ( ts.isDataMissing(dataValue)) {
+					if ( doFillFlag ) {
+						// Set the data flag, appending to the old value...
+						if ( doFillFlagAuto ) {
+							// Automatically use the "not used" flag value...
+							fillflag2 = not_used;
+						}
+						tsdata =ts.getDataPoint(tsdate,tsdata);
+						ts.setDataValue ( tsdate, 0.0, (tsdata.getDataFlag().trim() + fillflag2), 1 );
+					}
+					else {
+					    // No data flag...
+						ts.setDataValue ( tsdate, 0.0 );
+					}
+					++fill_count;
+				}
+			}
+		}
+		// Print/save a message for the year...
+		if ( fill_count > 0 ) {
+			String comment_string = "Filled " + fill_count + " values in irrigation year " +
+			iyear + " (Nov " + (iyear - 1) + "-Oct " + iyear + ") with zero because diversion comment notUsed=\"" + not_used + "\"";
+			if ( doFillFlag ) {
+				comment_string += ", flagged with " + fillflag2;
+			}
+			ts.addToGenesis(comment_string);
+			Message.printStatus(2, routine, comment_string);
+			// Save the flags that are used
+			if ( doFillFlag ) {
+                // Set the data flag, appending to the old value...
+				if ( (fillFlagDesc != null) && !fillFlagDesc.isEmpty() ) {
+					// Description is provided
+					if ( fillFlagDesc.equalsIgnoreCase("Auto") ) {
+	                    // Use the standard values as documented by DWR
+						List<ReferenceTablesDiversionNotUsedCodes> notUsedCodes = getDiversionNotUsedCodes();
+						for ( ReferenceTablesDiversionNotUsedCodes notUsedCode : notUsedCodes ) {
+							ts.addDataFlagMetadata(new TSDataFlagMetadata(notUsedCode.getNotUsedCode(), "Diversion comment - " + notUsedCode.getNotUsedCodeDescr() ) );
+						}
+					}
+					else {
+						// User-defined flag description same for all values
+						for ( int i = 0; i < usedCommentFlags.length(); i++ ) {
+							ts.addDataFlagMetadata(new TSDataFlagMetadata(""+usedCommentFlags.charAt(i),fillFlagDesc) );
+						}
+					}
+                }
+            }
+		}
+	}
+}
 /**
  * Get Administrative Calls from Web Services
  * @param callId - String representing the callId used to query from web services. Other parameters may
@@ -1074,6 +1309,7 @@ public List<TelemetryStationDataTypes> getTelemetryStationTimeSeriesCatalog ( St
 public List<String> getTimeSeriesDataTypes ( boolean includeGroup, boolean includeWildcard ) {
 	List<String> dataTypes = new ArrayList<String>();
 	if ( includeGroup ) {
+		dataTypes.add("Structure - DivComment");
 		dataTypes.add("Structure - DivTotal");
 		dataTypes.add("Structure - RelTotal");
 		dataTypes.add("Structure - Stage");
@@ -1112,9 +1348,13 @@ public List<String> getTimeSeriesDataTypes ( boolean includeGroup, boolean inclu
  */
 public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	List<String> timeSteps = new ArrayList<String>();
-	if(selectedDataType.equalsIgnoreCase("DivTotal") || 
-			selectedDataType.equalsIgnoreCase("RelTotal") || 
-			selectedDataType.equalsIgnoreCase("WaterClass")){
+	if(selectedDataType.equalsIgnoreCase("DivComment") ) {
+		// Year in data is irrigation year - users need to understand
+		timeSteps.add("Year");
+	}
+	else if(selectedDataType.equalsIgnoreCase("DivTotal") || 
+		selectedDataType.equalsIgnoreCase("RelTotal") || 
+		selectedDataType.equalsIgnoreCase("WaterClass")){
 		timeSteps.add("Day");
 		timeSteps.add("Month");
 		timeSteps.add("Year");
@@ -1632,8 +1872,9 @@ public List<WaterLevelsWell> getWells(String dataType, String intervalReq, List<
 * @return List<WaterLevelsWell> of {@link cdss.dmi.hydrobase.rest.dao.WaterLevelsWell}.
 */
 public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
+	String routine = getClass().getSimpleName() + ".getWellTimeSeriesCatalog";
 	List<WaterLevelsWell> wellsList = new ArrayList<WaterLevelsWell>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest structure time series list");
+	Message.printStatus(1, routine, "Getting ColoradoHydroBaseRest structure time series list");
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -1649,7 +1890,6 @@ public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String 
 	}
 	catch (Exception e) {
 		// TODO @jurentie 06/26/2018 - Fix catch
-		String routine = getClass().getSimpleName() + ".getWellTimeSeriesCatalog";
 		Message.printWarning(3, routine, e );
 	}
 	wellsList = getWells(dataType, interval, listOfTriplets);
@@ -1659,6 +1899,7 @@ public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String 
 /**
 Initialize internal data store data.
 This method should be called from all methods that are likely to be called from external code.
+Currently nothing is done but could check the web service version, etc.
 */
 private void initialize ()
 throws URISyntaxException, IOException
@@ -1669,66 +1910,6 @@ throws URISyntaxException, IOException
     }
     // Otherwise initialize the global data for the data store
     this.initialized = true;
-    // Determine the API version from a web request
-    if ( getAPIVersion() == 1 ) {
-        // Read variables from the HTML file on the website
-        //readVariableTableVersion1();
-    }
-    else {
-        // TODO SAM 2012-06-25 where does the list of variables come from for the version 2 API?
-        // TODO SAM 2012-07-25 Version 2 documentation lists a few more variables so add below
-        // 2012-06-26 Bill Noon pointed to test site (http://scacis.rcc-acis.org/ACIS_Builder.html) but this
-        // only shows "Common Element Names" - an API call will be made available
-        // Hard-code in order of major variable
-        // Elem, major, minor, name, method, measInterval, reportInterval, units, source
-        // Version 2 uses the element abbreviation and if VarMajor is not known, use a  negative number
-        // All VarMajor need to be unique because duplicates are ignored
-        //
-        // Precipitation...
-    	/* TODO smalers comment
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("pcpn", 4, 1, "Precipitation", "sum",
-            "daily", "daily", "Inch", ""));
-        // Snow...
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("snwd", 11, 1, "Snow depth, at obs time", "inst",
-            "inst", "daily", "Inch", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("snow", 10, 1, "Snowfall", "sum",
-            "daily", "daily", "Inch", ""));
-        // Temperature...
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("avgt", 43, 1, "Temperature, average", "ave",
-            "daily", "daily", "DegF", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("maxt", 1, 1, "Temperature, maximum", "max",
-            "daily", "daily", "DegF", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("mint", 2, 1, "Temperature, minimum", "min",
-            "daily", "daily", "DegF", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("obst", 3, 1, "Temperature, at obs time", "inst",
-            "inst", "daily", "DegF", ""));
-        // Degree days based on temperature...
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("hdd", 45, 1, "Heating degree days (base 65)", "sum",
-            "daily", "daily", "Day", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("cdd", 44, 1, "Cooling degree days (base 65)", "sum",
-            "daily", "daily", "Day", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("gdd50", 9990, 1, "Growing degree days (base 50)", "sum",
-            "daily", "daily", "Day", ""));
-        __variableTableRecordList.add(new RccAcisVariableTableRecord("gdd40", 9991, 1, "Growing degree days (base 40)", "sum",
-            "daily", "daily", "Day", ""));
-        */
-    }
-    // Initialize the station types - this may be available as a service at some point but for now inline
-    /* TODO smalers
-    __stationTypeList.add ( new RccAcisStationType(0,"ACIS","ACIS internal id"));
-    __stationTypeList.add ( new RccAcisStationType(1,"WBAN","5-digit WBAN id"));
-    __stationTypeList.add ( new RccAcisStationType(2,"COOP","6-digit COOP id"));
-    __stationTypeList.add ( new RccAcisStationType(3,"FAA","3-character FAA id"));
-    __stationTypeList.add ( new RccAcisStationType(4,"WMO","5-digit WMO id"));
-    __stationTypeList.add ( new RccAcisStationType(5,"ICAO","4-character ICAO id"));
-    // Note that ACIS documentation calls it GHCN-Daily but daily is the interval so leave out of the station type here
-    __stationTypeList.add ( new RccAcisStationType(6,"GHCN","?-character GHCN id"));
-    __stationTypeList.add ( new RccAcisStationType(7,"NWSLI","5-character NWSLI"));
-    __stationTypeList.add ( new RccAcisStationType(9,"ThreadEx","6-character ThreadEx id"));
-    __stationTypeList.add ( new RccAcisStationType(10,"CoCoRaHS","5+ character CoCoRaHS identifier"));
-    // AWDN still not officially supported in version 2 (not included in version 2 changelog)?
-    __stationTypeList.add ( new RccAcisStationType(16,"AWDN","7-character HPRCC AWDN id"));
-    */
 }
 
 /**
@@ -1748,7 +1929,7 @@ public boolean isStationTimeSeriesDataType ( String dataType ) {
  * @return true if data type is for a structure, false otherwise
  */
 public boolean isStructureTimeSeriesDataType ( String dataType ) {
-	String [] dataTypes = { "DIVTOTAL", "RELTOTAL", "STAGE", "VOLUME", "WATERCLASS"};
+	String [] dataTypes = { "DIVCOMMENT", "DIVTOTAL", "RELTOTAL", "STAGE", "VOLUME", "WATERCLASS"};
 	// Compare the first part of the data type, because water classes data type will be followed by the class string
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
@@ -2052,9 +2233,21 @@ trying to stay away from opaque variable major).
 @param readEnd the ending date/time to read, or null to read all data.
 @param readData if true, read the data; if false, construct the time series and populate properties but do
 not read the data
-@return the time series read from the ACIS web services
+@param props Additional properties to control reading, such as filling structure time series with diversion comments.
+Recognized properties include:
+<ul>
+<li> FillgDivRecordsCarryForward - indicate whether to fill diversion records with fill carry forward</li>
+<li> FillgDivRecordsCarryForwardFlag - flag used for filled carry forward values (default is "c")</li>
+<li> FillUsingDivComments - indicate whether to fill diversion record time series with
+additional zero values using diversion comments (default is False).</li>
+<li> FillUsingDivCommentsFlag - flag for data values filled with diversion comments
+(default if null is "Auto" to use "not in use" flag).</li>
+</ul>
+@return the time series read from the HydroBase web services,
+or minimally-initialized time series if unable to read.
 */
-public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData )
+public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData,
+	PropList props )
 throws MalformedURLException, Exception
 {   
 	String routine = "ColoradoHydroBaseRestDataStore.readTimeSeries";
@@ -2068,35 +2261,136 @@ throws MalformedURLException, Exception
     determineAPIVersion();
     TS ts = null;
     
+    if ( props == null ) {
+    	// Create an empty proplist to streamline processing
+    	props = new PropList("");
+    }
+    
     // 1. Parse the time series identifier (TSID) that was passed in
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
 	String locid = tsident.getLocation();
-	String data_type = tsident.getType(); // TSID data type
+	String dataType = tsident.getType(); // TSID data type
 	//String data_source = tsident.getSource();
 	
 	if(debug){
-		System.out.println("Data Type: " + data_type);
+		System.out.println("Data Type: " + dataType);
 	}
 	
 	String tsUnits = null;
 
 	// 2. Create time series to receive the data.
 	ts = TSUtil.newTimeSeries(tsidentString, true);
-	int interval_base = ts.getDataIntervalBase();
+	int intervalBase = ts.getDataIntervalBase();
 	
 	// 3. TS Configuration:
 	ts.setIdentifier(tsidentString);
 	ts.setMissing(Double.NaN); // don't need setMissingRange() for now
 	
-	//System.out.println(data_type);
+	//System.out.println(dataType);
 
-	if(data_type.equalsIgnoreCase("DivTotal") || data_type.equalsIgnoreCase("RelTotal") ||
-			data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
-		// Structure-related time series
+	if ( dataType.equalsIgnoreCase("DivComment") ) {
+		// Structure diversion comment, different than typical diversion record
+		
+		// Get Structure
+		// - TODO smalers 2019-08-26 need a method for this
+		String wdid = locid;
+		String structRequest = getServiceRootURI() + "/structures?format=json&wdid=" + wdid + getApiKeyString();
+		JsonNode structResult = jacksonToolkit.getJsonNodeFromWebServices(structRequest).get(0);
+		// Log structure request for debugging properties
+		//System.out.println(structRequest);
+		Message.printStatus(2, routine, "Retrieve structure data from DWR REST API request url: " + structRequest);
+		// Use jackson to convert structResult into a Structure POJO for easy retrieval of data
+		Structure struct = (Structure)jacksonToolkit.treeToValue(structResult, Structure.class);
+		if ( struct == null ) {
+			// Structure identifier not found
+			// - return minimal time series
+			return ts;
+		}
+		
+		// Set structure name as TS Description
+		ts.setDescription(struct.getStructureName());
+
+		// Get the diversion comments, using irrigation year for the year
+		boolean hasComments = waterclassHasComments(wdid);
+		if ( hasComments ) {
+			Message.printStatus(2, routine, "Structure has diversion comments - process to add more zeros.");
+			List<DiversionComments> divComments = getDivComments(wdid, null, -1);
+			if ( (divComments == null) || (divComments.size() == 0) ) {
+				// No diversion comments
+				Message.printStatus(2, routine, "No diversion comments for " + ts.getIdentifierString() + ".  Not filling data.");
+				return ts;
+			}
+			// Else continue.
+			// Loop through the records to determine the minimum and maximum years
+			// - may be possible to read WaterClass and use the porStart and porEnd
+			//   but dates are not as obvious as data record irrigation year
+			int minYear = -999;
+			int maxYear = -999;
+			int irrYear;
+			for ( DiversionComments comment : divComments ) {
+				irrYear = comment.getIrrYear();
+				if ( minYear < 0 ) {
+					minYear = irrYear;
+				}
+				else if ( irrYear < minYear ) {
+					minYear = irrYear;
+				}
+				if ( maxYear < 0 ) {
+					maxYear = irrYear;
+				}
+				else if ( irrYear > maxYear ) {
+					maxYear = irrYear;
+				}
+			}
+			
+			// Set the period properties
+
+			// Available period
+			DateTime start = new DateTime(DateTime.PRECISION_YEAR);
+			start.setYear(minYear);
+			ts.setDate1Original(start);
+			DateTime end = new DateTime(DateTime.PRECISION_YEAR);
+			end.setYear(maxYear);
+			ts.setDate2Original(end);
+			
+			// Requested period
+			if ( readStart != null ) {
+				start.setYear(readStart.getYear());
+			}
+			if ( readEnd != null ) {
+				end.setYear(readEnd.getYear());
+			}
+			ts.setDate1(start);
+			ts.setDate2(end);
+			
+			setCommentsStructure(ts, struct);
+			if ( readData ) {
+				ts.allocateDataSpace();
+				// Loop through the records and set the values
+				DateTime dt = new DateTime(DateTime.PRECISION_YEAR);
+				String notUsed;
+				for ( DiversionComments comment : divComments ) {
+					notUsed = comment.getNotUsed();
+					// Only process records that have a notUsed flag
+					if ( (notUsed != null) && !notUsed.isEmpty() ) {
+						dt.setYear(comment.getIrrYear());
+						// Value is set to zero diversion amount, flag can be used later to fill data with zeros
+						// -TODO smalers 2019-08-28 HydroBase 'usp_CDSS_DiversionComment_Sel_By_Structure_num' stored procedure has 'acres_irrig'
+						ts.setDataValue(dt, 0.0, notUsed, -1);
+						Message.printStatus(2, routine, "Setting diversion comment for " + dt.getYear() + " flag " + notUsed );
+					}
+				}
+			}
+		}
+	}
+	else if(dataType.equalsIgnoreCase("DivTotal") || dataType.equalsIgnoreCase("RelTotal") ||
+			dataType.startsWith("WaterClass") || dataType.startsWith("'WaterClass")){
+		// Structure-related time series that are "diversion records"
 		
 		String wdid = locid;
 		
 		// Get Structure
+		// - TODO smalers 2019-08-26 need a method for this
 		String structRequest = getServiceRootURI() + "/structures?format=json&wdid=" + wdid + getApiKeyString();
 		JsonNode structResult = jacksonToolkit.getJsonNodeFromWebServices(structRequest).get(0);
 		// Log structure request for debugging properties
@@ -2117,28 +2411,28 @@ throws MalformedURLException, Exception
 		
 		DiversionWaterClass waterClassForWdid = null;
 		try {
-			if(data_type.equalsIgnoreCase("DivTotal")){
+			if(dataType.equalsIgnoreCase("DivTotal")){
 				// Diversion records - total through diversion
 				// locid is the WDID in this case
 				String waterClassReqString = null;
 				
 				// Retrieve water class num for given wdid
-				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataType);
 				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 			}
-			else if(data_type.equalsIgnoreCase("RelTotal")){
+			else if(dataType.equalsIgnoreCase("RelTotal")){
 				// Release records - total through release
 				// locid is the WDID in this case
 				String waterClassReqString = null;
 						
 				// Retrieve water class num for given wdid
-				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,data_type);
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataType);
 				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 			}
-			else if(data_type.startsWith("WaterClass") || data_type.startsWith("'WaterClass")){
+			else if(dataType.startsWith("WaterClass") || dataType.startsWith("'WaterClass")){
 				// Water class, possibly quoted if it contains a period
 				// locid is the WDID in this case
-				String waterClassReqString = getWCIdentStringFromDataType(data_type);
+				String waterClassReqString = getWCIdentStringFromDataType(dataType);
 				
 				//System.out.println("water class: " + waterClassReqString);
 									
@@ -2157,13 +2451,13 @@ throws MalformedURLException, Exception
 		// First Date
 		DateTime firstDate = waterClassForWdid.getPorStart();
 		if ( firstDate != null ) {
-			if ( interval_base == TimeInterval.DAY ) {
+			if ( intervalBase == TimeInterval.DAY ) {
 				firstDate.setPrecision(DateTime.PRECISION_DAY); 
 			}
-			else if ( interval_base == TimeInterval.MONTH ) { 
+			else if ( intervalBase == TimeInterval.MONTH ) { 
 				firstDate.setPrecision(DateTime.PRECISION_MONTH); 
 			}
-			else if ( interval_base == TimeInterval.YEAR ) { 
+			else if ( intervalBase == TimeInterval.YEAR ) { 
 				firstDate.setPrecision(DateTime.PRECISION_YEAR); 
 			}
 		}
@@ -2172,26 +2466,26 @@ throws MalformedURLException, Exception
 		// Last Date
 		DateTime lastDate = waterClassForWdid.getPorEnd();
 		if ( lastDate != null ) {
-			if ( interval_base == TimeInterval.DAY ) {
+			if ( intervalBase == TimeInterval.DAY ) {
 				lastDate.setPrecision(DateTime.PRECISION_DAY); 
 			}
-			else if ( interval_base == TimeInterval.MONTH ) { 
+			else if ( intervalBase == TimeInterval.MONTH ) { 
 				lastDate.setPrecision(DateTime.PRECISION_MONTH); 
 			}
-			else if ( interval_base == TimeInterval.YEAR ) { 
+			else if ( intervalBase == TimeInterval.YEAR ) { 
 				lastDate.setPrecision(DateTime.PRECISION_YEAR); 
 			}
 		}
 		ts.setDate2Original(lastDate);
 			
 		/* TODO smalers 2019-06-15 need to use web service URL here
-		if(interval_base == TimeInterval.DAY){
+		if(intervalBase == TimeInterval.DAY){
 			ts.setInputName ( "HydroBase daily_amt.amt_*, daily_amt.obs_*");
 		}
-		if(interval_base == TimeInterval.MONTH){
+		if(intervalBase == TimeInterval.MONTH){
 			ts.setInputName("HydroBase annual_amt.amt_*");
 		}
-		if(interval_base == TimeInterval.YEAR){
+		if(intervalBase == TimeInterval.YEAR){
 			ts.setInputName ( "HydroBase annual_amt.ann_amt");
 		}
 		*/
@@ -2201,11 +2495,10 @@ throws MalformedURLException, Exception
 		//ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
 		setTimeSeriesPropertiesStructure(ts, struct, waterClassForWdid);
 		
-		setCommentsStructure(ts, struct);
-
 		// FIXME @jurentie 06/26/2018 Do not read all data if not within the bounds of the specified dates
 		// 5. Read Data: 
 		if(!readData){
+			setCommentsStructure(ts, struct);
 			return ts;
 		}
 		else {
@@ -2213,7 +2506,7 @@ throws MalformedURLException, Exception
 			
 			// Get the data from web services
 			String divRecRequest = null;
-			if(interval_base == TimeInterval.DAY){
+			if(intervalBase == TimeInterval.DAY){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision
@@ -2225,7 +2518,7 @@ throws MalformedURLException, Exception
 				}
 				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
 			}
-			if(interval_base == TimeInterval.MONTH){
+			if(intervalBase == TimeInterval.MONTH){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision
@@ -2237,7 +2530,7 @@ throws MalformedURLException, Exception
 				}
 				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
 			}
-			if(interval_base == TimeInterval.YEAR){
+			if(intervalBase == TimeInterval.YEAR){
 				// Create request URL for web services API
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision
@@ -2264,15 +2557,15 @@ throws MalformedURLException, Exception
 			// Set the original start and end date to the parameter period
 			if ( readStart == null ) {
 				// Set the time series start to the first data record
-				if (interval_base == TimeInterval.DAY ) {
+				if (intervalBase == TimeInterval.DAY ) {
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(0), DiversionByDay.class);
 					ts.setDate1(divRecCurrDay.getDataMeasDate());
 				}
-				if (interval_base == TimeInterval.MONTH ) {
+				if (intervalBase == TimeInterval.MONTH ) {
 					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(0), DiversionByMonth.class);
 					ts.setDate1(divRecCurrMonth.getDataMeasDate());
 				}
-				if (interval_base == TimeInterval.YEAR ) {
+				if (intervalBase == TimeInterval.YEAR ) {
 					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(0), DiversionByYear.class);
 					ts.setDate1(divRecCurrYear.getDataMeasDate());
 				}
@@ -2282,15 +2575,15 @@ throws MalformedURLException, Exception
 			}
 			if ( readEnd == null ) {
 				// Set the time series start to the last data record
-				if (interval_base == TimeInterval.DAY ) {
+				if (intervalBase == TimeInterval.DAY ) {
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByDay.class);
 					ts.setDate2(divRecCurrDay.getDataMeasDate());
 				}
-				if (interval_base == TimeInterval.MONTH ) {
+				if (intervalBase == TimeInterval.MONTH ) {
 					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByMonth.class);
 					ts.setDate2(divRecCurrMonth.getDataMeasDate());
 				}
-				if (interval_base == TimeInterval.YEAR ) {
+				if (intervalBase == TimeInterval.YEAR ) {
 					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByYear.class);
 					ts.setDate2(divRecCurrYear.getDataMeasDate());
 				}
@@ -2307,7 +2600,7 @@ throws MalformedURLException, Exception
 			String obsCode;
 			Double value;
 			boolean valueIsMissing;
-			if(interval_base == TimeInterval.DAY){
+			if(intervalBase == TimeInterval.DAY){
 				for(int i = 0; i < results.size(); i++){
 					
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(i), DiversionByDay.class);
@@ -2358,7 +2651,7 @@ throws MalformedURLException, Exception
 					}
 				}
 			}
-			if(interval_base == TimeInterval.MONTH){
+			if(intervalBase == TimeInterval.MONTH){
 				for(int i = 0; i < results.size(); i++){
 					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(i), DiversionByMonth.class);
 					
@@ -2408,7 +2701,7 @@ throws MalformedURLException, Exception
 					}
 				}
 			}
-			if(interval_base == TimeInterval.YEAR){
+			if(intervalBase == TimeInterval.YEAR){
 				for(int i = 0; i < results.size(); i++){
 					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(i), DiversionByYear.class);
 					
@@ -2440,39 +2733,93 @@ throws MalformedURLException, Exception
 					}
 				}
 			}
+
+			// Set comments based on period and units set when reading data
+			setCommentsStructure(ts, struct);
+
+			// Add observation code descriptions, which have been set with data
+			List<ReferenceTablesDivRecObservationCodes> obsCodes = getDivRecObservationCodes();
+			for ( ReferenceTablesDivRecObservationCodes obsCode2 : obsCodes ) {
+				// Years indicate years when description was used.
+				// - if endIyr is null, then the code is still active
+				String endYearString = "current";
+				if ( obsCode2.getEndIyr() != null ) {
+					endYearString = "" + obsCode2.getEndIyr();
+				}
+	            ts.addDataFlagMetadata(new TSDataFlagMetadata(obsCode2.getObsCode(), "Observation code - " +
+	            	obsCode2.getObsCodeLong() + ", " + obsCode2.getObsDescr() + " (" + obsCode2.getStartIyr() + "-" + endYearString + ")") );
+			}
 			
 			/**
 			 * If any data is set within the irrigation year then fill the rest of the data
-			 * forward or fill empty data with 0.0
+			 * forward or fill empty data with 0.0.
+			 * The default is false, which is changed by command parameters.
 			 */
-			if(interval_base == TimeInterval.DAY || interval_base == TimeInterval.MONTH){
-				String FillDailyDiv = null;
-				if((FillDailyDiv == null) || FillDailyDiv.equals("")){
-					FillDailyDiv = "true";
+			if ( intervalBase == TimeInterval.DAY ) {
+				String fillCarryForward = props.getValue("FillDivRecordsCarryForward");
+				if ( (fillCarryForward == null) || fillCarryForward.equals("") ) {
+					fillCarryForward = "false"; // Default is to not fill, consistent with CDSS approach.
 				}
-				if(FillDailyDiv.equalsIgnoreCase("true")){
-					String FillDailyDivFlag = null;
-					if((FillDailyDivFlag == null) || FillDailyDivFlag.equals("")){
-						FillDailyDivFlag = "c";
+				if(fillCarryForward.equalsIgnoreCase("true")){
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", filling daily diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
+					String fillCarryForwardFlag = props.getValue("FillDivRecordsCarryForwardFlag");
+					if((fillCarryForwardFlag == null) || fillCarryForwardFlag.isEmpty()){
+						fillCarryForwardFlag = "c"; // Default
 					}
-					fillTSIrrigationYearCarryForward(ts, FillDailyDivFlag);
+					// The following will add the flag as another flag description
+					fillTSIrrigationYearCarryForward(ts, fillCarryForwardFlag);
+				}
+				else {
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling daily diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
 				}
 			}
+			
+			boolean useHydroBaseDMILogic = true;
+			if ( useHydroBaseDMILogic ) {
+				// Use logic similar to HydroBaseDMI.readTimeSeries
+				// - parameters are same as ReadHydroBase command
+				// - default is false (don't fill using comments)
+				// - the properties are passed in from the Read command
+				// - this applies to day, month, and year interval data
+				boolean extendPeriod = true;
+				String fillDivComments = props.getValue("FillUsingDivComments");
+				if ( (fillDivComments != null) && fillDivComments.equalsIgnoreCase("true") ) {
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() +
+						", filling diversion records with diversion comments because FillUsingDivComments=" + fillDivComments );
+					String fillFlag = props.getValue("FillUsingDivCommentsFlag");
+					if ( (fillFlag == null) || fillFlag.isEmpty() ) {
+						fillFlag = "Auto";
+					}
+					// If not specified use "Auto"
+					// Fill flag description is automatically assigned to "notUsed" value
+					String fillFlagDesc = "Auto";
+					fillTSUsingDiversionComments( ts, readStart, readEnd,
+						fillFlag, fillFlagDesc, extendPeriod );
+				}
+				else {
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling diversion records with diversion comments because FillUsingDivComments=" + fillDivComments );
+				}
+			}
+			else {  // CURRENTLY DISABLED BY IF BOOLEAN
+				// Use logic that was roughly ported from HydroBase but does not seem correct.
+				// - TODO smalers 2019-08-26 code is disabled so delete when the above checks out
+			
 			
 			/**
 			 * Fill years with diversion comments. Currently defaults to not fill.
 			 */
 			TSIterator iterator = ts.iterator();
-			if(interval_base == TimeInterval.DAY ||
-				interval_base == TimeInterval.MONTH || 
-				interval_base == TimeInterval.YEAR ){
+			if(intervalBase == TimeInterval.DAY ||
+				intervalBase == TimeInterval.MONTH || 
+				intervalBase == TimeInterval.YEAR ) {
 				String FillUsingDivComments = null;
 				if((FillUsingDivComments == null) || FillUsingDivComments.equals("")){
-					FillUsingDivComments = "false"; //Default is NOT to fill.
+					FillUsingDivComments = "true"; //Default is to fill in order to provide more information.
 				}
 				if(FillUsingDivComments.equalsIgnoreCase("true")){
 					boolean hasComments = waterclassHasComments(wdid);
 					if(hasComments){
+						Message.printStatus(2, routine, "Structure has diversion comments - process to add more zeros.");
 						List<DiversionComments> divComments = getDivComments(wdid, null, -1);
 						if(divComments != null){
 							TSData it;
@@ -2482,7 +2829,7 @@ throws MalformedURLException, Exception
 								if(irrYear >= ts.getDate1().getYear() && irrYear <= ts.getDate2().getYear()){
 									DateTime start;
 									DateTime end;
-									if(interval_base == TimeInterval.DAY){
+									if(intervalBase == TimeInterval.DAY){
 										start = new DateTime(DateTime.PRECISION_DAY);
 										start.setYear(irrYear);
 										start.setMonth(11);
@@ -2501,7 +2848,7 @@ throws MalformedURLException, Exception
 											}
 										}
 									}
-									if(interval_base == TimeInterval.MONTH){
+									if(intervalBase == TimeInterval.MONTH){
 										start = new DateTime(DateTime.PRECISION_MONTH);
 										start.setYear(irrYear);
 										start.setMonth(11);
@@ -2516,7 +2863,7 @@ throws MalformedURLException, Exception
 											}
 										}
 									}
-									if(interval_base == TimeInterval.YEAR){
+									if(intervalBase == TimeInterval.YEAR){
 										start = new DateTime(DateTime.PRECISION_YEAR);
 										start.setYear(irrYear);
 										end = new DateTime(DateTime.PRECISION_YEAR);
@@ -2535,9 +2882,10 @@ throws MalformedURLException, Exception
 					}
 				}
 			}
+			}
 		}
 	}
-	else if(data_type.equalsIgnoreCase("Stage") || data_type.equalsIgnoreCase("Volume")){
+	else if(dataType.equalsIgnoreCase("Stage") || dataType.equalsIgnoreCase("Volume")){
 		String wdid = locid;
 		
 		// Get Structure
@@ -2578,23 +2926,23 @@ throws MalformedURLException, Exception
 		ts.setDate2Original(lastDate);
 			
 		// TODO smalers 2019-06-15 hard-code units since only specified in documentation
-		if ( data_type.equalsIgnoreCase("Stage") ) {
+		if ( dataType.equalsIgnoreCase("Stage") ) {
 			ts.setDataUnitsOriginal("FT");
 			ts.setDataUnits("FT");
 		}
-		else if ( data_type.equalsIgnoreCase("Volume") ) {
+		else if ( dataType.equalsIgnoreCase("Volume") ) {
 			ts.setDataUnitsOriginal("ACFT");
 			ts.setDataUnits("ACFT");
 		}
 			
 		/* TODO smalers 2019-06-15 maybe set the web service here?
-		if(interval_base == TimeInterval.DAY){
+		if(intervalBase == TimeInterval.DAY){
 			ts.setInputName ( "HydroBase daily_amt.amt_*, daily_amt.obs_*");
 		}
-		if(interval_base == TimeInterval.MONTH){
+		if(intervalBase == TimeInterval.MONTH){
 			ts.setInputName("HydroBase annual_amt.amt_*");
 		}
-		if(interval_base == TimeInterval.YEAR){
+		if(intervalBase == TimeInterval.YEAR){
 			ts.setInputName ( "HydroBase annual_amt.ann_amt");
 		}
 		*/
@@ -2670,10 +3018,10 @@ throws MalformedURLException, Exception
 					
 				//Get Data
 				Double value = null;
-				if(data_type.equalsIgnoreCase("Stage")){
+				if(dataType.equalsIgnoreCase("Stage")){
 					value = divStageVol.getStage();
 				}
-				else if(data_type.equalsIgnoreCase("Volume")){
+				else if(dataType.equalsIgnoreCase("Volume")){
 					value = divStageVol.getVolume();
 				}
 				
@@ -2683,7 +3031,7 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(isTelemetryStationTimeSeriesDataType(data_type)){
+	else if(isTelemetryStationTimeSeriesDataType(dataType)){
 		String abbrev = locid;
 		String parameter = ts.getDataType();
 
@@ -2772,14 +3120,14 @@ throws MalformedURLException, Exception
 		StringBuilder telRequest = new StringBuilder();
 
 		// Retrieve Telemetry based on date interval
-		if(interval_base == DateTime.PRECISION_MINUTE){
+		if(intervalBase == DateTime.PRECISION_MINUTE){
 			// Note that this is 15-minute, not instantaneous
 			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesraw?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
-		else if(interval_base == DateTime.PRECISION_HOUR){
+		else if(intervalBase == DateTime.PRECISION_HOUR){
 			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeserieshour?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
-		else if(interval_base == DateTime.PRECISION_DAY){
+		else if(intervalBase == DateTime.PRECISION_DAY){
 			telRequest.append(getServiceRootURI() + "/telemetrystations/telemetrytimeseriesday?format=json&includeThirdParty=true&abbrev=" + abbrev + "&parameter=" + parameter);
 		}
 		// Date/time format is the same regardless of interval
@@ -2804,7 +3152,7 @@ throws MalformedURLException, Exception
 		if ( readStart == null ) {
 			TelemetryTimeSeries telTS = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(0), TelemetryTimeSeries.class);
 			DateTime firstDate = null;
-			if ( (interval_base == DateTime.PRECISION_DAY) || (interval_base == DateTime.PRECISION_HOUR) ) {
+			if ( (intervalBase == DateTime.PRECISION_DAY) || (intervalBase == DateTime.PRECISION_HOUR) ) {
 				firstDate = telTS.getMeasDate();
 			}
 			else {
@@ -2818,7 +3166,7 @@ throws MalformedURLException, Exception
 		if ( readEnd == null ) {
 			TelemetryTimeSeries telTS = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(results.size() - 1), TelemetryTimeSeries.class);
 			DateTime lastDate = null;
-			if ( (interval_base == DateTime.PRECISION_DAY) || (interval_base == DateTime.PRECISION_HOUR) ) {
+			if ( (intervalBase == DateTime.PRECISION_DAY) || (intervalBase == DateTime.PRECISION_HOUR) ) {
 				lastDate = telTS.getMeasDate();
 			}
 			else {
@@ -2841,7 +3189,7 @@ throws MalformedURLException, Exception
 		// Read Data
 		// Pass Data into TS Object
 		String measUnit = null;
-		if(interval_base == TimeInterval.MINUTE){
+		if(intervalBase == TimeInterval.MINUTE){
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_MINUTE);
 			for(int i = 0; i < results.size(); i++){
@@ -2873,7 +3221,7 @@ throws MalformedURLException, Exception
 				}
 			}
 		}
-		if(interval_base == TimeInterval.HOUR){
+		if(intervalBase == TimeInterval.HOUR){
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_HOUR);
 			for(int i = 0; i < results.size(); i++){
@@ -2904,7 +3252,7 @@ throws MalformedURLException, Exception
 				}
 			}
 		}
-		if(interval_base == TimeInterval.DAY){
+		if(intervalBase == TimeInterval.DAY){
 			// Can declare DateTime outside of loop because time series stores in an array
 			DateTime date = new DateTime(DateTime.PRECISION_DAY);
 			for(int i = 0; i < results.size(); i++){
@@ -2935,7 +3283,7 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(data_type.equalsIgnoreCase("WaterLevelDepth") || data_type.equalsIgnoreCase("WaterLevelElev")){
+	else if(dataType.equalsIgnoreCase("WaterLevelDepth") || dataType.equalsIgnoreCase("WaterLevelElev")){
 		String wellid = locid;
 		
 		// Get Well
@@ -3037,7 +3385,7 @@ throws MalformedURLException, Exception
 				// Get Data
 				// TODO @jurentie 06/26/2018 - depthToWater or depthWaterBelowLandSurface
 				Double value;
-				if(data_type.equalsIgnoreCase("WaterLevelDepth")){
+				if(dataType.equalsIgnoreCase("WaterLevelDepth")){
 					value = wellMeas.getDepthToWater();
 				}
 				else {
@@ -3470,7 +3818,7 @@ public static void setTimeSeriesPropertiesWell ( TS ts, WaterLevelsWell well )
  * Check to see if a water class has diversion comments. This is used in filling data with 
  * zeroes if a year of data does happen to have diversion comments.
  * @param wdid - The WDID used to query the given waterclass
- * @return
+ * @return true if the water class has corresponding diversion comments
  */
 public boolean waterclassHasComments(String wdid){
 	
