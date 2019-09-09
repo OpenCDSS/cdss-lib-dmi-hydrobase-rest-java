@@ -82,10 +82,15 @@ public class JacksonToolkit {
 		JsonNode results = null;
 		URL request = null;
 		
+		/* TODO SAM 2019-09-06 the following makes a redundant call on success
+		 * and thereby slows down processing.
+		 * - comment out for now and see if the other exceptions report the status in their message
+		 * - otherwise could call something similar after an exception to see if the status can be determined
 		if(!httpResponse200(url)){
 			Message.printWarning(2, routine, "Error: " + url + " returned a 404 error");
 			return null;
 		}
+		 */
 		
 		//System.out.println(url);
 		
@@ -94,25 +99,31 @@ public class JacksonToolkit {
 			JsonNode divrecRootNode = mapper.readTree(request);
 			int pageCount = divrecRootNode.get("PageCount").asInt();
 			if(pageCount > 1){
+				// The results use paging with more than one page needed.
+				// Process using multiple page logic.
 				results = getJsonNodeResultsFromURLStringMultiplePages(url, pageCount);
-				//System.out.println("[ColoradoHydroBaseRestDataStore.getJsonNodeResultsFromURLString] Unable to process multiple pages at this time. Needs updated.");
 			}else{
+				// The results were returned on a single page.
 				results = divrecRootNode.path("ResultList");
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (MalformedURLException e) {
-			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3,routine,e);
 		}
 		catch (IOException e) { 
-			Message.printWarning(2, routine, "IOExpection: " + e);
+			Message.printWarning(3, routine, "IOException: " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		
@@ -137,18 +148,22 @@ public class JacksonToolkit {
 			tempNode = mapper.readTree(new URL(request));
 		} 
 		catch (JsonParseException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (MalformedURLException e) {
-			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3,routine,e);
 		}
 		catch (IOException e) { 
-			Message.printWarning(2, routine, "IOExpection: " + e);
+			Message.printWarning(3, routine, "IOException: " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		
@@ -167,23 +182,30 @@ public class JacksonToolkit {
 			}
 		}
 		catch (JsonParseException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (JsonMappingException e ) { 
-			Message.printWarning(2, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3, routine, "Error reading response from " + request + ". " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		catch (MalformedURLException e) {
-			Message.printWarning(2, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3, routine, "Malformed URL has occured. URL= " + url);
+			Message.printWarning(3,routine,e);
 		}
 		catch (IOException e) { 
-			Message.printWarning(2, routine, "IOExpection: " + e);
+			Message.printWarning(3, routine, "IOException: " + e);
+			Message.printWarning(3,routine,e);
 			return null;
 		}
 		return (JsonNode)results;
 	}
 	
+	// TODO smalers 2019-09-06 the following needs refactored since errors could be other than 200.
+	// Why not just return the actual status or change to "isError"?
+	// Calling this has been commented out for now because it makes a redundant call.
 	/**
 	 * Checks to see if the request string returns a response 200 or an error 404.
 	 * @param urlString - String representing the URL request from web services.
