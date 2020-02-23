@@ -2823,7 +2823,7 @@ throws MalformedURLException, Exception
 			/**
 			 * Fill years with diversion comments. Currently defaults to not fill.
 			 */
-			TSIterator iterator = ts.iterator();
+			TSIterator iterator = null;
 			if(intervalBase == TimeInterval.DAY ||
 				intervalBase == TimeInterval.MONTH || 
 				intervalBase == TimeInterval.YEAR ) {
@@ -2853,8 +2853,8 @@ throws MalformedURLException, Exception
 										end.setYear(irrYear + 1);
 										end.setMonth(10);
 										end.setDay(31);
-										iterator.setBeginTime(start);
-										iterator.setEndTime(end);
+										iterator = ts.iterator(start,end);
+										// Get the existing data and if missing set as zero
 										while(iterator.hasNext()){
 											it = iterator.next();
 											value = it.getDataValue();
@@ -2870,6 +2870,8 @@ throws MalformedURLException, Exception
 										end = new DateTime(DateTime.PRECISION_MONTH);
 										end.setYear(irrYear);
 										end.setMonth(10);
+										iterator = ts.iterator(start,end);
+										// Get the existing data and if missing set as zero
 										while(iterator.hasNext()){
 											it = iterator.next();
 											value = it.getDataValue();
@@ -2883,6 +2885,8 @@ throws MalformedURLException, Exception
 										start.setYear(irrYear);
 										end = new DateTime(DateTime.PRECISION_YEAR);
 										end.setYear(irrYear);
+										iterator = ts.iterator(start,end);
+										// Get the existing data and if missing set as zero
 										while(iterator.hasNext()){
 											it = iterator.next();
 											value = it.getDataValue();
