@@ -1,4 +1,4 @@
-// ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel - input filter panel for telemetry station data types for time series list
+// ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel - input filter panel for climate station data types, used to list time series
 
 /* NoticeStart
 
@@ -38,40 +38,39 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDistrict;
 import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 
 @SuppressWarnings("serial")
-public class ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel
+public class ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel
 extends InputFilter_JPanel
 implements MouseListener
 {
     
 /**
-Datastore for this panel.
+Datastore for this panel
 */
 private ColoradoHydroBaseRestDataStore datastore = null;
 
 /**
-Create an InputFilter_JPanel for ColoradoHydroBaseRest web services telemetry (real-time) station queries.
+Create an InputFilter_JPanel for ColoradoHydroBaseRest web services historical station queries.
 This is used by TSTool.
 Default filter panel properties are used (e.g., 3 filter groups).
-@return a JPanel containing InputFilter instances for telemetry station queries.
+@return a JPanel containing InputFilter instances for historical station queries.
 @param dataStore ColoradoHydroBaseRestDataStore instance.
 @exception Exception if there is an error.
 */
-public ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel (
-		ColoradoHydroBaseRestDataStore dataStore )
+public ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel ( ColoradoHydroBaseRestDataStore dataStore )
 throws Exception
 {	this ( dataStore, -1, -1 );
 }
 
 /**
-Create an InputFilter_JPanel for ColoradoHydroBaseRest web services telemetry (real-time) station queries.
+Create an InputFilter_JPanel for ColoradoHydroBaseRest web services historical station queries.
 This is used by TSTool.
-@return a JPanel containing InputFilter instances for telemetry station queries.
+@return a JPanel containing InputFilter instances for historical station queries.
 @param dataStore ColoradoHydroBaseRestDataStore instance.
 @param numFilterGroups the number of filter groups to display
 @param numWhereChoicesToDisplay the number of where choices to display in each filter
 @exception Exception if there is an error.
 */
-public ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel (
+public ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
 throws Exception
 {	this.datastore = datastore;
@@ -84,7 +83,7 @@ throws Exception
 
 	InputFilter filter;
 
-	// County.
+    // County.
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
 	List<String> countyList = new ArrayList<> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
@@ -115,16 +114,12 @@ throws Exception
 	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units", "LatLongRadiusUnits",
 		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
 
-	// Station abbreviation.
-	input_filters.add ( new InputFilter ( "Station Abbreviation", "abbrev", "abbrev", "StationAbbreviation",
-		StringUtil.TYPE_STRING, null, null, true ) );
-
-	// Station type.
-	input_filters.add ( new InputFilter ( "Station Type", "stationType", "stationType", "StationType",
+	// Station name.
+	input_filters.add ( new InputFilter ( "Station Name", "stationName", "stationName", "StationName",
 		StringUtil.TYPE_STRING, null, null, true ) );
 	
-	// USIS identifier.
-	input_filters.add ( new InputFilter ( "USGS Station ID", "usgsStationId", "usgsStationId", "USGSStationID",
+	// Site identifier.
+	input_filters.add ( new InputFilter ( "Site ID", "siteId", "siteId", "siteId",
 		StringUtil.TYPE_STRING, null, null, true ) );
 
 	// Water district.
@@ -140,10 +135,6 @@ throws Exception
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
 
-	// Water district identifier.
-	input_filters.add ( new InputFilter ( "WDID", "str_name", "str_name", "WDID",
-		StringUtil.TYPE_STRING, null, null, true ) );
-
 	// Water division.
 	List<ReferenceTablesWaterDivision> divisionDataList = datastore.getWaterDivisions();
 	List<String> divisionList = new ArrayList<> ( 7 );
@@ -158,14 +149,14 @@ throws Exception
 	input_filters.add ( filter );
 
 	if ( numFilterGroups < 0 ) {
-		// Set number of filter groups to 5 so that latitude, longitude, radius, units, and one other can be specified.
+		// Set number of filter groups to 5 so that latitude, longitude, radius, units, and one other can be specified
 		numFilterGroups = 5;
 	}
 	if ( numWhereChoicesToDisplay < 0 ) {
-		// Set the number of visible rows in the choices.
+		// Set the number of visible rows in the choices
 		numWhereChoicesToDisplay = input_filters.size();
 	}
-	setToolTipText ( "<html>ColoradoHydroBaseRest telemetry station queries can be filtered based on station data.</html>" );
+	setToolTipText ( "<html>ColoradoHydroBaseRest queries can be filtered based on climate station data.</html>" );
 	setInputFilters ( input_filters, numFilterGroups, numWhereChoicesToDisplay );
 }
 
@@ -182,10 +173,10 @@ throws Exception
  */
 @Override
 public String checkInputFilters ( boolean displayWarning ) {
-	// Use the parent class method to check basic input types based on data types:
+	// Use the parent class method to check basic input types based on data types
 	// - will return empty string if no issues
 	String warning = super.checkInputFilters(displayWarning);
-	// Perform specific checks.
+	// Perform specific checks
 	String warning2 = "";
 	int coordCount = 0;
 	String Latitude = getInputValue("Latitude", false);
@@ -208,34 +199,36 @@ public String checkInputFilters ( boolean displayWarning ) {
 		warning2 += "\nSpecifying latitude and longitude requires specifying latitude, longitude, radius, and units.";
 	}
 	if ( !warning2.isEmpty() ) {
-		// Have non-empty specific warnings so append specific warnings.
+		// Have non-empty specific warnings so append specific warnings
 		warning += warning2;
 	}
-	// Return the general warnings or the appended results.
+	// Return the general warnings or the appended results
 	return warning;
 }
 
-public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore () {
+public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore ()
+{
     return this.datastore;
 }
 
-public void mouseClicked(MouseEvent event) {
-}
+public void mouseClicked(MouseEvent event) {}
 
-public void mouseExited(MouseEvent event) {
-}
+public void mouseExited(MouseEvent event) {}
 
-public void mouseEntered(MouseEvent event) {
-}
+public void mouseEntered(MouseEvent event) {}
 
 /**
 Responds to mouse pressed events.
 @param event the event that happened.
 */
 public void mousePressed(MouseEvent event) {
+    /** Not enabled - used for PLSS query
+	JFrame temp = new JFrame();
+	JGUIUtil.setIcon(temp, JGUIUtil.getIconImage());	
+	HydroBase_GUI_Util.buildLocation(temp, (JTextField)event.getSource());
+	*/
 }
 
-public void mouseReleased(MouseEvent event) {
-}
+public void mouseReleased(MouseEvent event) {}
 
 }

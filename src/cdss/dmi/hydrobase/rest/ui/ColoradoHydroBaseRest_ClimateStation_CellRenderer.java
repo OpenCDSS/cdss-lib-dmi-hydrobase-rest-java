@@ -1,10 +1,10 @@
-// ColoradoHydroBaseRest_Station_CellRenderer - cell renderer for station
+// ColoradoHydroBaseRest_ClimateStation_CellRenderer - cell renderer for climate station time series
 
 /* NoticeStart
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2019 Colorado Department of Natural Resources
+Copyright (C) 2018-2022 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,19 +26,19 @@ package cdss.dmi.hydrobase.rest.ui;
 import RTi.Util.GUI.JWorksheet_DefaultTableCellRenderer;
 
 /**
-This class is used to render cells for TSTool_HydroBase_StationGeolocMeasType_TableModel data.
+This class is used to render cells for ColoradoHydroBaseRest_ClimateStation_TableModel data.
 */
 @SuppressWarnings("serial")
-public class ColoradoHydroBaseRest_Station_CellRenderer
+public class ColoradoHydroBaseRest_ClimateStation_CellRenderer
 extends JWorksheet_DefaultTableCellRenderer {
 
-ColoradoHydroBaseRest_Station_TableModel __table_model = null;	// Table model to render
+ColoradoHydroBaseRest_ClimateStation_TableModel __table_model = null;	// Table model to render>
 
 /**
 Constructor.
-@param table_model The TSTool_HydroBase_TableModel to render.
+@param table_model The ColoradoHydroBaseRest_Climatetation_TableModel to render.
 */
-public ColoradoHydroBaseRest_Station_CellRenderer ( ColoradoHydroBaseRest_Station_TableModel table_model )
+public ColoradoHydroBaseRest_ClimateStation_CellRenderer ( ColoradoHydroBaseRest_ClimateStation_TableModel table_model )
 {	__table_model = table_model;
 }
 
