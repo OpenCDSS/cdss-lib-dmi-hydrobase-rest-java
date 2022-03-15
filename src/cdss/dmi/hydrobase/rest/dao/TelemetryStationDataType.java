@@ -1,10 +1,10 @@
-// TelemetryStationDataTypes - data object for telemetry station data types
+// TelemetryStationDataType - data object for telemetry station data types
 
 /* NoticeStart
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2019 Colorado Department of Natural Resources
+Copyright (C) 2018-2022 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,20 +29,11 @@ import RTi.Util.Time.DateTime;
 import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
- * This class acts as a way to convert results from DWR web services
- * to a plain old java object, for means of processing the data 
- * returned.<br>
+ * This class stores a DWR web services telemetry station data type object.
  * https://dnrweb.state.co.us/DWR/DwrApiService/Help/Api/GET-api-v2-telemetrystations-telemetrystationdatatypes
- * @author jurentie
- *
- */
-/*
- * Ignore any properties defined after defining this class.
- * If properties are added that are necessary to data processing these can be added,
- * but for now ignore anything that is new so as to not break the code.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TelemetryStationDataTypes {
+public class TelemetryStationDataType {
 	
 	/**
 	 * Variables declared in alphabetical order.
@@ -55,12 +46,12 @@ public class TelemetryStationDataTypes {
 	private String abbrev;
 	
 	/**
-	 * Contributing Area
+	 * Contributing area
 	 */
 	private Double contrArea;
 	
 	/**
-	 * County where the well is located
+	 * County where the station is located
 	 */
 	private String county;
 	
@@ -422,7 +413,7 @@ public class TelemetryStationDataTypes {
 	 */
 	@Override
 	public String toString(){
-		return "TelemetryStationDataTypes: [ division: " + division + ", waterDistrict: " + waterDistrict + 
+		return "TelemetryStationDataType: [ division: " + division + ", waterDistrict: " + waterDistrict + 
 				", county: " + county + ", stationName: " + stationName + ", dataSourceAbbrev: " + dataSourceAbbrev + 
 				", dataSource: " + dataSource + ", abbrev: " + abbrev + ", wdid: " + wdid + ", usgsStationId: "+
 				usgsStationId + ", stationStatus: " + stationStatus + ", stationType: " + stationType + ", stationType: " +

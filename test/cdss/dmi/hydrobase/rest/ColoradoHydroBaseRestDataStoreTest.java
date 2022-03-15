@@ -36,7 +36,7 @@ import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
 import cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable;
 import cdss.dmi.hydrobase.rest.dao.TelemetryShift;
-import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataTypes;
+import cdss.dmi.hydrobase.rest.dao.TelemetryStationDataType;
 import cdss.dmi.hydrobase.rest.dao.WaterLevelsWell;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsNetAmount;
 import cdss.dmi.hydrobase.rest.dao.WaterRightsTransaction;
@@ -340,7 +340,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 	@Test
 	public void testDeserializationOfGetSingleTelemetryStationDataTypeFromWdid(){
 		
-		TelemetryStationDataTypes telStationDataType = new TelemetryStationDataTypes();
+		TelemetryStationDataType telStationDataType = new TelemetryStationDataType();
 		telStationDataType.setDivision(7);
 		telStationDataType.setWaterDistrict(33);
 		telStationDataType.setCounty("LA PLATA");
@@ -368,7 +368,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		telStationDataType.setLocationAccuracy(null);
 		telStationDataType.setModified(null);
 		
-		List<TelemetryStationDataTypes> expectedResultsList = new ArrayList<TelemetryStationDataTypes>();
+		List<TelemetryStationDataType> expectedResultsList = new ArrayList<TelemetryStationDataType>();
 		expectedResultsList.add(telStationDataType);
 		
 		//Uncomment the following to regenerate expected results
@@ -377,7 +377,7 @@ public class ColoradoHydroBaseRestDataStoreTest {
 		String[] inputFilters = {"str_name", "MA", "3302204"};
 		List<String[]> listOfTriplets = new ArrayList<String[]>();
 		listOfTriplets.add(inputFilters);
-		List<TelemetryStationDataTypes> resultsList = chrds.getTelemetryDataTypes("AIRTEMP", "15min", listOfTriplets);
+		List<TelemetryStationDataType> resultsList = chrds.getTelemetryStationDataTypes("AIRTEMP", "15min", listOfTriplets);
 		resultsList.get(0).setModified(null);
 		
 		writeToFile("results/SingleTelemetryStationDataTypeFromWdid.txt", Arrays.asList(resultsList).toString());
