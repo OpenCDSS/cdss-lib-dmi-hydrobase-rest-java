@@ -25,6 +25,7 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
 
 /**
@@ -210,8 +211,19 @@ public class SurfaceWaterTSMonth {
 		this.minQCfs = minQCfs;
 	}
 
-	public void setModified(DateTime modified) {
-		this.modified = modified;
+	public void setModified(String modified) {
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			try {
+				this.modified = DateTime.parse(modified);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setModified", "Error parsing modified: " + modified);
+				Message.printWarning(3, "setModified", e);
+			}
+		}
 	}
 
 	public void setStationNum(Integer stationNum) {

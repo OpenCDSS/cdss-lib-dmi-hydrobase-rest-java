@@ -81,7 +81,7 @@ public final int COL_INPUT_TYPE = 22;
 Input type for time series identifier (default to "HydroBase" but can be set to allow class to be used
 with other State-related data, such as ColoradoWaterSMS).
 */
-private String __inputType = "ColoradoHydroBaseRest";
+private String inputType = "ColoradoHydroBaseRest";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -89,14 +89,26 @@ The input type defaults to "HydroBase".
 @param worksheet the JWorksheet that displays the data from the table model.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
-@inputName input name for time series (default if not specified is "HydroBase").  Use this, for example,
-when using the class to display data from the ColoradoWaterSMS database.
+@inputName input name for time series (default if not specified is "ColoradoHydroBaseRest").
 @throws Exception if an invalid results passed in.
 */
 public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, List<WaterLevelsWell> data )
-throws Exception
-{
+throws Exception {
     this ( worksheet, -1, data, null );
+}
+
+/**
+Constructor.  This builds the model for displaying the given HydroBase time series data.
+The input type defaults to "HydroBase".
+@param worksheet the JWorksheet that displays the data from the table model.
+@param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
+that will be displayed in the table (null is allowed - see setData()).
+@inputName input name for time series (default if not specified is "ColoradoHydroBaseRest").
+@throws Exception if an invalid results passed in.
+*/
+public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, List<WaterLevelsWell> data, String inputType )
+throws Exception {
+    this ( worksheet, -1, data, inputType );
 }
 
 /**
@@ -105,8 +117,7 @@ Constructor.  This builds the model for displaying the given HydroBase time seri
 @param wdid_length Total length to use when formatting WDIDs.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
-@inputType input type for time series (default if null or blank is "HydroBase").  Use this, for example,
-when using the class to display data from the ColoradoWaterSMS database.
+@inputType input type for time series (default if null or blank is "ColoradoHydroBaseRest").
 @throws Exception if an invalid results passed in.
 */
 public ColoradoHydroBaseRest_Well_TableModel ( JWorksheet worksheet, int wdid_length, List<WaterLevelsWell> data, String inputType )
@@ -123,7 +134,7 @@ throws Exception
 	}
 	_data = data;
 	if ( (inputType != null) && !inputType.equals("") ) {
-	    __inputType = inputType;
+	    this.inputType = inputType;
 	}
 }
 
@@ -356,18 +367,17 @@ public Object getValueAt(int row, int col)
     	case COL_UTM_Y: return well.getUtmY();
 		//case COL_STR_TYPE: return
 		//case COL_STRTYPE: return
-		case COL_INPUT_TYPE: return __inputType;
+		case COL_INPUT_TYPE:
+			return this.inputType;
 		default: return "";
 	}
 }
 
 /**
-Set the input type (default is "HydroBase" but need to change when the table model is used for
-multiple purposes.
+Set the input type (default is "HydroBase" but need to change when the table model is used for multiple purposes.
 */
-public void setInputType ( String inputType )
-{
-    __inputType = inputType;
+public void setInputType ( String inputType ) {
+    this.inputType = inputType;
 }
 
 /**

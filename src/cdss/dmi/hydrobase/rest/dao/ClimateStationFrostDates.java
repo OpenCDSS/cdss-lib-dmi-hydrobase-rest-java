@@ -108,20 +108,20 @@ public class ClimateStationFrostDates {
 		this.calYear = calYear;
 	}
 
-	public void setF28F(DateTime f28f) {
-		this.f28f = f28f;
+	public void setF28F(String f28f) {
+		this.f28f = DateTime.parse(f28f);
 	}
 
-	public void setF32F(DateTime f32f) {
-		this.f32f = f32f;
+	public void setF32F(String f32f) {
+		this.f32f = DateTime.parse(f32f);
 	}
 
-	public void setL28s(DateTime l28s) {
-		this.l28s = l28s;
+	public void setL28s(String l28s) {
+		this.l28s = DateTime.parse(l28s);
 	}
 
-	public void setL32s(DateTime l32s) {
-		this.l32s = l32s;
+	public void setL32s(String l32s) {
+		this.l32s = DateTime.parse(l32s);
 	}
 
 	public void setStationNum(Integer stationNum) {

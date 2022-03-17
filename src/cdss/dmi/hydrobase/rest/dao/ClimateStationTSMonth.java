@@ -195,20 +195,20 @@ public class ClimateStationTSMonth {
 		this.maxValue = maxValue;
 	}
 
-	public void setMinValue(Double minValue) {
-		this.minValue = minValue;
-	}
-
-	public void setModified(DateTime modified) {
-		this.modified = modified;
-	}
-
 	public void setMeasType(String measType) {
 		this.measType = measType;
 	}
 
 	public void setMeasUnit(String measUnit){
 		this.measUnit = measUnit;
+	}
+
+	public void setMinValue(Double minValue) {
+		this.minValue = minValue;
+	}
+
+	public void setModified(String modified) {
+		this.modified = DateTime.parse(modified);
 	}
 
 	public void setSiteId(String siteId) {

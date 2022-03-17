@@ -25,8 +25,8 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
-import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class stores surface water station data.
@@ -229,7 +229,17 @@ public class SurfaceWaterStation {
 	}
 	
 	public void setEndDate(String endDate) {
-		this.endDate = TimeToolkit.getInstance().toDateTime(endDate, false);
+		if ( endDate == null ) {
+			this.endDate = null;
+		}
+		else {
+			try {
+				this.endDate = DateTime.parse(endDate);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setEndDate", "Error parsing endDate: " + endDate);
+			}
+		}
 	}
 
 	public void setLatitude(Double latitude) {
@@ -249,11 +259,29 @@ public class SurfaceWaterStation {
 	}
 	
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			try {
+				this.modified = DateTime.parse(modified);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setModified", "Error parsing modified: " + modified);
+			}
+		}
 	}
 	
 	public void setStartDate(String startDate) {
-		this.startDate = TimeToolkit.getInstance().toDateTime(startDate, false);
+		if ( startDate == null ) {
+			this.startDate = null;
+		}
+		try {
+			this.startDate = DateTime.parse(startDate);
+		}
+		catch ( Exception e ) {
+			Message.printWarning(3, "setStartDate", "Error parsing startDate: " + startDate );
+		}
 	}
 
 	public void setState(String state) {

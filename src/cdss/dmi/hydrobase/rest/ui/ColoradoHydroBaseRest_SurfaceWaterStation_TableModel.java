@@ -69,9 +69,14 @@ public final int COL_UTM_Y = 16;
 public final int COL_INPUT_TYPE = 17;
 
 /**
-Input type for time series identifier.
+Data interval.
 */
-private String __inputType = "ColoradoHydroBaseRest";
+private String interval = "";
+
+/**
+Input type for time series identifier, should be the datastore name.
+*/
+private String inputType = "ColoradoHydroBaseRest";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -84,7 +89,7 @@ when using the class to display data from the ColoradHydroBaseRest database.
 */
 public ColoradoHydroBaseRest_SurfaceWaterStation_TableModel ( JWorksheet worksheet, List<SurfaceWaterStationDataType> data )
 throws Exception {
-    this ( worksheet, data, null );
+    this ( worksheet, data, "", null );
 }
 
 /**
@@ -92,11 +97,11 @@ Constructor.  This builds the model for displaying the given HydroBase time seri
 @param worksheet the JWorksheet that displays the data from the table model.
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
-@inputType input type for time series (default if null or blank is "HydroBase").  Use this, for example,
-when using the class to display data from the ColoradoWaterSMS database.
+@param interval time series interval (e.g., "Day"), from TSTool UI
+@inputType input type for time series (default if null or blank is "ColoradoHydroBaseRest").
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_SurfaceWaterStation_TableModel ( JWorksheet worksheet, List<SurfaceWaterStationDataType> data, String inputType )
+public ColoradoHydroBaseRest_SurfaceWaterStation_TableModel ( JWorksheet worksheet, List<SurfaceWaterStationDataType> data, String interval, String inputType )
 throws Exception {
 	if ( data == null ) {
 		_rows = 0;
@@ -105,8 +110,9 @@ throws Exception {
 	    _rows = data.size();
 	}
 	_data = data;
+	this.interval = interval;
 	if ( (inputType != null) && !inputType.equals("") ) {
-	    __inputType = inputType;
+	    this.inputType = inputType;
 	}
 }
 
@@ -116,11 +122,13 @@ From AbstractTableModel.  Returns the class of the data stored in a given column
 */
 public Class<?> getColumnClass (int columnIndex) {
 	switch (columnIndex) {
-		// FIXME - can't seem to handle missing...
-		//case COL_START:		return Integer.class;
-		//case COL_END:			return Integer.class;
-		//case COL_DIV:			return Integer.class;
-		//case COL_DIST:		return Integer.class;
+		// FIXME - need to handle formatting and justification.
+		//case COL_LAT:    return Double.class;
+		//case COL_LONG:   return Double.class;
+		case COL_DIV:    return Integer.class;
+		case COL_DIST:   return Integer.class;
+		//case COL_UTM_X:  return Double.class;
+		//case COL_UTM_Y:  return Double.class;
 		default: return String.class;
 	}
 }
@@ -174,7 +182,7 @@ public String[] getColumnToolTips() {
     tips[COL_USGS_SITE] = "USGS site identifier.";
     tips[COL_NAME] = "Station name";
     tips[COL_DATA_SOURCE] = "Organization/agency name";
-    tips[COL_DATA_TYPE] = "Data type";
+    tips[COL_DATA_TYPE] = "Data type, may include a statistic";
     tips[COL_TIME_STEP] = "Time step";
     tips[COL_UNITS] = "Data units are not currently available from web services for station/parameter";
     tips[COL_START] = "Starting date/time of available data";
@@ -200,14 +208,14 @@ public int[] getColumnWidths() {
     int[] widths = new int[__COLUMNS];
     //widths[COL_ID] = 12;
     widths[COL_ABBREV] = 7;
-    widths[COL_USGS_SITE] = 7;
+    widths[COL_USGS_SITE] = 8;
     widths[COL_NAME] = 20;
     widths[COL_DATA_SOURCE] = 10;
     widths[COL_DATA_TYPE] = 15;
     widths[COL_TIME_STEP] = 7;
     widths[COL_UNITS] = 8;
-    widths[COL_START] = 10;
-    widths[COL_END] = 10;
+    widths[COL_START] = 7;
+    widths[COL_END] = 7;
     //widths[COL_MEAS_COUNT] = 8;
     widths[COL_DIV] = 3;
     widths[COL_DIST] = 3;
@@ -228,6 +236,8 @@ Returns the format to display the specified column.
 */
 public String getFormat ( int column ) {
 	switch (column) {
+		//case COL_DIV:    return "%d";
+		//case COL_DIST:   return "%d";
 		default: return "%s"; // All are strings.
 	}
 }
@@ -246,15 +256,18 @@ Return a TSIdent object for the specified row, used to transfer the table to val
 */
 public TSIdent getTimeSeriesIdentifier(int row) {
     TSIdent tsid = new TSIdent();
-	String locType = "abbrev:";
+   	String locType = "";
     String abbrev = (String)getValueAt( row, COL_ABBREV );
     String usgs = (String)getValueAt( row, COL_USGS_SITE );
-    if ( (abbrev != null) && !abbrev.isEmpty() ) {
-    	tsid.setLocation(locType + abbrev );
-    }
-    else {
+    if ( (usgs != null) && !usgs.isEmpty() ) {
+    	// Use USGS if available because it is the primary data source.
     	locType = "usgs:";
     	tsid.setLocation(locType + usgs );
+    }
+    else if ( (abbrev != null) && !abbrev.isEmpty() ) {
+    	// Otherwise, use State of CO abbreviation.
+    	locType = "abbrev:";
+    	tsid.setLocation(locType + abbrev );
     }
     tsid.setSource((String)getValueAt( row, COL_DATA_SOURCE));
     tsid.setType((String)getValueAt( row, COL_DATA_TYPE));
@@ -271,8 +284,8 @@ public TSIdent getTimeSeriesIdentifier(int row) {
     // No input name
     // Format a simple comment that includes the telemetry station name
     if ( (abbrev != null) && !abbrev.isEmpty() && (usgs != null) && !usgs.isEmpty() ) {
-    	// Use both ABBREV and USGS site ID in comment
-    	tsid.setComment("ABBREV=" + abbrev + " USGS site ID=" + usgs + " - " + (String)getValueAt ( row, COL_NAME));
+    	// Use both ABBREV and USGS site ID in comment.
+    	tsid.setComment("ABBREV=" + abbrev + ", USGS site ID=" + usgs + " - " + (String)getValueAt ( row, COL_NAME));
     }
     else if ( (abbrev != null) && !abbrev.isEmpty() && ((usgs == null) || usgs.isEmpty()) ) {
     	// Use ABBREV only in comment
@@ -303,30 +316,38 @@ public Object getValueAt(int row, int col) {
 	SurfaceWaterStationDataType tsds = _data.get(row);
 	
 	//String timestep = tsds.getTimeStep();
-	String timestep = "";
 	DateTime dt;
 	switch (col) {
 		// case 0 handled above.
 		//case COL_ID: return tsds.getWdid();
-		case COL_ABBREV: return tsds.getAbbrev();
-		case COL_USGS_SITE: return tsds.getUsgsSiteId();
-		case COL_NAME: return tsds.getStationName();
-		case COL_DATA_SOURCE: return tsds.getDataSource();
-		case COL_DATA_TYPE: return tsds.getMeasType();
-		case COL_TIME_STEP: return timestep;
-		case COL_UNITS: return tsds.getMeasUnit();
+		case COL_ABBREV:
+			return tsds.getAbbrev();
+		case COL_USGS_SITE:
+			return tsds.getUsgsSiteId();
+		case COL_NAME:
+			return tsds.getStationName();
+		case COL_DATA_SOURCE:
+			return tsds.getDataSource();
+		case COL_DATA_TYPE:
+			// Data type is consistent with TSTool, don't use measType directly.
+			//return tsds.getMeasType();
+			return tsds.getDataType();
+		case COL_TIME_STEP:
+			return this.interval;
+		case COL_UNITS:
+			return tsds.getMeasUnit();
 		case COL_START:
 			dt = tsds.getPorStart();
 			if ( dt == null ) {
 				return null;
 			}
-			else if ( timestep.equalsIgnoreCase("day") ) {
+			else if ( interval.equalsIgnoreCase("day") ) {
 				dt.setPrecision(DateTime.PRECISION_DAY);
 			}
-			else if ( timestep.equalsIgnoreCase("month") ) {
+			else if ( interval.equalsIgnoreCase("month") ) {
 				dt.setPrecision(DateTime.PRECISION_MONTH);
 			}
-			else if ( timestep.equalsIgnoreCase("year") ) {
+			else if ( interval.equalsIgnoreCase("year") ) {
 				dt.setPrecision(DateTime.PRECISION_YEAR);
 			}
 			return dt.toString();
@@ -335,13 +356,13 @@ public Object getValueAt(int row, int col) {
 			if ( dt == null ) {
 				return null;
 			}
-			else if ( timestep.equalsIgnoreCase("day") ) {
+			else if ( interval.equalsIgnoreCase("day") ) {
 				dt.setPrecision(DateTime.PRECISION_DAY);
 			}
-			else if ( timestep.equalsIgnoreCase("month") ) {
+			else if ( interval.equalsIgnoreCase("month") ) {
 				dt.setPrecision(DateTime.PRECISION_MONTH);
 			}
-			else if ( timestep.equalsIgnoreCase("year") ) {
+			else if ( interval.equalsIgnoreCase("year") ) {
 				dt.setPrecision(DateTime.PRECISION_YEAR);
 			}
 			return dt.toString();
@@ -368,18 +389,16 @@ public Object getValueAt(int row, int col) {
 			}
 		case COL_UTM_X: return tsds.getUtmX();
 		case COL_UTM_Y: return tsds.getUtmY();
-		case COL_INPUT_TYPE: return __inputType;
+		case COL_INPUT_TYPE: return this.inputType;
 		default: return "";
 	}
 }
 
 /**
-Set the input type (default is "HydroBase" but need to change when the table model is used for
-multiple purposes.
+Set the input type.
 */
-public void setInputType ( String inputType )
-{
-    __inputType = inputType;
+public void setInputType ( String inputType ) {
+    this.inputType = inputType;
 }
 
 }

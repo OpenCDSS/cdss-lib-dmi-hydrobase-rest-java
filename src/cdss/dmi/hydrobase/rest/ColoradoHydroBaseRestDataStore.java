@@ -53,6 +53,7 @@ import RTi.Util.Message.Message;
 import RTi.Util.String.StringUtil;
 import RTi.Util.Time.DateTime;
 import RTi.Util.Time.TimeInterval;
+import RTi.Util.Time.TimeUtil;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel;
 import cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel;
@@ -83,6 +84,9 @@ import cdss.dmi.hydrobase.rest.dao.ReferenceTablesWaterDivision;
 import cdss.dmi.hydrobase.rest.dao.Structure;
 import cdss.dmi.hydrobase.rest.dao.SurfaceWaterStation;
 import cdss.dmi.hydrobase.rest.dao.SurfaceWaterStationDataType;
+import cdss.dmi.hydrobase.rest.dao.SurfaceWaterTSDay;
+import cdss.dmi.hydrobase.rest.dao.SurfaceWaterTSMonth;
+import cdss.dmi.hydrobase.rest.dao.SurfaceWaterTSYear;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDecodeSettings;
 import cdss.dmi.hydrobase.rest.dao.TelemetryDischargeMeasurement;
 import cdss.dmi.hydrobase.rest.dao.TelemetryRatingTable;
@@ -120,8 +124,11 @@ Indicates whether global data store properties have been initialized, set by ini
 private boolean initialized = false;
 
 /**
- * Global variables created to store cached data.
+ * Global lists to store cached data.
+ * See the read* methods.
  */
+private List<String> climateStationMeasTypeList = null;
+
 private List<ReferenceTablesCounty> countyList = null;
 
 private List<ReferenceTablesCurrentInUseCodes> currentInUseCodeList = null;
@@ -139,6 +146,8 @@ private List<ReferenceTablesGroundwaterPublication> groundwaterPublicationList =
 private List<ReferenceTablesManagementDistrict> managementDistrictList = null;
 
 private List<ReferenceTablesPermitActionName> permitActionNameList = null;
+
+private List<String> surfaceWaterStationMeasTypeList = null;
 
 private List<ReferenceTablesTelemetryParams> telemetryParamsList = null;
 
@@ -1165,17 +1174,19 @@ public List<SurfaceWaterStationDataType> getSurfaceWaterStationDataTypes(String 
 	String requestString = getSurfaceWaterStationDataTypesRequestString(dataType, listOfTriplets);
 	
 	JsonNode dataTypesNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(requestString);
-	if(dataTypesNode == null){
+	if ( dataTypesNode == null ) {
 		return dataTypes;
 	}
 	
 	//System.out.println(tdRequestString);
 	Message.printStatus(2, routine, "Retrieve surface water station data types from url request: " + requestString);
 	
-	for(int i = 0; i < dataTypesNode.size(); i++){
-		SurfaceWaterStationDataType dataType2;
-		dataType2 = (SurfaceWaterStationDataType) JacksonToolkit.getInstance().treeToValue(dataTypesNode.get(i), SurfaceWaterStationDataType.class);
+	for ( int i = 0; i < dataTypesNode.size(); i++ ) {
+		SurfaceWaterStationDataType dataType2 =
+			(SurfaceWaterStationDataType) JacksonToolkit.getInstance().treeToValue(dataTypesNode.get(i), SurfaceWaterStationDataType.class);
 		//dataType2.setTimeStep(interval);
+		// In addition to the measType from the web service (e.g., "Streamflow"), set the data type that is used to query (e.g., "Streamflow-Min").
+		dataType2.setDataType(dataType);
 		dataTypes.add(dataType2);
 	}
 	return dataTypes;
@@ -1190,17 +1201,24 @@ public List<SurfaceWaterStationDataType> getSurfaceWaterStationDataTypes(String 
  * ['County', 'MA', 'mesa'], [argument, operator, value].
  * @return a formatted request string for retrieving surface water station data type data.
  */
-public String getSurfaceWaterStationDataTypesRequestString(String dataType, List<String []> listOfTriplets) {
+public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, List<String []> listOfTriplets) {
+	String routine = getClass().getSimpleName() + "getSuraceWaterStationDataTypesRequestString";
 	// All surface water station data type data is assumed to be available for day, month, and year interval.
 	StringBuilder requestString = new StringBuilder(getServiceRootURI() +
 		"/surfacewater/surfacewaterstationdatatypes?format=json");
+	String dataType = dataTypeReq;
+	if ( (dataTypeReq != null) && dataTypeReq.toUpperCase().startsWith("STREAMFLOW-") ) {
+		// Surface water station data types can only have 'measType=Streamflow' and depending on interval have different statistic values.
+		// TSTool uses Streamflow-Avg for the datatype, so have to stream off the end.
+		dataType = "Streamflow";
+	}
 	if ( (dataType != null) && !dataType.isEmpty() && !dataType.equals("*") ) { 
-		requestString.append ( "&dataType=" + dataType );
+		requestString.append ( "&measType=" + dataType );
 	}
 	int newVal;
 	// Step through all triplets.
 	for ( int i = 0; i < listOfTriplets.size(); i++ ) {
-		// Assign variables based off triplet.
+		// Assign variables based on triplet.
 		String[] triplet = listOfTriplets.get(i);
 		String argumentKey = triplet[0];
 		String operator = triplet[1];
@@ -1209,84 +1227,81 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataType, List
 		// Determine what to append to request string for specifiers.
 		try{
 			switch (argumentKey.toUpperCase()){
+				//case "ABBREV":
+				//		requestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+				//		break;
 				case "COUNTY":  
-						requestString.append("&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
-						break;
+					requestString.append("&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+					break;
 				case "LATITUDE":
-						requestString.append("&latitude=" + URLEncoder.encode(value, "UTF-8") );
-						break;
+					requestString.append("&latitude=" + URLEncoder.encode(value, "UTF-8") );
+					break;
 				case "LONGITUDE":
-						requestString.append("&longitude=" + URLEncoder.encode(value, "UTF-8") );
-						break;
+					requestString.append("&longitude=" + URLEncoder.encode(value, "UTF-8") );
+					break;
 				case "RADIUS":
-						requestString.append("&radius=" + URLEncoder.encode(value, "UTF-8") );
-						break;
+					requestString.append("&radius=" + URLEncoder.encode(value, "UTF-8") );
+					break;
+				case "STATIONNAME":
+					requestString.append("&stationName=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+					break;
 				case "UNITS":
-						requestString.append("&units=" + URLEncoder.encode(value, "UTF-8") );
-						break;
-				case "ABBREV":
-						requestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
-						break;
-				case "STATIONTYPE":
-						requestString.append("&stationType=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
-						break;
-				case "USGSSTATIONID":
-						requestString.append("&usgsStationId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
-						break;
+					// Radius units.
+					requestString.append("&units=" + URLEncoder.encode(value, "UTF-8") );
+					break;
+				case "USGSSITEID":
+					requestString.append("&usgsSiteId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+					break;
 				case "WATERDISTRICT":
-						switch (operator.toUpperCase()){
-							case "EQ":
-								requestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "LT":
-								newVal = new Integer(value) - 1;
-								value = Integer.toString(newVal);
-								requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "LE":
-								requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "GT":
-								newVal = new Integer(value) + 1;
-								value = Integer.toString(newVal);
-								requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "GE":
-								requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-						}
-						break;
+					switch (operator.toUpperCase()){
+						case "EQ":
+							requestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "LT":
+							newVal = new Integer(value) - 1;
+							value = Integer.toString(newVal);
+							requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "LE":
+							requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "GT":
+							newVal = new Integer(value) + 1;
+							value = Integer.toString(newVal);
+							requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "GE":
+							requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+					}
+					break;
 				case "WATERDIVISION":
-						switch (operator.toUpperCase()){
-							case "EQ":
-								requestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "LT":
-								newVal = new Integer(value) - 1;
-								value = Integer.toString(newVal);
-								requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "LE": 
-								requestString.append("&max-division" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "GT":
-								newVal = new Integer(value) + 1;
-								value = Integer.toString(newVal);
-								requestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
-								break;
-							case "GE":
-								requestString.append("&min-division" + URLEncoder.encode(value, "UTF-8") );
-								break;
-						}
-						break;
-				case "STR_NAME":
-						requestString.append("&wdid=" + URLEncoder.encode(value, "UTF-8") );
-						break;
+					switch (operator.toUpperCase()){
+						case "EQ":
+							requestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "LT":
+							newVal = new Integer(value) - 1;
+							value = Integer.toString(newVal);
+							requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "LE": 
+							requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "GT":
+							newVal = new Integer(value) + 1;
+							value = Integer.toString(newVal);
+							requestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+						case "GE":
+							requestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
+							break;
+					}
+					break;
 			}
 		}
 		catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block.
-			String routine = getClass().getSimpleName() + "getTelemetryStationDataTypesRequestString";
 			Message.printWarning(3,routine,e);
 		}
 	}
@@ -1662,6 +1677,10 @@ public List<String> getTimeSeriesDataTypes ( boolean includeGroup, boolean inclu
 		dataTypes.add("Climate Station - MaxTemp");         // Returned by climate station data type service.
 		dataTypes.add("Climate Station - MeanTemp");        // Returned by climate station data type service.
 		dataTypes.add("Climate Station - MinTemp");         // Returned by climate station data type service.
+		dataTypes.add("Climate Station - Precip");          // Returned by climate station data type service.
+		dataTypes.add("Climate Station - Snow");            // Returned by climate station data type service.
+		dataTypes.add("Climate Station - SnowDepth");       // Returned by climate station data type service.
+		dataTypes.add("Climate Station - SnowSWE");         // Returned by climate station data type service.
 		dataTypes.add("Climate Station - Solar");           // Returned by climate station data type service.
 		dataTypes.add("Climate Station - VP");              // Returned by climate station data type service.
 		dataTypes.add("Climate Station - Wind");            // Returned by climate station data type service.
@@ -1703,6 +1722,10 @@ public List<String> getTimeSeriesDataTypes ( boolean includeGroup, boolean inclu
 		dataTypes.add("MaxTemp");
 		dataTypes.add("MeanTemp");
 		dataTypes.add("MinTemp");
+		dataTypes.add("Precip");
+		dataTypes.add("Snow");
+		dataTypes.add("SnowDepth");
+		dataTypes.add("SnowSWE");
 		dataTypes.add("Solar");
 		dataTypes.add("VP");
 		dataTypes.add("Wind");
@@ -1739,39 +1762,50 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 	List<String> timeSteps = new ArrayList<>();
 	String selectedDataTypeUpper = selectedDataType.toUpperCase();
 	// Returned from 'climatestationdatatypes':
-	// - but also seems to overlap 'surfacewaterstationdatatypes'
-	if(selectedDataType.equalsIgnoreCase("MaxTemp") ||
+	// - TODO smalers 2022-03-17 some data types are also returned by 'surfacewaterstationdatatypes' so hard code for now
+	if (
+		selectedDataType.equalsIgnoreCase("Evap") ||
+		selectedDataType.equalsIgnoreCase("MaxTemp") ||
 		selectedDataType.equalsIgnoreCase("MeanTemp") ||
 		selectedDataType.equalsIgnoreCase("MinTemp") ||
+		selectedDataType.equalsIgnoreCase("Precip") ||
+		selectedDataType.equalsIgnoreCase("Snow") ||
+		selectedDataType.equalsIgnoreCase("SnowDepth") ||
+		selectedDataType.equalsIgnoreCase("SnowSWE") ||
 		selectedDataType.equalsIgnoreCase("Solar") ||
 		selectedDataType.equalsIgnoreCase("VP") ||
 		selectedDataType.equalsIgnoreCase("Wind") ) {
 		// Returned from 'surfacewaterstationdatatypes':
-		// - but also seems to overlap 'climatestationdatatypes'
 		timeSteps.add("Day");
 		timeSteps.add("Month");
+	}
+	else if (
+		selectedDataType.equalsIgnoreCase("FrostDateF28F") ||
+		selectedDataType.equalsIgnoreCase("FrostDateF32F") ||
+		selectedDataType.equalsIgnoreCase("FrostDateL28S") ||
+		selectedDataType.equalsIgnoreCase("FrostDateL32S") ) {
+		// These all correspond to web service "FrostDate" data type.
 		timeSteps.add("Year");
 	}
-	// Returned from 'surfacewaterstationdatatypes':
-	// - but also seems to overlap 'climatestationdatatypes'
-	/* TODO smalers 2022-03-13 For now always include the statistic for historical stations.
-	else if(selectedDataType.equalsIgnoreCase("Streamflow") ) {
-		// Only daily average CFS.
-		timeSteps.add("Day");
-		//timeSteps.add("Month");
-		//timeSteps.add("Year");
-	}
-	*/
 	else if(selectedDataTypeUpper.startsWith("STREAMFLOW-") ) {
 		// Data types are:
 		//   Streamflow-Avg
 		//   Streamflow-Max
 		//   Streamflow-Min
 		//   Streamflow-Total
-		// Always have day interval.
-		timeSteps.add("Day");
-		if ( selectedDataTypeUpper.indexOf("AVG") < 0 ) {
-			// Not average so add Month and Year.
+		// Day interval is not available for Total statistic.
+		if (
+			(selectedDataTypeUpper.indexOf("MAX") > 0) ||
+			(selectedDataTypeUpper.indexOf("MIN") > 0) ||
+			(selectedDataTypeUpper.indexOf("TOTAL") > 0)
+			) {
+			// Only available Month and Year.
+			timeSteps.add("Month");
+			timeSteps.add("Year");
+		}
+		else {
+			// 'Avg' flow data types have values for all intervals.
+			timeSteps.add("Day");
 			timeSteps.add("Month");
 			timeSteps.add("Year");
 		}
@@ -1793,13 +1827,15 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
 			selectedDataType.equalsIgnoreCase("Volume")) {
 		timeSteps.add("Day");
 	}
-	else {
-		// Assume telemetry station data types, which are the most types and not easy to list here:
-		// - this will be a problem if the data type is actually not for a telemetry station
-		// - TODO smalers 2019-06-27 might need to include instantaneous.
+	else if ( isTelemetryStationTimeSeriesDataType ( selectedDataType ) ) {
+		// Telemetry station data types.
 		timeSteps.add("15Min");
 		timeSteps.add("Hour");
 		timeSteps.add("Day");
+	}
+	else {
+		String routine = getClass().getSimpleName() + ".getTimeSeriesTimeSteps";
+		Message.printWarning(2, routine, "Don't know how to get timesteps for selected data type \"" + selectedDataType + "\"" );
 	}
 	return timeSteps;
 }
@@ -2334,26 +2370,28 @@ throws URISyntaxException, IOException {
 
 /**
  * Indicate whether a time series data type corresponds to a climate station.
+ * Data types must match those in 'getTimeSeriesDataTypes'.
  * @param dataType the datatype part of the TSID (e.g., 'MaxTemp')
  * @return true if data type is for a climate station, false otherwise
  */
 public boolean isClimateStationTimeSeriesDataType ( String dataType ) {
-	String [] dataTypes = { "MAXTEMP", "MEANTEMP", "MINTEMP", "SOLAR", "STREAMFLOW", "VP", "WIND" };
-	for ( int i = 0; i < dataTypes.length; i++ ) {
-		if ( dataType.toUpperCase().equals(dataTypes[i]) ) {
-			return true;
-		}
-	}
-	return false;
-}
-
-/**
- * Indicate whether a time series data type corresponds to a surface water station.
- * @param dataType the datatype part of the TSID ex. 'Streamflow'
- * @return true if data type is for a station, false otherwise
- */
-public boolean isSurfaceWaterStationTimeSeriesDataType ( String dataType ) {
-	String [] dataTypes = { "STREAMFLOW"};
+	String [] dataTypes = {
+		"EVAP",
+		"FROSTDATEF28F",  // Web service just uses "FrostDate" but that is not specific enough.
+		"FROSTDATEF32F",
+		"FROSTDATEL28S",
+		"FROSTDATEL32S",
+		"MAXTEMP",
+		"MEANTEMP",
+		"MINTEMP",
+		"PRECIP",
+		"SNOW",
+		"SNOWDEPTH",
+		"SNOWSWE",
+		"SOLAR",
+		"VP",
+		"WIND"
+	};
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.toUpperCase().equals(dataTypes[i]) ) {
 			return true;
@@ -2364,6 +2402,7 @@ public boolean isSurfaceWaterStationTimeSeriesDataType ( String dataType ) {
 
 /**
  * Indicate whether a time series data type corresponds to a structure.
+ * Data types must match those in 'getTimeSeriesDataTypes'.
  * @param dataType - the datatype portion of the TSID ex. 'DivTotal'
  * @return true if data type is for a structure, false otherwise
  */
@@ -2372,6 +2411,41 @@ public boolean isStructureTimeSeriesDataType ( String dataType ) {
 	// Compare the first part of the data type, because water classes data type will be followed by the class string.
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether a time series data type corresponds to a surface water station.
+ * Data types must match those in 'getTimeSeriesDataTypes'.
+ * @param dataType the datatype part of the TSID ex. 'Streamflow'
+ * @return true if data type is for a station, false otherwise
+ */
+public boolean isSurfaceWaterStationTimeSeriesDataType ( String dataType ) {
+	// Data types include the statistic, such as "Streamflow-Avg".
+	String [] dataTypes = { "STREAMFLOW-"};
+	for ( int i = 0; i < dataTypes.length; i++ ) {
+		if ( dataType.toUpperCase().startsWith(dataTypes[i]) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
+ * Indicate whether a time series data type corresponds to a telemetry station.
+ * @param dataType - the datatype portion of the TSID ex. 'DISCHRG'
+ * @return true if data type is for a telemetry station, false otherwise
+ */
+public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
+	if ( dataType.equals("*") ) {
+		// Allow wildcard.
+		return true;
+	}
+	for ( int i = 0; i < this.telemetryParamsList.size(); i++ ) {
+		if ( dataType.equalsIgnoreCase(this.telemetryParamsList.get(i).getParameter()) ) {
 			return true;
 		}
 	}
@@ -2415,24 +2489,6 @@ public boolean isWaterClassStructure(String dataType){
 }
 
 /**
- * Indicate whether a time series data type corresponds to a telemetry station.
- * @param dataType - the datatype portion of the TSID ex. 'DISCHRG'
- * @return true if data type is for a telemetry station, false otherwise
- */
-public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
-	if ( dataType.equals("*") ) {
-		// Allow wildcard.
-		return true;
-	}
-	for ( int i = 0; i < this.telemetryParamsList.size(); i++ ) {
-		if ( dataType.equalsIgnoreCase(this.telemetryParamsList.get(i).getParameter()) ) {
-			return true;
-		}
-	}
-	return false;
-}
-
-/**
  * Indicate whether a time series data type corresponds to a well.
  * @param dataType - the datatype portion of the TSID ex. 'WaterLevelDepth'
  * @return true if data type is for a well, false otherwise
@@ -2460,6 +2516,36 @@ private String lookUpDataType(String dataType){
 	else{
 		return dataType;
 	}
+}
+
+/**
+ * Read the list of distinct climate station meastype from web services.
+ * For example, this will include "Evap", "FrostDates", etc.
+ * This is the list of available data types that can be displayed in TSTool.
+ */
+private void readClimateStationMeasTypes() {
+	// First get the web service objects.
+	String dataTypesRequest = getServiceRootURI() + "/climatedata/climatestationsdatatypes?format=json" + getApiKeyString();
+	List<ClimateStationDataType> climateStationDataTypeList = new ArrayList<>();
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(dataTypesRequest);
+	for ( int i = 0; i < results.size(); i++ ) {
+		climateStationDataTypeList.add((ClimateStationDataType)JacksonToolkit.getInstance().treeToValue(results.get(i), ClimateStationDataType.class));
+	}
+	// Determine a unique list of 'measType' from the list.
+	this.climateStationMeasTypeList = new ArrayList<>();
+	for ( ClimateStationDataType dataType : climateStationDataTypeList ) {
+		boolean found = false;
+		for ( String measType : climateStationMeasTypeList ) {
+			if ( measType.equals(dataType.getMeasType()) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			this.climateStationMeasTypeList.add(dataType.getMeasType());
+		}
+	}
+	Collections.sort(this.climateStationMeasTypeList);
 }
 
 /**
@@ -2535,9 +2621,10 @@ private void readDivRecTypes(){
 }
 
 /**
- * Read in data and store in global variables for caching purposes.<br>
+ * Read global data for caching purposes.<br>
  * Calls the following methods:<br>
  * <ul>
+ * <li>{@link #readClimateStationDataTypes()}</li>
  * <li>{@link #readCounties()}</li>
  * <li>{@link #readCurrentInUseCodes()}</li>
  * <li>{@link #readDiversionNotUsedCodes()}</li>
@@ -2547,6 +2634,7 @@ private void readDivRecTypes(){
  * <li>{@link #readDesignatedBasins()}</li>
  * <li>{@link #readManagementDistrict()}</li>
  * <li>{@link #readPermitActionName()}</li>
+ * <li>{@link #readSurfaceWaterStationDataTypes()}</li>
  * <li>{@link #readTelemetryParams()}</li>
  * <li>{@link #readWaterDistricts()}<li>
  * <li>{@link #readWaterDivisions()}</li>
@@ -2554,6 +2642,7 @@ private void readDivRecTypes(){
  * @throws MalformedURLException 
  */
 private void readGlobalData() throws MalformedURLException{
+	readClimateStationMeasTypes();
 	readCounties();
 	readCurrentInUseCodes();
 	readDiversionNotUsedCodes();
@@ -2563,6 +2652,7 @@ private void readGlobalData() throws MalformedURLException{
 	readDesignatedBasins();
 	readManagementDistrict();
 	readPermitActionName();
+	readSurfaceWaterStationMeasTypes();
 	readTelemetryParams();
 	readWaterDistricts();
 	readWaterDivisions();
@@ -2643,7 +2733,37 @@ public List<ParcelUseTimeSeries> readParcelUseTSListForParcelId(String wdid, int
 }
 
 /**
- * Read telemetry params from web services. Convert to POJO.
+ * Read the list of distinct surface water station meastype from web services.
+ * For example, this will include "Streamflow" (but nothing else?).
+ * This is the list of available data types that can be displayed in TSTool.
+ */
+private void readSurfaceWaterStationMeasTypes() {
+	// First get the web service objects.
+	String dataTypesRequest = getServiceRootURI() + "/surfacewater/surfacewaterstationdatatypes?format=json" + getApiKeyString();
+	List<SurfaceWaterStationDataType> surfaceWaterStationDataTypeList = new ArrayList<>();
+	JsonNode results = JacksonToolkit.getInstance().getJsonNodeFromWebServices(dataTypesRequest);
+	for ( int i = 0; i < results.size(); i++ ) {
+		surfaceWaterStationDataTypeList.add((SurfaceWaterStationDataType)JacksonToolkit.getInstance().treeToValue(results.get(i), SurfaceWaterStationDataType.class));
+	}
+	// Determine a unique list of 'measType' from the list.
+	this.surfaceWaterStationMeasTypeList = new ArrayList<>();
+	for ( SurfaceWaterStationDataType dataType : surfaceWaterStationDataTypeList ) {
+		boolean found = false;
+		for ( String measType : surfaceWaterStationMeasTypeList ) {
+			if ( measType.equals(dataType.getMeasType()) ) {
+				found = true;
+				break;
+			}
+		}
+		if ( !found ) {
+			this.surfaceWaterStationMeasTypeList.add(dataType.getMeasType());
+		}
+	}
+	Collections.sort(this.surfaceWaterStationMeasTypeList);
+}
+
+/**
+ * Read telemetry station parameters from web services.
  * This is the list of available parameters that can be displayed in TSTool.
  */
 private void readTelemetryParams(){
@@ -2655,12 +2775,13 @@ private void readTelemetryParams(){
 	}
 }
 
-
 /**
-Read a time series.  Only one element type is read.
+Read a single time series matching the requested criteria.
 @param tsidentString the time series identifier string as per TSTool conventions.
-The location should be LocationType:ID (e.g., COOP:1234).
-The data type should be the variable name (might implement abbreviation later but trying to stay away from opaque variable major).
+The location type may be specified (e.g., abbrev:PLAKERCO).
+The data type should be the 'measType' or similar returned from web services;
+however, in some cases custom handling is required because it is not easy or possible to map
+because a record contains multiple values.
 @param readStart the starting date/time to read, or null to read all data.
 @param readEnd the ending date/time to read, or null to read all data.
 @param readData if true, read the data; if false, construct the time series and populate properties but do not read the data
@@ -2677,15 +2798,12 @@ additional zero values using diversion comments (default is False).</li>
 @return the time series read from the HydroBase web services,
 or minimally-initialized time series if unable to read.
 */
-public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData,
-	PropList props )
-throws MalformedURLException, Exception
-{   
-	String routine = "ColoradoHydroBaseRestDataStore.readTimeSeries";
+public TS readTimeSeries ( String tsidentString, DateTime readStart, DateTime readEnd, boolean readData, PropList props )
+throws MalformedURLException, Exception {   
+	String routine = getClass().getSimpleName() + ".readTimeSeries";
+	int dl = 1; // Debug level.
 
 	JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
-	
-	boolean debug = false;
 	
 	// Make sure data store is initialized.
     initialize();
@@ -2699,13 +2817,14 @@ throws MalformedURLException, Exception
     
     // 1. Parse the time series identifier (TSID) that was passed in.
     TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
+    String locType = tsident.getLocationType();
 	String locid = tsident.getLocation();
-	String dataType = tsident.getType(); // TSID data type
-	String dataTypeUpper = dataType.toUpperCase();
+	String dataTypeReq = tsident.getType(); // TSID data type
+	String dataTypeReqUpper = dataTypeReq.toUpperCase();
 	//String data_source = tsident.getSource();
 	
-	if(debug){
-		System.out.println("Data Type: " + dataType);
+	if ( Message.isDebugOn ) {
+		Message.printDebug(dl, routine, "Requested data type: " + dataTypeReq);
 	}
 	
 	String tsUnits = null;
@@ -2720,7 +2839,410 @@ throws MalformedURLException, Exception
 	
 	//System.out.println(dataType);
 
-	if ( dataType.equalsIgnoreCase("DivComment") ) {
+	// TODO smalers 2022-03-17 hard code for now to test.
+	String dataTypeGroup = "Climate Station";
+	if ( dataTypeGroup.equalsIgnoreCase("climate") && isClimateStationTimeSeriesDataType(dataTypeReq) ) {
+		// Climate station time series.
+
+		String dataType = dataTypeReq;
+		if ( (dataTypeReq != null) && (dataTypeReq.indexOf("-") > 0) ) {
+			// Climate station data types can only have 'measType=Evap' and similar.
+			// Depending on interval the data will have different statistic values.
+			// TSTool uses statistic such as Evap-Avg for the datatype, so have to strip off the end.
+			int pos = dataTypeReq.indexOf("-");
+			dataType = dataTypeReq.substring(0,pos);
+		}
+
+		// Round the times and also remove time zone since not returned from web services.
+		// - TODO smalers 2022-03-16 don't need to round because dates in time series will have
+		//   precision of the time series interval, remove code when tested out.
+		/*
+		if ( readStart != null ) {
+			// Round to 15-minute so that allocated time series will align with data.
+			readStart = new DateTime(readStart);
+			readStart.round(-1, TimeInterval.MINUTE, 15);
+			readStart.setTimeZone("");
+		}
+		if ( readEnd != null ) {
+			// Round to 15-minute so that allocated time series will align with data.
+			readEnd = new DateTime(readEnd);
+			readEnd.round(1, TimeInterval.MINUTE, 15);
+			readEnd.setTimeZone("");
+		}
+		*/
+		
+		// Get the climate station.
+		String stationRequest = "";
+		String locParam = "&siteId=" + locid;
+		stationRequest = getServiceRootURI() + "/climatedata/climatestations?format=json" + locParam + getApiKeyString();
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( dl, routine, "stationRequest: " + stationRequest );
+		}
+		JsonNode results0 = jacksonToolkit.getJsonNodeFromWebServices(stationRequest);
+		JsonNode stationResult = null;
+		if ( results0 == null ) {
+			Message.printWarning(3, routine, "No data returned for:  " + stationRequest);
+			return ts;
+		}
+		else {
+			stationResult = results0.get(0);
+		}
+		
+		ClimateStation station = (ClimateStation)jacksonToolkit.treeToValue(stationResult, ClimateStation.class);
+		Message.printStatus(2, routine, "Retrieve surface water stations from DWR REST API request url: " + stationRequest);
+
+		// Get the climate station data type.
+		String stationDataTypeRequest = "";
+		stationDataTypeRequest = getServiceRootURI() + "/climatedata/climatestationdatatypes?format=json" + locParam +
+			"&measType=" + dataType + getApiKeyString();
+		if ( Message.isDebugOn ) {
+			Message.printDebug(dl, routine, "stationDataTypesRequest: " + stationDataTypeRequest);
+		}
+		results0 = jacksonToolkit.getJsonNodeFromWebServices(stationDataTypeRequest);
+		JsonNode stationDataTypeResult = null;
+		if ( results0 == null ) {
+			Message.printWarning(3, routine, "No data returned for:  " + stationDataTypeRequest);
+			return ts;
+		}
+		else {
+			stationDataTypeResult = results0.get(0);
+		}
+		
+		ClimateStationDataType stationDataType = (ClimateStationDataType)jacksonToolkit.treeToValue(stationDataTypeResult, ClimateStationDataType.class);
+		Message.printStatus(2, routine, "Retrieve climate station data types from DWR REST API request url: " + stationDataTypeRequest);
+		
+		// Set the description:
+		// - use the station name since nothing suitable on data type/parameter
+		ts.setDescription(station.getStationName());
+		
+		// Set data units depending on the data type:
+		// - also set a boolean to allow checking the records because some time series don't seem to have units in metadata
+		if ( dataTypeReq.equalsIgnoreCase("Streamflow-Avg") ||
+			dataTypeReq.equalsIgnoreCase("Streamflow-Min") ||
+			dataTypeReq.equalsIgnoreCase("Streamflow-Max") ) {
+			ts.setDataUnitsOriginal("cfs");
+			ts.setDataUnits("cfs");
+		}
+		else if ( dataTypeReq.equalsIgnoreCase("Streamflow-Total") ) {
+			ts.setDataUnitsOriginal("af");
+			ts.setDataUnits("af");
+		}
+		boolean dataUnitsSet = false;
+		boolean dataUnitsOriginalSet = false;
+		if ( !ts.getDataUnitsOriginal().isEmpty() ) {
+			dataUnitsOriginalSet = true;
+		}
+		if ( !ts.getDataUnits().isEmpty() ) {
+			dataUnitsSet = true;
+		}
+		
+		// Set the available start and end date to the time series parameter period.
+		ts.setDate1Original(stationDataType.getPorStart());
+		ts.setDate2Original(stationDataType.getPorEnd());
+		Message.printStatus(2,routine,"Date1Original=" + ts.getDate1Original() + " Date2Original=" + ts.getDate2Original());
+
+		setTimeSeriesPropertiesForClimateStation(ts, station, stationDataType);
+		setCommentsForClimateStation(ts, station);
+
+		// If not reading the data, return the time series with only header information.
+		if ( !readData ) {
+			return ts;
+		}
+
+		// Read the time series records.
+		StringBuilder tsRequest = new StringBuilder();
+
+		// Retrieve surface water station time series data based on interval
+		// - make sure the precision of the requested dates is day for web services
+		DateTime readStart2 = null;
+		DateTime readEnd2 = null;
+		if ( readStart != null ) {
+			readStart2 = new DateTime(readStart);
+			readStart2.setPrecision(DateTime.PRECISION_DAY);
+		}
+		if ( readEnd != null ) {
+			readEnd2 = new DateTime(readEnd);
+			readEnd2.setPrecision(DateTime.PRECISION_DAY);
+		}
+		// Date/time format is day format regardless of interval, but set to full month and year to ensure all data is returned.
+		if ( intervalBase == DateTime.PRECISION_DAY ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertsday?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// No need to change the requested date/time - use what was passed in.
+		}
+		else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertsmonth?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// Specify a full months using day precision.
+			if ( readStart2 != null ) {
+				readStart2.setDay(1);
+			}
+			if ( readEnd2 != null ) {
+				readEnd2.setDay(TimeUtil.numDaysInMonth(readEnd2));
+			}
+		}
+		else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertswateryear?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// Specify a full months using day precision.
+			if ( readStart2 != null ) {
+				readStart2.setDay(1);
+				readStart2.setMonth(1);
+			}
+			if ( readEnd2 != null ) {
+				readEnd2.setDay(31);
+				readEnd2.setMonth(12);
+			}
+		}
+		String minMeasDateParam = "";
+		String maxMeasDateParam = "";
+		if ( readStart2 != null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				minMeasDateParam = "&min-MeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart2.getMonth(), readStart2.getDay(), readStart2.getYear()), "UTF-8");
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				minMeasDateParam = "&min-calYear=" + readStart2.getYear();
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				minMeasDateParam = "&min-waterYear=" + readStart2.getYear();
+			}
+		}
+		if ( readEnd2 != null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				maxMeasDateParam = "&max-MeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd2.getMonth(), readEnd2.getDay(), readEnd2.getYear()), "UTF-8");
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				maxMeasDateParam = "&max-calYear=" + readEnd2.getYear();
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				maxMeasDateParam = "&max-waterYear=" + readEnd2.getYear();
+			}
+		}
+		tsRequest.append(minMeasDateParam);
+		tsRequest.append(maxMeasDateParam);
+		// Add URL without key, to help with troubleshooting.
+		ts.setProperty("dataUrl", tsRequest.toString().replace("format=json", "format=jsonprettyprint"));
+		tsRequest.append(getApiKeyString());
+		Message.printStatus(2, routine, "Retrieve surface water station time series from DWR REST API request url: " + tsRequest);
+		
+		JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(tsRequest.toString());
+		if ( (results == null) || (results.size() == 0) ){
+			return ts;
+		}
+
+		// Set the actual data period to the requested period if specified,
+		// or the actual period if the requested period was not specified.
+		if ( readStart2 == null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				SurfaceWaterTSDay staTS = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSDay.class);
+				DateTime firstDate = staTS.getMeasDate();
+				ts.setDate1(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				SurfaceWaterTSMonth staTS = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSMonth.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_MONTH);
+				firstDate.setMonth(staTS.getCalMonNum());
+				firstDate.setYear(staTS.getCalYear());
+				ts.setDate1(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				SurfaceWaterTSYear staTS = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSYear.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_YEAR);
+				firstDate.setYear(staTS.getWaterYear());
+				ts.setDate1(firstDate);
+			}
+		}
+		else {
+			ts.setDate1(readStart2);
+		}
+		if ( readEnd2 == null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				SurfaceWaterTSDay staTS = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSDay.class);
+				DateTime firstDate = staTS.getMeasDate();
+				ts.setDate2(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				SurfaceWaterTSMonth staTS = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSMonth.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_MONTH);
+				firstDate.setMonth(staTS.getCalMonNum());
+				firstDate.setYear(staTS.getCalYear());
+				ts.setDate2(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				SurfaceWaterTSYear staTS = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSYear.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_YEAR);
+				firstDate.setYear(staTS.getWaterYear());
+				ts.setDate2(firstDate);
+			}
+		}
+		else {
+			ts.setDate2(readEnd2);
+		}
+
+		// Allocate data space.
+		ts.allocateDataSpace();
+		Message.printStatus(2, routine, "Allocated memory for " + ts.getDate1() + " to " + ts.getDate2() );
+		
+		// Set the properties.
+		ts.addToGenesis("Read data from web services: " + tsRequest );
+		
+		// Read the data
+		// Pass data into the TS object.
+		String measUnit = null;
+		if ( intervalBase == TimeInterval.DAY ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_DAY);
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSDay tsDay = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSDay.class);
+				// If units were not set in the station data type, set here.
+				measUnit = tsDay.getMeasUnit();
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date = tsDay.getMeasDate();
+					
+				// Get the data.
+				Double value = tsDay.getValue();
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+		else if ( intervalBase == TimeInterval.MONTH ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_MONTH);
+			Double value = null;
+			boolean doAf = false;
+			boolean doAvg = false;
+			boolean doMax = false;
+			boolean doMin = false;
+			boolean doTotal = false;
+			if ( dataTypeReqUpper.indexOf("AVG") > 0 ) {
+				doAvg = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MAX") > 0 ) {
+				doMax = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MIN") > 0 ) {
+				doMin = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("TOT") > 0 ) {
+				doTotal = true;
+				doAf = true;
+			}
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSMonth tsMonth = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSMonth.class);
+				// If units were not set in the station data type, set here.
+				if ( doAf ) {
+					measUnit = "af";
+				}
+				else {
+					measUnit = "cfs";
+				}
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date.setMonth ( tsMonth.getCalMonNum() );
+				date.setYear ( tsMonth.getCalYear() );
+					
+				// Get the data.
+				if ( doAvg ) {
+					value = tsMonth.getAvgQCfs();
+				}
+				else if ( doMax ) {
+					value = tsMonth.getMaxQCfs();
+				}
+				else if ( doMin ) {
+					value = tsMonth.getMinQCfs();
+				}
+				else if ( doTotal ) {
+					value = tsMonth.getTotalQAf();
+				}
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+		else if ( intervalBase == TimeInterval.YEAR ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_YEAR);
+			Double value = null;
+			boolean doAf = false;
+			boolean doAvg = false;
+			boolean doMax = false;
+			boolean doMin = false;
+			boolean doTotal = false;
+			if ( dataTypeReqUpper.indexOf("AVG") > 0 ) {
+				doAvg = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MAX") > 0 ) {
+				doMax = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MIN") > 0 ) {
+				doMin = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("TOT") > 0 ) {
+				doTotal = true;
+				doAf = true;
+			}
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSYear tsYear = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSYear.class);
+				// If units were not set in the station data type, set here.
+				if ( doAf ) {
+					measUnit = "af";
+				}
+				else {
+					measUnit = "cfs";
+				}
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date.setYear ( tsYear.getWaterYear() );
+					
+				// Get the data.
+				if ( doAvg ) {
+					value = tsYear.getAvgQCfs();
+				}
+				else if ( doMax ) {
+					value = tsYear.getMaxQCfs();
+				}
+				else if ( doMin ) {
+					value = tsYear.getMinQCfs();
+				}
+				else if ( doTotal ) {
+					value = tsYear.getTotalQAf();
+				}
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+	}
+	else if ( dataTypeReq.equalsIgnoreCase("DivComment") ) {
 		// Structure diversion comment, different than typical diversion record.
 		
 		// Get Structure:
@@ -2815,8 +3337,11 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(dataType.equalsIgnoreCase("DivTotal") || dataType.equalsIgnoreCase("RelTotal") ||
-			dataTypeUpper.startsWith("WATERCLASS") || dataTypeUpper.startsWith("'WATERCLASS")){
+	else if (
+		dataTypeReq.equalsIgnoreCase("DivTotal") ||
+		dataTypeReq.equalsIgnoreCase("RelTotal") ||
+		dataTypeReqUpper.startsWith("WATERCLASS") ||
+		dataTypeReqUpper.startsWith("'WATERCLASS")) {
 		// Structure-related time series that are "diversion records":
 		// - requests involve water class
 		
@@ -2844,28 +3369,28 @@ throws MalformedURLException, Exception
 		
 		DiversionWaterClass waterClassForWdid = null;
 		try {
-			if(dataType.equalsIgnoreCase("DivTotal")){
+			if(dataTypeReq.equalsIgnoreCase("DivTotal")){
 				// Diversion records - total through diversion.
 				// locid is the WDID in this case.
 				String waterClassReqString = null;
 				
 				// Retrieve water class num for given wdid.
-				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataType);
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataTypeReq);
 				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 			}
-			else if(dataType.equalsIgnoreCase("RelTotal")){
+			else if(dataTypeReq.equalsIgnoreCase("RelTotal")){
 				// Release records - total through release.
 				// locid is the WDID in this case.
 				String waterClassReqString = null;
 						
 				// Retrieve water class num for given wdid
-				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataType);
+				waterClassForWdid = readWaterClassNumForWdid(wdid,waterClassReqString,dataTypeReq);
 				waterClassNumForWdid = waterClassForWdid.getWaterclassNum();
 			}
-			else if(dataType.startsWith("WaterClass") || dataType.startsWith("'WaterClass")){
+			else if(dataTypeReq.startsWith("WaterClass") || dataTypeReq.startsWith("'WaterClass")){
 				// Water class, possibly surrounded by single quotes if it contains a period.
 				// locid is the WDID in this case.
-				String waterClassReqString = getWCIdentStringFromDataType(dataType);
+				String waterClassReqString = getWCIdentStringFromDataType(dataTypeReq);
 				
 				//System.out.println("water class: " + waterClassReqString);
 									
@@ -2975,8 +3500,8 @@ throws MalformedURLException, Exception
 				}
 				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
 			}
-			if(debug){ 
-				System.out.println("DivRecRequest: " + divRecRequest);
+			if ( Message.isDebugOn ) { 
+				Message.printDebug(dl, routine, "DivRecRequest: " + divRecRequest);
 			}
 			// Save the URL without API key as a property to help with troubleshooting.
 			ts.setProperty("dataUrl", divRecRequest.toString().replace("format=json", "format=jsonprettyprint"));
@@ -3319,13 +3844,16 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(dataType.equalsIgnoreCase("Stage") || dataType.equalsIgnoreCase("Volume")){
+	else if (
+		dataTypeReq.equalsIgnoreCase("Stage") ||
+		dataTypeReq.equalsIgnoreCase("Volume") ) {
+		// Reservoir structure.
 		String wdid = locid;
 		
 		// Get the structure.
 		String structRequest = getServiceRootURI() + "/structures?format=json&wdid=" + wdid + getApiKeyString();
-		if(debug){
-			System.out.println("structRequest: " + structRequest);
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( dl, routine, "structRequest: " + structRequest );
 		}
 		JsonNode structResult = jacksonToolkit.getJsonNodeFromWebServices(structRequest).get(0);
 		// Log structure request for debugging properties.
@@ -3360,11 +3888,11 @@ throws MalformedURLException, Exception
 		ts.setDate2Original(lastDate);
 			
 		// TODO smalers 2019-06-15 hard-code units since only specified in documentation.
-		if ( dataType.equalsIgnoreCase("Stage") ) {
+		if ( dataTypeReq.equalsIgnoreCase("Stage") ) {
 			ts.setDataUnitsOriginal("FT");
 			ts.setDataUnits("FT");
 		}
-		else if ( dataType.equalsIgnoreCase("Volume") ) {
+		else if ( dataTypeReq.equalsIgnoreCase("Volume") ) {
 			ts.setDataUnitsOriginal("ACFT");
 			ts.setDataUnits("ACFT");
 		}
@@ -3412,8 +3940,8 @@ throws MalformedURLException, Exception
 			// Save the URL without API key as property for troubleshooting.
 			ts.setProperty("dataUrl", divRecRequest.toString().replace("format=json", "format=jsonprettyprint"));
 			divRecRequest += getApiKeyString();
-			if(debug){
-				System.out.println("divRecRequest: " + divRecRequest);
+			if ( Message.isDebugOn ) {
+				Message.printDebug ( dl, routine, "divRecRequest: " + divRecRequest );
 			}
 			JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(divRecRequest);
 			
@@ -3452,10 +3980,10 @@ throws MalformedURLException, Exception
 					
 				// Get the data.
 				Double value = null;
-				if(dataType.equalsIgnoreCase("Stage")){
+				if(dataTypeReq.equalsIgnoreCase("Stage")){
 					value = divStageVol.getStage();
 				}
-				else if(dataType.equalsIgnoreCase("Volume")){
+				else if(dataTypeReq.equalsIgnoreCase("Volume")){
 					value = divStageVol.getVolume();
 				}
 				
@@ -3465,7 +3993,412 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(isTelemetryStationTimeSeriesDataType(dataType)){
+	else if ( isSurfaceWaterStationTimeSeriesDataType(dataTypeReq) ) {
+		// Surface water station time series.
+
+		String dataType = dataTypeReq;
+		if ( (dataTypeReq != null) && dataTypeReq.toUpperCase().startsWith("STREAMFLOW-") ) {
+			// Surface water station data types can only have 'measType=Streamflow' and depending on interval have different statistic values.
+			// TSTool uses Streamflow-Avg for the datatype, so have to strip off the end.
+			dataType = "Streamflow";
+		}
+
+		// Round the times and also remove time zone since not returned from web services.
+		// - TODO smalers 2022-03-16 don't need to round because dates in time series will have
+		//   precision of the time series interval, remove code when tested out.
+		/*
+		if ( readStart != null ) {
+			// Round to 15-minute so that allocated time series will align with data.
+			readStart = new DateTime(readStart);
+			readStart.round(-1, TimeInterval.MINUTE, 15);
+			readStart.setTimeZone("");
+		}
+		if ( readEnd != null ) {
+			// Round to 15-minute so that allocated time series will align with data.
+			readEnd = new DateTime(readEnd);
+			readEnd.round(1, TimeInterval.MINUTE, 15);
+			readEnd.setTimeZone("");
+		}
+		*/
+		
+		// Get the surface water station.
+		String stationRequest = "";
+		String locParam = "";
+		if ( locType.equalsIgnoreCase("abbrev") ) {
+			locParam = "&abbrev=" + locid;
+		}
+		else if ( locType.equalsIgnoreCase("usgs") ) {
+			locParam = "&usgsSiteId=" + locid;
+		}
+		stationRequest = getServiceRootURI() + "/surfacewater/surfacewaterstations?format=json" + locParam + getApiKeyString();
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( dl, routine, "stationRequest: " + stationRequest );
+		}
+		JsonNode results0 = jacksonToolkit.getJsonNodeFromWebServices(stationRequest);
+		JsonNode stationResult = null;
+		if ( results0 == null ) {
+			Message.printWarning(3, routine, "No data returned for:  " + stationRequest);
+			return ts;
+		}
+		else {
+			stationResult = results0.get(0);
+		}
+		
+		SurfaceWaterStation station = (SurfaceWaterStation)jacksonToolkit.treeToValue(stationResult, SurfaceWaterStation.class);
+		Message.printStatus(2, routine, "Retrieve surface water stations from DWR REST API request url: " + stationRequest);
+
+		// Get the surface water station data type.
+		String stationDataTypeRequest = "";
+		stationDataTypeRequest = getServiceRootURI() + "/surfacewater/surfacewaterstationdatatypes?format=json" + locParam +
+			"&measType=" + dataType + getApiKeyString();
+		if ( Message.isDebugOn ) {
+			Message.printDebug(dl, routine, "stationDataTypesRequest: " + stationDataTypeRequest);
+		}
+		results0 = jacksonToolkit.getJsonNodeFromWebServices(stationDataTypeRequest);
+		JsonNode stationDataTypeResult = null;
+		if ( results0 == null ) {
+			Message.printWarning(3, routine, "No data returned for:  " + stationDataTypeRequest);
+			return ts;
+		}
+		else {
+			stationDataTypeResult = results0.get(0);
+		}
+		
+		SurfaceWaterStationDataType stationDataType = (SurfaceWaterStationDataType)jacksonToolkit.treeToValue(stationDataTypeResult, SurfaceWaterStationDataType.class);
+		Message.printStatus(2, routine, "Retrieve surface water station data types from DWR REST API request url: " + stationDataTypeRequest);
+		
+		// Set the description:
+		// - use the station name since nothing suitable on data type/parameter
+		ts.setDescription(station.getStationName());
+		
+		// Set data units depending on the data type:
+		// - also set a boolean to allow checking the records because some time series don't seem to have units in metadata
+		if ( dataTypeReq.equalsIgnoreCase("Streamflow-Avg") ||
+			dataTypeReq.equalsIgnoreCase("Streamflow-Min") ||
+			dataTypeReq.equalsIgnoreCase("Streamflow-Max") ) {
+			ts.setDataUnitsOriginal("cfs");
+			ts.setDataUnits("cfs");
+		}
+		else if ( dataTypeReq.equalsIgnoreCase("Streamflow-Total") ) {
+			ts.setDataUnitsOriginal("af");
+			ts.setDataUnits("af");
+		}
+		boolean dataUnitsSet = false;
+		boolean dataUnitsOriginalSet = false;
+		if ( !ts.getDataUnitsOriginal().isEmpty() ) {
+			dataUnitsOriginalSet = true;
+		}
+		if ( !ts.getDataUnits().isEmpty() ) {
+			dataUnitsSet = true;
+		}
+		
+		// Set the available start and end date to the time series parameter period.
+		ts.setDate1Original(stationDataType.getPorStart());
+		ts.setDate2Original(stationDataType.getPorEnd());
+		Message.printStatus(2,routine,"Date1Original=" + ts.getDate1Original() + " Date2Original=" + ts.getDate2Original());
+
+		setTimeSeriesPropertiesForSurfaceWaterStation(ts, station, stationDataType);
+		setCommentsForSurfaceWaterStation(ts, station);
+
+		// If not reading the data, return the time series with only header information.
+		if ( !readData ) {
+			return ts;
+		}
+
+		// Read the time series records.
+		StringBuilder tsRequest = new StringBuilder();
+
+		// Retrieve surface water station time series data based on interval
+		// - make sure the precision of the requested dates is day for web services
+		DateTime readStart2 = null;
+		DateTime readEnd2 = null;
+		if ( readStart != null ) {
+			readStart2 = new DateTime(readStart);
+			readStart2.setPrecision(DateTime.PRECISION_DAY);
+		}
+		if ( readEnd != null ) {
+			readEnd2 = new DateTime(readEnd);
+			readEnd2.setPrecision(DateTime.PRECISION_DAY);
+		}
+		// Date/time format is day format regardless of interval, but set to full month and year to ensure all data is returned.
+		if ( intervalBase == DateTime.PRECISION_DAY ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertsday?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// No need to change the requested date/time - use what was passed in.
+		}
+		else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertsmonth?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// Specify a full months using day precision.
+			if ( readStart2 != null ) {
+				readStart2.setDay(1);
+			}
+			if ( readEnd2 != null ) {
+				readEnd2.setDay(TimeUtil.numDaysInMonth(readEnd2));
+			}
+		}
+		else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+			tsRequest.append(getServiceRootURI() + "/surfacewater/surfacewatertswateryear?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
+			// Specify a full months using day precision.
+			if ( readStart2 != null ) {
+				readStart2.setDay(1);
+				readStart2.setMonth(1);
+			}
+			if ( readEnd2 != null ) {
+				readEnd2.setDay(31);
+				readEnd2.setMonth(12);
+			}
+		}
+		String minMeasDateParam = "";
+		String maxMeasDateParam = "";
+		if ( readStart2 != null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				minMeasDateParam = "&min-MeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart2.getMonth(), readStart2.getDay(), readStart2.getYear()), "UTF-8");
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				minMeasDateParam = "&min-calYear=" + readStart2.getYear();
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				minMeasDateParam = "&min-waterYear=" + readStart2.getYear();
+			}
+		}
+		if ( readEnd2 != null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				maxMeasDateParam = "&max-MeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd2.getMonth(), readEnd2.getDay(), readEnd2.getYear()), "UTF-8");
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				maxMeasDateParam = "&max-calYear=" + readEnd2.getYear();
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				maxMeasDateParam = "&max-waterYear=" + readEnd2.getYear();
+			}
+		}
+		tsRequest.append(minMeasDateParam);
+		tsRequest.append(maxMeasDateParam);
+		// Add URL without key, to help with troubleshooting.
+		ts.setProperty("dataUrl", tsRequest.toString().replace("format=json", "format=jsonprettyprint"));
+		tsRequest.append(getApiKeyString());
+		Message.printStatus(2, routine, "Retrieve surface water station time series from DWR REST API request url: " + tsRequest);
+		
+		JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(tsRequest.toString());
+		if ( (results == null) || (results.size() == 0) ){
+			return ts;
+		}
+
+		// Set the actual data period to the requested period if specified,
+		// or the actual period if the requested period was not specified.
+		if ( readStart2 == null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				SurfaceWaterTSDay staTS = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSDay.class);
+				DateTime firstDate = staTS.getMeasDate();
+				ts.setDate1(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				SurfaceWaterTSMonth staTS = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSMonth.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_MONTH);
+				firstDate.setMonth(staTS.getCalMonNum());
+				firstDate.setYear(staTS.getCalYear());
+				ts.setDate1(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				SurfaceWaterTSYear staTS = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(0), SurfaceWaterTSYear.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_YEAR);
+				firstDate.setYear(staTS.getWaterYear());
+				ts.setDate1(firstDate);
+			}
+		}
+		else {
+			ts.setDate1(readStart2);
+		}
+		if ( readEnd2 == null ) {
+			if ( intervalBase == DateTime.PRECISION_DAY ) {
+				SurfaceWaterTSDay staTS = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSDay.class);
+				DateTime firstDate = staTS.getMeasDate();
+				ts.setDate2(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_MONTH ) {
+				SurfaceWaterTSMonth staTS = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSMonth.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_MONTH);
+				firstDate.setMonth(staTS.getCalMonNum());
+				firstDate.setYear(staTS.getCalYear());
+				ts.setDate2(firstDate);
+			}
+			else if ( intervalBase == DateTime.PRECISION_YEAR ) {
+				SurfaceWaterTSYear staTS = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(results.size() - 1), SurfaceWaterTSYear.class);
+				DateTime firstDate = new DateTime(DateTime.PRECISION_YEAR);
+				firstDate.setYear(staTS.getWaterYear());
+				ts.setDate2(firstDate);
+			}
+		}
+		else {
+			ts.setDate2(readEnd2);
+		}
+
+		// Allocate data space.
+		ts.allocateDataSpace();
+		Message.printStatus(2, routine, "Allocated memory for " + ts.getDate1() + " to " + ts.getDate2() );
+		
+		// Set the properties.
+		ts.addToGenesis("Read data from web services: " + tsRequest );
+		
+		// Read the data
+		// Pass data into the TS object.
+		String measUnit = null;
+		if ( intervalBase == TimeInterval.DAY ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_DAY);
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSDay tsDay = (SurfaceWaterTSDay)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSDay.class);
+				// If units were not set in the station data type, set here.
+				measUnit = tsDay.getMeasUnit();
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date = tsDay.getMeasDate();
+					
+				// Get the data.
+				Double value = tsDay.getValue();
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+		else if ( intervalBase == TimeInterval.MONTH ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_MONTH);
+			Double value = null;
+			boolean doAf = false;
+			boolean doAvg = false;
+			boolean doMax = false;
+			boolean doMin = false;
+			boolean doTotal = false;
+			if ( dataTypeReqUpper.indexOf("AVG") > 0 ) {
+				doAvg = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MAX") > 0 ) {
+				doMax = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MIN") > 0 ) {
+				doMin = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("TOT") > 0 ) {
+				doTotal = true;
+				doAf = true;
+			}
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSMonth tsMonth = (SurfaceWaterTSMonth)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSMonth.class);
+				// If units were not set in the station data type, set here.
+				if ( doAf ) {
+					measUnit = "af";
+				}
+				else {
+					measUnit = "cfs";
+				}
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date.setMonth ( tsMonth.getCalMonNum() );
+				date.setYear ( tsMonth.getCalYear() );
+					
+				// Get the data.
+				if ( doAvg ) {
+					value = tsMonth.getAvgQCfs();
+				}
+				else if ( doMax ) {
+					value = tsMonth.getMaxQCfs();
+				}
+				else if ( doMin ) {
+					value = tsMonth.getMinQCfs();
+				}
+				else if ( doTotal ) {
+					value = tsMonth.getTotalQAf();
+				}
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+		else if ( intervalBase == TimeInterval.YEAR ) {
+			// Can declare DateTime outside of loop because time series stores in an array.
+			DateTime date = new DateTime(DateTime.PRECISION_YEAR);
+			Double value = null;
+			boolean doAf = false;
+			boolean doAvg = false;
+			boolean doMax = false;
+			boolean doMin = false;
+			boolean doTotal = false;
+			if ( dataTypeReqUpper.indexOf("AVG") > 0 ) {
+				doAvg = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MAX") > 0 ) {
+				doMax = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("MIN") > 0 ) {
+				doMin = true;
+			}
+			else if ( dataTypeReqUpper.indexOf("TOT") > 0 ) {
+				doTotal = true;
+				doAf = true;
+			}
+			for ( int i = 0; i < results.size(); i++ ) {
+				SurfaceWaterTSYear tsYear = (SurfaceWaterTSYear)jacksonToolkit.treeToValue(results.get(i), SurfaceWaterTSYear.class);
+				// If units were not set in the station data type, set here.
+				if ( doAf ) {
+					measUnit = "af";
+				}
+				else {
+					measUnit = "cfs";
+				}
+				if ( !dataUnitsSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnits(measUnit);
+					dataUnitsSet = true;
+				}
+				if ( !dataUnitsOriginalSet && (measUnit != null) && !measUnit.isEmpty() ) {
+					// Make sure the units are consistent.
+					ts.setDataUnitsOriginal(measUnit);
+					dataUnitsOriginalSet = true;
+				}
+				
+				// Set the date directly from the time series.
+				date.setYear ( tsYear.getWaterYear() );
+					
+				// Get the data.
+				if ( doAvg ) {
+					value = tsYear.getAvgQCfs();
+				}
+				else if ( doMax ) {
+					value = tsYear.getMaxQCfs();
+				}
+				else if ( doMin ) {
+					value = tsYear.getMinQCfs();
+				}
+				else if ( doTotal ) {
+					value = tsYear.getTotalQAf();
+				}
+				if ( !isTimeSeriesValueMissing(value, true) ) {
+					ts.setDataValue(date, value);
+				}
+			}
+		}
+	}
+	else if ( isTelemetryStationTimeSeriesDataType(dataTypeReq) ) {
 		String abbrev = locid;
 		String parameter = ts.getDataType();
 
@@ -3485,8 +4418,8 @@ throws MalformedURLException, Exception
 		
 		// Get the telemetry station.
 		String telemetryRequest = getServiceRootURI() + "/telemetrystations/telemetrystation?format=json&includeThirdParty=true&abbrev=" + abbrev + getApiKeyString();
-		if(debug){
-			System.out.println("telemetryRequest: " + telemetryRequest);
+		if ( Message.isDebugOn ) {
+			Message.printDebug(dl, routine, "telemetryRequest: " + telemetryRequest);
 		}
 		JsonNode results0 = jacksonToolkit.getJsonNodeFromWebServices(telemetryRequest);
 		JsonNode telemetryResult = null;
@@ -3504,8 +4437,8 @@ throws MalformedURLException, Exception
 		// Get the Telemetry station data type (TODO smalers 2019-06-16 might be able to not query station if have enough overlap).
 		String telemetryStationDataTypeRequest = getServiceRootURI() + "/telemetrystations/telemetrystationdatatypes?format=json&includeThirdParty=true&abbrev=" + abbrev + 
 			"&parameter=" + parameter + getApiKeyString();
-		if(debug){
-			System.out.println("telemetryStationDataTypeRequest: " + telemetryStationDataTypeRequest);
+		if ( Message.isDebugOn ) {
+			Message.printDebug(dl, routine, "telemetryStationDataTypeRequest: " + telemetryStationDataTypeRequest);
 		}
 		results0 = jacksonToolkit.getJsonNodeFromWebServices(telemetryStationDataTypeRequest);
 		JsonNode telemetryStationDataTypeResult = null;
@@ -3624,7 +4557,7 @@ throws MalformedURLException, Exception
 		// Pass data into the TS object.
 		String measUnit = null;
 		if(intervalBase == TimeInterval.MINUTE){
-			// Can declare DateTime outside of loop because time series stores in an array>
+			// Can declare DateTime outside of loop because time series stores in an array.
 			DateTime date = new DateTime(DateTime.PRECISION_MINUTE);
 			for(int i = 0; i < results.size(); i++){
 				TelemetryTimeSeries telTSMinute = (TelemetryTimeSeries)jacksonToolkit.treeToValue(results.get(i), TelemetryTimeSeries.class);
@@ -3717,13 +4650,16 @@ throws MalformedURLException, Exception
 			}
 		}
 	}
-	else if(dataType.equalsIgnoreCase("WaterLevelDepth") || dataType.equalsIgnoreCase("WaterLevelElev")){
+	else if (
+		dataTypeReq.equalsIgnoreCase("WaterLevelDepth") ||
+		dataTypeReq.equalsIgnoreCase("WaterLevelElev") ) {
+		// Well structure time series.
 		String wellid = locid;
 		
 		// Get the well.
 		String wellRequest = getServiceRootURI() + "/groundwater/waterlevels/wells?format=json&wellid=" + wellid + getApiKeyString();
-		if(debug){
-			System.out.println("wellRequest: " + wellRequest);
+		if ( Message.isDebugOn ) {
+			Message.printDebug ( dl, routine, "wellRequest: " + wellRequest );
 		}
 		JsonNode wellResults = jacksonToolkit.getJsonNodeFromWebServices(wellRequest).get(0);
 		
@@ -3767,8 +4703,8 @@ throws MalformedURLException, Exception
 		// Read the data.
 		if ( readData ) {
 			String wellMeasurementRequest = getServiceRootURI() + "/groundwater/waterlevels/wellmeasurements/" + wellid + "?format=json";
-			if(debug){
-				System.out.println("wellMeasurementRequest: " + wellMeasurementRequest);
+			if ( Message.isDebugOn ) {
+				Message.printDebug ( dl, routine, "wellMeasurementRequest: " + wellMeasurementRequest );
 			}
 			// Add dates to limit query.
 			if ( readStart != null ) {
@@ -3819,7 +4755,7 @@ throws MalformedURLException, Exception
 				// Get the data.
 				// TODO @jurentie 06/26/2018 - depthToWater or depthWaterBelowLandSurface.
 				Double value;
-				if(dataType.equalsIgnoreCase("WaterLevelDepth")){
+				if ( dataTypeReq.equalsIgnoreCase("WaterLevelDepth") ) {
 					value = wellMeas.getDepthToWater();
 				}
 				else {

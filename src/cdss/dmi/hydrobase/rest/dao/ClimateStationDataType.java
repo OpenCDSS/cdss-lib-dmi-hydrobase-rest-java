@@ -26,7 +26,6 @@ package cdss.dmi.hydrobase.rest.dao;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
-import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class stores climate station data type data.
@@ -226,15 +225,15 @@ public class ClimateStationDataType {
 	}
 	
 	public void setPorEnd(String porEnd) {
-		this.porEnd = TimeToolkit.getInstance().toDateTime(porEnd, false);
+		this.porEnd = DateTime.parse(porEnd);
 	}
 
 	public void setPorLastModified(String porLastModified) {
-		this.porLastModified = TimeToolkit.getInstance().toDateTime(porLastModified, false);
+		this.porLastModified = DateTime.parse(porLastModified);
 	}
 	
 	public void setPorStart(String porStart) {
-		this.porStart = TimeToolkit.getInstance().toDateTime(porStart, false);
+		this.porStart = DateTime.parse(porStart);
 	}
 
 	public void setSiteId(String siteId) {

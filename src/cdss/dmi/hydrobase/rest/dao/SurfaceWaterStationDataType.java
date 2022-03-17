@@ -25,8 +25,8 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
-import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class stores surface water station data type data.
@@ -52,6 +52,11 @@ public class SurfaceWaterStationDataType {
 	private String dataSource;
 	
 	/**
+	 * Data type, used in TSTool.
+	 */
+	private String dataType;
+
+	/**
 	 * DWR Water Division.
 	 */
 	private Integer division;
@@ -72,7 +77,7 @@ public class SurfaceWaterStationDataType {
 	private Double longdecdeg;
 	
 	/**
-	 * Measurement type.
+	 * Measurement type, from the web service.
 	 */
 	private String measType;
 
@@ -138,6 +143,10 @@ public class SurfaceWaterStationDataType {
 	
 	public String getDataSource() {
 		return dataSource;
+	}
+
+	public String getDataType() {
+		return dataType;
 	}
 	
 	public Integer getDivision() {
@@ -214,6 +223,10 @@ public class SurfaceWaterStationDataType {
 		this.dataSource = dataSource;
 	}
 	
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
+
 	public void setDivision(Integer division) {
 		this.division = division;
 	}
@@ -239,15 +252,48 @@ public class SurfaceWaterStationDataType {
 	}
 	
 	public void setPorEnd(String porEnd) {
-		this.porEnd = TimeToolkit.getInstance().toDateTime(porEnd, false);
+		if ( porEnd == null ) {
+			this.porEnd = null;
+		}
+		else {
+			try {
+				this.porEnd = DateTime.parse(porEnd);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setPorEnd", "Error parsing porEnd: " + porEnd);
+				Message.printWarning(3, "setPorEnd", e);
+			}
+		}
 	}
 
 	public void setPorLastModified(String porLastModified) {
-		this.porLastModified = TimeToolkit.getInstance().toDateTime(porLastModified, false);
+		if ( porLastModified == null ) {
+			this.porLastModified = null;
+		}
+		else {
+			try {
+				this.porLastModified = DateTime.parse(porLastModified);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setPorLastModified", "Error parsing porLastModified: " + porLastModified);
+				Message.printWarning(3, "setPorLastModified", e);
+			}
+		}
 	}
 	
 	public void setPorStart(String porStart) {
-		this.porStart = TimeToolkit.getInstance().toDateTime(porStart, false);
+		if ( porStart == null ) {
+			this.porStart = null;
+		}
+		else {
+			try {
+				this.porStart = DateTime.parse(porStart);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setPorStart", "Error parsing porStart: " + porStart);
+				Message.printWarning(3, "setPorStart", e);
+			}
+		}
 	}
 
 	public void setSt(String st) {
