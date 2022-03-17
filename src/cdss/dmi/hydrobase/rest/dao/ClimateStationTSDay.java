@@ -185,12 +185,12 @@ public class ClimateStationTSDay {
 		this.flagD = flagD;
 	}
 	
-	public void setMeasDate(DateTime measDate) {
-		this.measDate = measDate;
+	public void setMeasDate(String measDate) {
+		this.measDate = DateTime.parse(measDate);
 	}
 
-	public void setModified(DateTime modified) {
-		this.modified = modified;
+	public void setModified(String modified) {
+		this.modified = DateTime.parse(modified);
 	}
 
 	public void setMeasType(String measType) {

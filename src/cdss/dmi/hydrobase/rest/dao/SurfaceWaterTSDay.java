@@ -25,6 +25,7 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
 
 /**
@@ -198,12 +199,34 @@ public class SurfaceWaterTSDay {
 		this.flagD = flagD;
 	}
 	
-	public void setMeasDate(DateTime measDate) {
-		this.measDate = measDate;
+	public void setMeasDate(String measDate) {
+		if ( measDate == null ) {
+			this.measDate = null;
+		}
+		else {
+			try {
+				this.measDate = DateTime.parse(measDate);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setMeasDate", "Error parsing measDate: " + measDate);
+				Message.printWarning(3, "setMeasDate", e);
+			}
+		}
 	}
 
-	public void setModified(DateTime modified) {
-		this.modified = modified;
+	public void setModified(String modified) {
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			try {
+				this.modified = DateTime.parse(modified);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setModified", "Error parsing modified: " + modified);
+				Message.printWarning(3, "setModified", e);
+			}
+		}
 	}
 
 	public void setMeasType(String measType) {

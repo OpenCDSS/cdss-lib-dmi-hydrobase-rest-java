@@ -26,7 +26,6 @@ package cdss.dmi.hydrobase.rest.dao;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import RTi.Util.Time.DateTime;
-import cdss.dmi.hydrobase.rest.dto.TimeToolkit;
 
 /**
  * This class stores climate station data.
@@ -206,7 +205,7 @@ public class ClimateStation {
 	}
 	
 	public void setEndDate(String endDate) {
-		this.endDate = TimeToolkit.getInstance().toDateTime(endDate, false);
+		this.endDate = DateTime.parse(endDate);
 	}
 
 	public void setLatitude(Double latitude) {
@@ -222,7 +221,7 @@ public class ClimateStation {
 	}
 	
 	public void setModified(String modified) {
-		this.modified = TimeToolkit.getInstance().toDateTime(modified, false);
+		this.modified = DateTime.parse(modified);
 	}
 	
 	public void setMoreInformation(String moreInformation) {
@@ -234,7 +233,7 @@ public class ClimateStation {
 	}
 
 	public void setStartDate(String startDate) {
-		this.startDate = TimeToolkit.getInstance().toDateTime(startDate, false);
+		this.startDate = DateTime.parse(startDate);
 	}
 
 	public void setState(String state) {

@@ -25,6 +25,7 @@ package cdss.dmi.hydrobase.rest.dao;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import RTi.Util.Message.Message;
 import RTi.Util.Time.DateTime;
 
 /**
@@ -62,16 +63,6 @@ public class SurfaceWaterTSYear {
 	 */
 	private Double avgQCfs;
 
-	/**
-	 * Calendar month number.
-	 */
-	private Integer calMonNum;
-
-	/**
-	 * Calendar year number.
-	 */
-	private Integer calYear;
-	
 	/**
 	 * Primary source/provider of station data (e.g., "USGS", "DWR").
 	 */
@@ -116,6 +107,11 @@ public class SurfaceWaterTSYear {
 	 * USGS site ID.
 	 */
 	private String usgsSiteId;
+
+	/**
+	 * Water year.
+	 */
+	private Integer waterYear;
 	
 	// Getters for data members.
 
@@ -125,14 +121,6 @@ public class SurfaceWaterTSYear {
 
 	public Double getAvgQCfs(){
 		return avgQCfs;
-	}
-
-	public Integer getCalMonNum() {
-		return calMonNum;
-	}
-
-	public Integer getCalyear() {
-		return calYear;
 	}
 
 	public String getDataSource() {
@@ -171,6 +159,10 @@ public class SurfaceWaterTSYear {
 		return usgsSiteId;
 	}
 
+	public Integer getWaterYear() {
+		return waterYear;
+	}
+
 	// Setters for data members.
 
 	public void setAbbrev(String abbrev) {
@@ -181,14 +173,6 @@ public class SurfaceWaterTSYear {
 		this.avgQCfs = avgQCfs;
 	}
 	
-	public void setCalMonNum(Integer calMonNum) {
-		this.calMonNum = calMonNum;
-	}
-
-	public void setCalYear(Integer calYear) {
-		this.calYear = calYear;
-	}
-
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
 	}
@@ -209,8 +193,19 @@ public class SurfaceWaterTSYear {
 		this.minQCfs = minQCfs;
 	}
 
-	public void setModified(DateTime modified) {
-		this.modified = modified;
+	public void setModified(String modified) {
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			try {
+				this.modified = DateTime.parse(modified);
+			}
+			catch ( Exception e ) {
+				Message.printWarning(3, "setModified", "Error parsing modified: " + modified);
+				Message.printWarning(3, "setModified", e);
+			}
+		}
 	}
 
 	public void setStationNum(Integer stationNum) {
@@ -225,6 +220,10 @@ public class SurfaceWaterTSYear {
 		this.usgsSiteId = usgsSiteId;
 	}
 
+	public void setWaterYear(Integer waterYear) {
+		this.waterYear = waterYear;
+	}
+
 	/**
 	 * To string method for testing purposes:
 	 * Variables defined in order of how they are returned in a json format from
@@ -235,8 +234,6 @@ public class SurfaceWaterTSYear {
 		return "SurfaceWaterTSDay: [ " 
 			+ "abbrev: " + abbrev
 			+ ", avgQcfs: " + avgQCfs
-			+ ", calMonNum: " + calMonNum
-			+ ", calYear: " + calYear
 			+ ", dataSource: " + dataSource
 			+ ", maxQCfs: " + maxQCfs
 			+ ", measCount: " + measCount
@@ -246,6 +243,7 @@ public class SurfaceWaterTSYear {
 			+ ", stationNum: " + stationNum
 			+ ", totalQAf: " + totalQAf
 			+ ", usgsSiteId: " + usgsSiteId
+			+ ", waterYear: " + waterYear
 			+ " ]\n";
 	}
 
