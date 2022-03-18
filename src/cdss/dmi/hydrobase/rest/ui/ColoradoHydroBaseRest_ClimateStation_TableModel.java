@@ -69,7 +69,12 @@ public final int COL_INPUT_TYPE = 16;
 /**
 Input type for time series identifier.
 */
-private String __inputType = "ColoradoHydroBaseRest";
+private String inputType = "ColoradoHydroBaseRest";
+
+/**
+Data interval.
+*/
+private String interval = "";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -81,7 +86,7 @@ Constructor.  This builds the model for displaying the given HydroBase time seri
 */
 public ColoradoHydroBaseRest_ClimateStation_TableModel ( JWorksheet worksheet, List<ClimateStationDataType> data )
 throws Exception {
-    this ( worksheet, data, null );
+    this ( worksheet, data, "", null );
 }
 
 /**
@@ -89,20 +94,22 @@ Constructor.  This builds the model for displaying the given HydroBase time seri
 @param worksheet the JWorksheet that displays the data from the table model.
 @param data the list of ColoradoHydroBaseRest_ClimateStationDataType
 that will be displayed in the table (null is allowed - see setData()).
-@inputType input type for time series.
+@param interval time series interval (e.g., "Day"), from TSTool UI
+@param input type for time series.
 @throws Exception if an invalid results passed in.
 */
-public ColoradoHydroBaseRest_ClimateStation_TableModel ( JWorksheet worksheet, List<ClimateStationDataType> data, String inputType )
+public ColoradoHydroBaseRest_ClimateStation_TableModel ( JWorksheet worksheet, List<ClimateStationDataType> data, String interval, String inputType )
 throws Exception {
 	if ( data == null ) {
-		_rows = 0;
+		this._rows = 0;
 	}
 	else {
-	    _rows = data.size();
+	    this._rows = data.size();
 	}
-	_data = data;
+	this._data = data;
+	this.interval = interval;
 	if ( (inputType != null) && !inputType.equals("") ) {
-	    __inputType = inputType;
+	    this.inputType = inputType;
 	}
 }
 
@@ -192,14 +199,14 @@ Returns an array containing the column widths (in number of characters).
 */
 public int[] getColumnWidths() {
     int[] widths = new int[__COLUMNS];
-    widths[COL_SITE_ID] = 7;
+    widths[COL_SITE_ID] = 9;
     widths[COL_NAME] = 20;
     widths[COL_DATA_SOURCE] = 10;
     widths[COL_DATA_TYPE] = 15;
     widths[COL_TIME_STEP] = 7;
     widths[COL_UNITS] = 8;
-    widths[COL_START] = 10;
-    widths[COL_END] = 10;
+    widths[COL_START] = 7;
+    widths[COL_END] = 7;
     //widths[COL_MEAS_COUNT] = 8;
     widths[COL_DIV] = 3;
     widths[COL_DIST] = 3;
@@ -275,29 +282,31 @@ public Object getValueAt(int row, int col) {
 
 	ClimateStationDataType tsds = _data.get(row);
 	
-	//String timestep = tsds.getTimeStep();
-	String timestep = "";
 	DateTime dt;
 	switch (col) {
 		// case 0 handled above.
 		case COL_SITE_ID: return tsds.getSiteId();
 		case COL_NAME: return tsds.getStationName();
 		case COL_DATA_SOURCE: return tsds.getDataSource();
-		case COL_DATA_TYPE: return tsds.getMeasType();
-		case COL_TIME_STEP: return timestep;
+		case COL_DATA_TYPE:
+			// Data type is consistent with TSTool, don't use measType directly.
+			//return tsds.getMeasType();
+			return tsds.getDataType();
+		case COL_TIME_STEP:
+			return this.interval;
 		case COL_UNITS: return tsds.getMeasUnit();
 		case COL_START:
 			dt = tsds.getPorStart();
 			if ( dt == null ) {
 				return null;
 			}
-			else if ( timestep.equalsIgnoreCase("day") ) {
+			else if ( this.interval.equalsIgnoreCase("day") ) {
 				dt.setPrecision(DateTime.PRECISION_DAY);
 			}
-			else if ( timestep.equalsIgnoreCase("month") ) {
+			else if ( this.interval.equalsIgnoreCase("month") ) {
 				dt.setPrecision(DateTime.PRECISION_MONTH);
 			}
-			else if ( timestep.equalsIgnoreCase("year") ) {
+			else if ( this.interval.equalsIgnoreCase("year") ) {
 				dt.setPrecision(DateTime.PRECISION_YEAR);
 			}
 			return dt.toString();
@@ -306,13 +315,13 @@ public Object getValueAt(int row, int col) {
 			if ( dt == null ) {
 				return null;
 			}
-			else if ( timestep.equalsIgnoreCase("day") ) {
+			else if ( this.interval.equalsIgnoreCase("day") ) {
 				dt.setPrecision(DateTime.PRECISION_DAY);
 			}
-			else if ( timestep.equalsIgnoreCase("month") ) {
+			else if ( this.interval.equalsIgnoreCase("month") ) {
 				dt.setPrecision(DateTime.PRECISION_MONTH);
 			}
-			else if ( timestep.equalsIgnoreCase("year") ) {
+			else if ( this.interval.equalsIgnoreCase("year") ) {
 				dt.setPrecision(DateTime.PRECISION_YEAR);
 			}
 			return dt.toString();
@@ -322,7 +331,7 @@ public Object getValueAt(int row, int col) {
 		case COL_COUNTY: return tsds.getCounty();
 		case COL_STATE: return "CO";
 		case COL_LONG:
-			Double longitude = tsds.getLongdecdeg();
+			Double longitude = tsds.getLongitude();
 			if ( longitude == null ) {
 				return null;
 			}
@@ -330,7 +339,7 @@ public Object getValueAt(int row, int col) {
 				return df.format(longitude);
 			}
 		case COL_LAT:
-			Double latitude = tsds.getLatdecdeg();
+			Double latitude = tsds.getLatitude();
 			if ( latitude == null ) {
 				return null;
 			}
@@ -339,18 +348,17 @@ public Object getValueAt(int row, int col) {
 			}
 		case COL_UTM_X: return tsds.getUtmX();
 		case COL_UTM_Y: return tsds.getUtmY();
-		case COL_INPUT_TYPE: return __inputType;
+		case COL_INPUT_TYPE: return inputType;
 		default: return "";
 	}
 }
 
 /**
-Set the input type (default is "HydroBase" but need to change when the table model is used for
-multiple purposes.
+Set the input type (default is "HydroBase" but need to change when the table model is used for multiple purposes.
+@param inputType the input type for the time series identifier, the datastore name
 */
-public void setInputType ( String inputType )
-{
-    __inputType = inputType;
+public void setInputType ( String inputType ) {
+    this.inputType = inputType;
 }
 
 }
