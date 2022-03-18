@@ -62,7 +62,7 @@ public class ClimateStationTSMonth {
 	/**
 	 * Calendar month number.
 	 */
-	private Integer calMonNum;
+	private Integer calMonthNum;
 
 	/**
 	 * Calendar year number.
@@ -125,8 +125,8 @@ public class ClimateStationTSMonth {
 		return avgValue;
 	}
 
-	public Integer getCalMonNum() {
-		return calMonNum;
+	public Integer getCalMonthNum() {
+		return calMonthNum;
 	}
 
 	public Integer getCalYear() {
@@ -179,8 +179,8 @@ public class ClimateStationTSMonth {
 		this.avgValue = avgValue;
 	}
 
-	public void setCalMonNum(Integer calMonNum) {
-		this.calMonNum = calMonNum;
+	public void setCalMonNum(Integer calMonthNum) {
+		this.calMonthNum = calMonthNum;
 	}
 
 	public void setCalYear(Integer calYear) {
@@ -231,7 +231,7 @@ public class ClimateStationTSMonth {
 	public String toString(){
 		return "SurfaceWaterTSDay: [ " 
 			+ ", avgValue: " + avgValue
-			+ ", calMonNum: " + calMonNum
+			+ ", calMonthNum: " + calMonthNum
 			+ ", calYear: " + calYear
 			+ ", dataSource: " + dataSource
 			+ ", maxValue: " + maxValue

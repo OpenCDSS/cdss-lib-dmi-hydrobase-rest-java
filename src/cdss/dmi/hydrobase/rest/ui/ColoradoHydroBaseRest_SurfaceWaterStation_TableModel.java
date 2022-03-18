@@ -69,14 +69,14 @@ public final int COL_UTM_Y = 16;
 public final int COL_INPUT_TYPE = 17;
 
 /**
-Data interval.
-*/
-private String interval = "";
-
-/**
 Input type for time series identifier, should be the datastore name.
 */
 private String inputType = "ColoradoHydroBaseRest";
+
+/**
+Data interval.
+*/
+private String interval = "";
 
 /**
 Constructor.  This builds the model for displaying the given HydroBase time series data.
@@ -98,18 +98,18 @@ Constructor.  This builds the model for displaying the given HydroBase time seri
 @param data the list of HydroBase_StationGeolocMeasType or HydroBase_StructureGeolocStructMeasType
 that will be displayed in the table (null is allowed - see setData()).
 @param interval time series interval (e.g., "Day"), from TSTool UI
-@inputType input type for time series (default if null or blank is "ColoradoHydroBaseRest").
+@param inputType input type for time series (default if null or blank is "ColoradoHydroBaseRest").
 @throws Exception if an invalid results passed in.
 */
 public ColoradoHydroBaseRest_SurfaceWaterStation_TableModel ( JWorksheet worksheet, List<SurfaceWaterStationDataType> data, String interval, String inputType )
 throws Exception {
 	if ( data == null ) {
-		_rows = 0;
+		this._rows = 0;
 	}
 	else {
-	    _rows = data.size();
+	    this._rows = data.size();
 	}
-	_data = data;
+	this._data = data;
 	this.interval = interval;
 	if ( (inputType != null) && !inputType.equals("") ) {
 	    this.inputType = inputType;

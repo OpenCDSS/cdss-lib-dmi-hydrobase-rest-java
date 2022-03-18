@@ -44,6 +44,11 @@ public class ClimateStationDataType {
 	 * Primary source/provider of station data (e.g., "USGS", "DWR").
 	 */
 	private String dataSource;
+
+	/**
+	 * Data type, used in TSTool, a variation of 'measType'.
+	 */
+	private String dataType;
 	
 	/**
 	 * DWR Water Division.
@@ -53,7 +58,7 @@ public class ClimateStationDataType {
 	/**
 	 * Latitude value in decimal degrees.
 	 */
-	private Double latdecdeg;
+	private Double latitude;
 	
 	/**
 	 * Accuracy of location coordinates.
@@ -63,7 +68,7 @@ public class ClimateStationDataType {
 	/**
 	 * Longitude in decimal degrees.
 	 */
-	private Double longdecdeg;
+	private Double longitude;
 	
 	/**
 	 * Measurement type.
@@ -101,9 +106,14 @@ public class ClimateStationDataType {
 	private String state;
 
 	/**
-	 * Station Name.
+	 * Station name.
 	 */
 	private String stationName;
+
+	/**
+	 * Station number.
+	 */
+	private Integer stationNum;
 	
 	/**
 	 * The x (Easting) component of the Universal Transverse Mercator system (Zone 12, NAD83 datum).
@@ -129,21 +139,25 @@ public class ClimateStationDataType {
 	public String getDataSource() {
 		return dataSource;
 	}
+
+	public String getDataType() {
+		return dataType;
+	}
 	
 	public Integer getDivision() {
 		return division;
 	}
 	
-	public Double getLatdecdeg() {
-		return latdecdeg;
+	public Double getLatitude() {
+		return latitude;
 	}
 	
 	public String getLocationAccuracy() {
 		return locationAccuracy;
 	}
 	
-	public Double getLongdecdeg() {
-		return longdecdeg;
+	public Double getLongitude() {
+		return longitude;
 	}
 	
 	public String getMeasType() {
@@ -178,6 +192,10 @@ public class ClimateStationDataType {
 		return stationName;
 	}
 
+	public Integer getStationNum() {
+		return stationNum;
+	}
+
 	public Double getUtmX() {
 		return utmX;
 	}
@@ -199,21 +217,25 @@ public class ClimateStationDataType {
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
 	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
 	
 	public void setDivision(Integer division) {
 		this.division = division;
 	}
 	
-	public void setLatdecdeg(Double latdecdeg) {
-		this.latdecdeg = latdecdeg;
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
 	}
 	
 	public void setLocationAccuracy(String locationAccuracy) {
 		this.locationAccuracy = locationAccuracy;
 	}
 	
-	public void setLongdecdeg(Double longdecdeg) {
-		this.longdecdeg = longdecdeg;
+	public void setLongdecdeg(Double longitude) {
+		this.longitude = longitude;
 	}
 	
 	public void setMeasType(String measType) {
@@ -248,6 +270,10 @@ public class ClimateStationDataType {
 		this.stationName = stationName;
 	}
 	
+	public void setStationNum(Integer stationNum) {
+		this.stationNum = stationNum;
+	}
+	
 	public void setUtmX(Double utmX) {
 		this.utmX = utmX;
 	}
@@ -270,9 +296,9 @@ public class ClimateStationDataType {
 			+ ", county: " + county
 			+ ", dataSource: " + dataSource
 			+ ", division: " + division 
-			+ ", latdecdeg: " + latdecdeg
+			+ ", latitude: " + latitude
 			+ ", locationAccuracy: " + locationAccuracy
-			+ ", longdecdeg: " + longdecdeg
+			+ ", longitude: " + longitude
 			+ ", measType: " + measType
 			+ ", measUnit: " + measUnit
 			+ ", porEnd: " + porEnd
@@ -281,6 +307,7 @@ public class ClimateStationDataType {
 			+ ", siteId: " + siteId
 			+ ", state: " + state
 			+ ", stationName: " + stationName
+			+ ", stationNum: " + stationNum
 			+ ", utmX: " + utmX
 			+ ", utmY: " + utmY
 			+ ", waterDistrict: " + waterDistrict

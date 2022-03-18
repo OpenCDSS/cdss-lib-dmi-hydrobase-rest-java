@@ -79,27 +79,27 @@ public class ClimateStationFrostDates {
 	// Getters for data members.
 
 	public Integer getCalYear() {
-		return calYear;
+		return this.calYear;
 	}
 
 	public DateTime getF28f() {
-		return f28f;
+		return this.f28f;
 	}
 
 	public DateTime getF32f() {
-		return f32f;
+		return this.f32f;
 	}
 
 	public DateTime getL28s() {
-		return l28s;
+		return this.l28s;
 	}
 
 	public DateTime getL32s() {
-		return l32s;
+		return this.l32s;
 	}
 
 	public Integer getStationNum() {
-		return stationNum;
+		return this.stationNum;
 	}
 	
 	// Setters for data members.
@@ -108,20 +108,40 @@ public class ClimateStationFrostDates {
 		this.calYear = calYear;
 	}
 
-	public void setF28F(String f28f) {
-		this.f28f = DateTime.parse(f28f);
+	public void setF28f(String f28f) {
+		if ( f28f == null ) {
+			this.f28f = null;
+		}
+		else {
+			this.f28f = DateTime.parse(f28f);
+		}
 	}
 
-	public void setF32F(String f32f) {
-		this.f32f = DateTime.parse(f32f);
+	public void setF32f(String f32f) {
+		if ( f32f == null ) {
+			this.f32f = null;
+		}
+		else {
+			this.f32f = DateTime.parse(f32f);
+		}
 	}
 
 	public void setL28s(String l28s) {
-		this.l28s = DateTime.parse(l28s);
+		if ( l28s == null ) {
+			this.l28s = null;
+		}
+		else {
+			this.l28s = DateTime.parse(l28s);
+		}
 	}
 
 	public void setL32s(String l32s) {
-		this.l32s = DateTime.parse(l32s);
+		if ( l32s == null ) {
+			this.l32s = null;
+		}
+		else {
+			this.l32s = DateTime.parse(l32s);
+		}
 	}
 
 	public void setStationNum(Integer stationNum) {
@@ -133,8 +153,8 @@ public class ClimateStationFrostDates {
 	 * Data members are in alphabetical order.
 	 */
 	@Override 
-	public String toString(){
-		return "SurfaceWaterTSDay: [ " 
+	public String toString() {
+		return "ClimateStationFrostDates: [ " 
 			+ ", calYear: " + calYear
 			+ ", f28f: " + f28f
 			+ ", f32f: " + f32f

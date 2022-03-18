@@ -52,7 +52,7 @@ public class SurfaceWaterStationDataType {
 	private String dataSource;
 	
 	/**
-	 * Data type, used in TSTool.
+	 * Data type, used in TSTool, a variation of 'measType'.
 	 */
 	private String dataType;
 
@@ -330,6 +330,7 @@ public class SurfaceWaterStationDataType {
 			+ ", abbrev: " + abbrev
 			+ ", county: " + county
 			+ ", dataSource: " + dataSource
+			+ ", dataType: " + dataType
 			+ ", division: " + division 
 			+ ", latdecdeg: " + latdecdeg
 			+ ", locationAccuracy: " + locationAccuracy
