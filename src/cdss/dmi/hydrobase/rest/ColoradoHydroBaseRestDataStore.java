@@ -135,6 +135,13 @@ private boolean initialized = false;
 private List<String> climateStationMeasTypeList = null;
 private List<String> climateStationDataSourceList = null;
 
+/*
+ * List of climate station 'measType' that are the same as telemetry station parameter.
+ * Telemetry stations use all upper case parameters (e.g., 'EVAP') whereas climate station uses mixed case (e.g., 'Evap').
+ * The values are upper case.
+ */
+private List<String> climateStationMeasTypeSameAsTelemetryStationParamList = null;
+
 private List<ReferenceTablesCounty> countyList = null;
 
 private List<ReferenceTablesCurrentInUseCodes> currentInUseCodeList = null;
@@ -189,6 +196,28 @@ throws URISyntaxException, IOException
     initialize();
     // Set up local objects to be cached.
     readGlobalData();
+}
+
+/**
+Also check for overlap between climate station and telemetry station data types,
+which is used in some cases to differentiate uppercase 'EVAP' for telemetry station parameter and
+mixed case 'Evap' climate station data type.
+This should be called from the readClimateStationMeasType and readTelemetryParams methods.
+*/
+private void checkClimateAndTelemetryStationTypes () {
+	if ( (climateStationMeasTypeList != null) && (climateStationMeasTypeList.size() > 0)  &&
+		(telemetryParamsList != null) && (telemetryParamsList.size() > 0) ) {
+		// Have data to check for overlapping data.
+		this.climateStationMeasTypeSameAsTelemetryStationParamList = new ArrayList<>();
+		for ( String measType : this.climateStationMeasTypeList ) {
+			String measTypeUpper = measType.toUpperCase();
+			for ( ReferenceTablesTelemetryParams param : this.telemetryParamsList ) {
+				if ( measTypeUpper.equalsIgnoreCase(param.getParameter()) ) {
+					this.climateStationMeasTypeSameAsTelemetryStationParamList.add(measTypeUpper);
+				}
+			}
+		}
+	}
 }
 
 /**
@@ -2031,16 +2060,20 @@ public List<String> getTimeSeriesTimeSteps(String selectedDataType){
  * Using the string request returned from 
  * {@link #getWaterClassesRequestString()} retrieve a list
  * of DiversionWaterClasses from web services.
- * @param dataType - any of the data types that can be returned from getWaterClasses()
- * @param intervalReq - requested interval day, month, or year
- * @param listOfTriplets - input filter values such as ['County', 'MA', 'mesa'], [argument, operator, value].
+ * @param dataTypeReq data type for water classes "WaterClass" or "Structure - WaterClass"
+ * @param intervalReq requested interval day, month, or year
+ * @param listOfTriplets input filter values such as ['County', 'MA', 'mesa'], [argument, operator, value].
  * @return List<DiversionWaterClass> of {@link cdss.dmi.hydrobase.rest.dmi.DiversionWaterClass}.
  */
-public List<DiversionWaterClass> getWaterClasses(String dataType, String intervalReq, List<String[]> listOfTriplets) {
+public List<DiversionWaterClass> getWaterClasses(String dataTypeReq, String intervalReq, List<String[]> listOfTriplets) {
 	String routine = "ColoradoHydroBaseRestDataStore.getWaterClasses";
 	List<DiversionWaterClass> waterclasses = new ArrayList<>();
 
-	String request = getWaterClassesRequestString(dataType, intervalReq, listOfTriplets);
+	// Get the web service 'measType' by stripping off the leading group and any statistic.
+	String dataTypeNoGroup = getDataTypeWithoutGroup(dataTypeReq);
+
+	// Pass the data type without leading group.
+	String request = getWaterClassesRequestString(dataTypeNoGroup, intervalReq, listOfTriplets);
 	JsonNode waterclassesNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(request);
 	
 	TimeInterval interval = TimeInterval.parseInterval(intervalReq);
@@ -2056,7 +2089,7 @@ public List<DiversionWaterClass> getWaterClasses(String dataType, String interva
 		DiversionWaterClass waterclass;
 		waterclass = (DiversionWaterClass) JacksonToolkit.getInstance().treeToValue(waterclassesNode.get(i), DiversionWaterClass.class);
 		waterclass.setTimeStep(intervalReq);
-		waterclass.setDivrectype(dataType);
+		waterclass.setDivrectype(dataTypeNoGroup);
 		// Set the precision on date/times.
 		if ( interval.getBase() == TimeInterval.DAY ) {
 			waterclass.getPorStart().setPrecision(DateTime.PRECISION_DAY);
@@ -2180,14 +2213,14 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 
 /**
 * Return the list of structure time series, suitable for display in TSTool browse area.
-* @param dataType data type (e.g. "DivTotal", "RelTotal", "WaterClass").
+* @param dataType data type (e.g. "DivTotal", "RelTotal", "WaterClass", "Structure - DivTotal") - the leading group will be stripped off
 * Note that a specific water class with SFUT cannot be requested and must be filtered after the call.
-* @param interval - Interval such as 15min, day, month, year.
-* @param filterPanel - {@link cdss.dmi.hydrobase.rest.ui.ColoradoHydroBaseRest_Structure_InputFilter_JPanel}
+* @param interval Interval such as 15min, day, month, year.
+* @param filterPanel TSTool input filter panel
 * @return List<DiversionWaterClass> of {@link cdss.dmi.hydrobase.rest.dao.DiversionWaterClass}.
 */
 public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Structure_InputFilter_JPanel filterPanel ) {
-	String routine = "ColoradyHydroBaseRestDataStore.getWaterClassesTimeSeriesCatalog";
+	String routine = getClass().getSimpleName() + ".getWaterClassesTimeSeriesCatalog";
 	// Create list for returned water classes.
 	List<DiversionWaterClass> waterclassList = new ArrayList<>();
 	Message.printStatus(1, routine, "Getting ColoradoHydroBaseRest structure time series list");
@@ -2472,21 +2505,25 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 
 /**
  * Get list of water level wells from web services. 
- * @param dataType
+ * @param dataTypeReq requested data type ('WaterLevelDepth' or 'Well - WaterLevelDepth')
  * @param intervalReq requested time interval
  * @param listOfTriplets
  * @return
  */
-public List<WaterLevelsWell> getWells(String dataType, String intervalReq, List<String[]> listOfTriplets){
-	String routine = "ColoradoHydroBaseRestDataStore.getWells";
+public List<WaterLevelsWell> getWells(String dataTypeReq, String intervalReq, List<String[]> listOfTriplets){
+	String routine = getClass().getSimpleName() + ".getWells";
 	List<WaterLevelsWell> waterclasses = new ArrayList<>();
+
+	// Get the web service 'measType' by stripping off the leading group and any statistic.
+	String dataTypeNoGroup = getDataTypeWithoutGroup(dataTypeReq);
+
 	// Create request string.
 	JsonNode wellsNode = JacksonToolkit.getInstance().getJsonNodeFromWebServices(getWellRequestString(listOfTriplets));
 	Message.printStatus(2, routine, "Request Url: " + getWellRequestString(listOfTriplets));
 	TimeInterval interval = TimeInterval.parseInterval(intervalReq);
 	for(int i = 0; i < wellsNode.size(); i++){
 		WaterLevelsWell well = (WaterLevelsWell) JacksonToolkit.getInstance().treeToValue(wellsNode.get(i), WaterLevelsWell.class);
-		well.setDataType(dataType);
+		well.setDataType(dataTypeNoGroup);
 		well.setTimeStep(intervalReq);
 		// Set the precision on date/times.
 		if ( interval.getBase() == TimeInterval.DAY ) {
@@ -2584,7 +2621,8 @@ public boolean isClimateStationTimeSeriesDataType ( String dataType ) {
 		return false;
 	}
 	dataType = getDataTypeWithoutGroup(dataType);
-	if ( dataType.toUpperCase().indexOf("FROSTDATE") >= 0 ) {
+	String dataTypeUpper = dataType.toUpperCase();
+	if ( dataTypeUpper.indexOf("FROSTDATE") >= 0 ) {
 		// TSTool internally uses the following because 4 values are in each data record:
 		//  "FrostDateF28F",
 		//  "FrostDateF32F",
@@ -2593,7 +2631,17 @@ public boolean isClimateStationTimeSeriesDataType ( String dataType ) {
 		return true;
 	}
 	for ( String measType : getClimateStationMeasTypeList() ) {
-		if ( dataType.toUpperCase().startsWith(measType.toUpperCase()) ) {
+		if ( dataTypeUpper.startsWith(measType.toUpperCase()) ) {
+			// If the 'measType' overlaps telemetry station parameter,
+			// matching upper case indicates a telemetry station parameter.
+			if ( this.climateStationMeasTypeSameAsTelemetryStationParamList != null ) {
+				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamList ) {
+					if ( dataType.startsWith(sameMeasTypeUpper) ) {
+						// Requested datatype is uppercase so assume it is telemetry station.
+						return false;
+					}
+				}
+			}
 			return true;
 		}
 	}
@@ -2667,6 +2715,20 @@ public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
 	}
 	for ( int i = 0; i < this.telemetryParamsList.size(); i++ ) {
 		if ( dataType.equalsIgnoreCase(this.telemetryParamsList.get(i).getParameter()) ) {
+			// If the 'measType' overlaps telemetry station parameter,
+			// an upper case match indicates a telemetry station parameter.
+			if ( this.climateStationMeasTypeSameAsTelemetryStationParamList != null ) {
+				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamList ) {
+					if ( dataType.startsWith(sameMeasTypeUpper) ) {
+						// Requested datatype is uppercase so assume it is telemetry station.
+						return true;
+					}
+					else {
+						// Upper case did not match so climate station data type such as 'Evap'.
+						return false;
+					}
+				}
+			}
 			return true;
 		}
 	}
@@ -2711,11 +2773,15 @@ public boolean isWaterClassStructure(String dataType){
 
 /**
  * Indicate whether a time series data type corresponds to a well.
- * @param dataType - the datatype portion of the TSID ex. 'WaterLevelDepth'
+ * @param dataType the datatype portion of the TSID (e.g. 'WaterLevelDepth') or data type with group (e.g., 'Well - WaterLevelDepth')
  * @return true if data type is for a well, false otherwise
  */
 public boolean isWellTimeSeriesDataType ( String dataType ) {
-	String [] dataTypes = { "WaterLevelDepth", "WaterLevelElev" };
+	String [] dataTypes = {
+		"WaterLevelDepth",
+		"WaterLevelElev"
+	};
+	dataType = getDataTypeWithoutGroup(dataType);
 	// TODO smalers 2018-06-20 will need to compare only the first part of the data type for classes.
 	for ( int i = 0; i < dataTypes.length; i++ ) {
 		if ( dataType.equalsIgnoreCase(dataTypes[i]) ) {
@@ -2786,6 +2852,11 @@ private void readClimateStationMeasTypes() {
 	// Sort alphabetically.
 	Collections.sort(this.climateStationMeasTypeList);
 	Collections.sort(this.climateStationDataSourceList);
+	
+	// Also check for overlap between climate station and telemetry station data types,
+	// which is used in some cases to differentiate uppercase 'EVAP' for telemetry station parameter and
+	// mixed case 'Evap' climate station data type.
+	checkClimateAndTelemetryStationTypes();
 }
 
 /**
@@ -3015,6 +3086,11 @@ private void readTelemetryParams(){
 	for(int i = 0; i < results.size(); i++){
 		this.telemetryParamsList.add((ReferenceTablesTelemetryParams)JacksonToolkit.getInstance().treeToValue(results.get(i), ReferenceTablesTelemetryParams.class));
 	}
+
+	// Also check for overlap between climate station and telemetry station data types,
+	// which is used in some cases to differentiate uppercase 'EVAP' for telemetry station parameter and
+	// mixed case 'Evap' climate station data type.
+	checkClimateAndTelemetryStationTypes();
 }
 
 /**
@@ -3204,10 +3280,16 @@ throws MalformedURLException, Exception {
 			tsRequest.append(getServiceRootURI() + "/climatedata/climatestationtsmonth?format=json&dateFormat=dateOnly" + locParam + "&measType=" + dataType);
 			// Specify a full months using day precision.
 			if ( readStart2 != null ) {
-				readStart2.setDay(1);
+				if ( (readStart != null) && (readStart.getPrecision() < DateTime.PRECISION_DAY) ) {
+					// Original date/time precision was less than day so set to the beginning of the month.
+					readStart2.setDay(1);
+				}
 			}
 			if ( readEnd2 != null ) {
-				readEnd2.setDay(TimeUtil.numDaysInMonth(readEnd2));
+				if ( (readEnd != null) && (readEnd.getPrecision() < DateTime.PRECISION_DAY) ) {
+					// Original date/time precision was less than day so set to the beginning of the month.
+					readEnd2.setDay(TimeUtil.numDaysInMonth(readEnd2));
+				}
 			}
 		}
 		else if ( intervalBase == DateTime.PRECISION_YEAR ) {
@@ -3218,12 +3300,18 @@ throws MalformedURLException, Exception {
 			// The frost date service currently only allows stationNum so get the value from the station.
 			// Specify a full months using day precision.
 			if ( readStart2 != null ) {
-				readStart2.setDay(1);
-				readStart2.setMonth(1);
+				if ( (readStart != null) && (readStart.getPrecision() < DateTime.PRECISION_DAY) ) {
+					// Original date/time precision was less than day so set to the beginning of the month.
+					readStart2.setDay(1);
+					readStart2.setMonth(1);
+				}
 			}
 			if ( readEnd2 != null ) {
-				readEnd2.setDay(31);
-				readEnd2.setMonth(12);
+				if ( (readEnd != null) && (readEnd.getPrecision() < DateTime.PRECISION_DAY) ) {
+					// Original date/time precision was less than day so set to the beginning of the month.
+					readEnd2.setDay(31);
+					readEnd2.setMonth(12);
+				}
 			}
 		}
 		String minMeasDateParam = "";
@@ -3357,16 +3445,16 @@ throws MalformedURLException, Exception {
 			boolean doMax = false;
 			boolean doMin = false;
 			boolean doTotal = false;
-			if ( dataTypeReqUpper.indexOf("AVG") > 0 ) {
+			if ( dataTypeReqUpper.indexOf("-AVG") > 0 ) {
 				doAvg = true;
 			}
-			else if ( dataTypeReqUpper.indexOf("MAX") > 0 ) {
+			else if ( dataTypeReqUpper.indexOf("-MAX") > 0 ) {
 				doMax = true;
 			}
-			else if ( dataTypeReqUpper.indexOf("MIN") > 0 ) {
+			else if ( dataTypeReqUpper.indexOf("-MIN") > 0 ) {
 				doMin = true;
 			}
-			else if ( dataTypeReqUpper.indexOf("TOT") > 0 ) {
+			else if ( dataTypeReqUpper.indexOf("-TOT") > 0 ) {
 				doTotal = true;
 			}
 			for ( int i = 0; i < results.size(); i++ ) {
