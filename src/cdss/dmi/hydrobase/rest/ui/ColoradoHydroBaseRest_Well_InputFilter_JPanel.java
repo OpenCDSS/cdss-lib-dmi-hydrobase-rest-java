@@ -4,7 +4,7 @@
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2019 Colorado Department of Natural Resources
+Copyright (C) 2018-2022 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 import RTi.Util.GUI.InputFilter;
 import RTi.Util.GUI.InputFilter_JPanel;
@@ -79,14 +78,14 @@ throws Exception
 	
 	// Now define the input filters
 
-	List<InputFilter> input_filters = new Vector<InputFilter>(8);
+	List<InputFilter> input_filters = new ArrayList<InputFilter>(8);
 	input_filters.add ( new InputFilter ("", "",
 	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter
 
 	InputFilter filter;
     // County
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
-	List<String> countyList = new ArrayList<String> ( countyDataList.size() );
+	List<String> countyList = new ArrayList<> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
 		countyList.add ( county.getCounty() ); // TODO smalers 2018-06-19 HydroBase has state + ", CO" );
 	}
@@ -113,7 +112,7 @@ throws Exception
 
 	// Radius units, used with radius
 	// TODO smalers 2018-06-20 should this be a reference table?
-	List<String> radiusUnitsChoices = new ArrayList<String>(2);
+	List<String> radiusUnitsChoices = new ArrayList<>(2);
 	radiusUnitsChoices.add("feet");
 	radiusUnitsChoices.add("miles");
 	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units", "LatLongRadiusUnits",
@@ -129,8 +128,8 @@ throws Exception
 
 	// Water district
 	List<ReferenceTablesWaterDistrict> districtDataList = datastore.getWaterDistricts();
-	List<String> districtList = new ArrayList<String> ( districtDataList.size() );
-	List<String> districtInternalList = new ArrayList<String>(districtDataList.size());
+	List<String> districtList = new ArrayList<> ( districtDataList.size() );
+	List<String> districtInternalList = new ArrayList<>(districtDataList.size());
 	for ( ReferenceTablesWaterDistrict wd : districtDataList ) {
 		districtList.add ("" + wd.getWaterDistrict() + " - " + wd.getWaterDistrictName());
 		districtInternalList.add ("" + wd.getWaterDistrict() );
@@ -142,8 +141,8 @@ throws Exception
 
 	// Water division
 	List<ReferenceTablesWaterDivision> divisionDataList = datastore.getWaterDivisions();
-	List<String> divisionList = new ArrayList<String> ( 7 );
-	List<String> divisionInternalList = new ArrayList<String> ( 7 );
+	List<String> divisionList = new ArrayList<>( 7 );
+	List<String> divisionInternalList = new ArrayList<>( 7 );
 	for ( ReferenceTablesWaterDivision div: divisionDataList ) {
 		divisionList.add ("" + div.getDivision() + " - " + div.getDivisionName());
 		divisionInternalList.add ("" + div.getDivision() );
@@ -181,10 +180,10 @@ throws Exception
  */
 @Override
 public String checkInputFilters ( boolean displayWarning ) {
-	// Use the parent class method to check basic input types based on data types
+	// Use the parent class method to check basic input types based on data types:
 	// - will return empty string if no issues
 	String warning = super.checkInputFilters(displayWarning);
-	// Perform specific checks
+	// Perform specific checks.
 	String warning2 = "";
 	int coordCount = 0;
 	String Latitude = getInputValue("Latitude", false);
@@ -206,24 +205,46 @@ public String checkInputFilters ( boolean displayWarning ) {
 	if ( (coordCount > 0) && (coordCount != 4) ) {
 		warning2 += "\nSpecifying latitude and longitude requires specifying latitude, longitude, radius, and units.";
 	}
+	String WellId = getInputValue("WellID", false);
+	String Division = getInputValue("WaterDivision", false);
+	String District = getInputValue("WaterDistrict", false);
+	String County = getInputValue("County", false);
+	int necInputFilters = 0;
+	if( (WellId != null) && !WellId.isEmpty()){
+		++necInputFilters;
+	}
+	if( (Division != null) && !Division.isEmpty()){
+		++necInputFilters;
+	}
+	if( (District != null) && !District.isEmpty()){
+		++necInputFilters;
+	}
+	if( (County != null) && !County.isEmpty()){
+		++necInputFilters;
+	}
+	if( !(necInputFilters > 0)){
+		warning2 += "\nWell ID, county, designated basin, management district, pulication name, location, water district, or water division is required.";
+	}
 	if ( !warning2.isEmpty() ) {
-		// Have non-empty specific warnings so append specific warnings
+		// Have non-empty specific warnings so append specific warnings.
 		warning += warning2;
 	}
-	// Return the general warnings or the appended results
+	// Return the general warnings or the appended results.
 	return warning;
 }
 
-public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore ()
-{
+public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore () {
     return this.datastore;
 }
 
-public void mouseClicked(MouseEvent event) {}
+public void mouseClicked(MouseEvent event) {
+}
 
-public void mouseExited(MouseEvent event) {}
+public void mouseExited(MouseEvent event) {
+}
 
-public void mouseEntered(MouseEvent event) {}
+public void mouseEntered(MouseEvent event) {
+}
 
 /**
 Responds to mouse pressed events.
@@ -237,6 +258,7 @@ public void mousePressed(MouseEvent event) {
 	*/
 }
 
-public void mouseReleased(MouseEvent event) {}
+public void mouseReleased(MouseEvent event) {
+}
 
 }
