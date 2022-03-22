@@ -140,7 +140,7 @@ private List<String> climateStationDataSourceList = null;
  * Telemetry stations use all upper case parameters (e.g., 'EVAP') whereas climate station uses mixed case (e.g., 'Evap').
  * The values are upper case.
  */
-private List<String> climateStationMeasTypeSameAsTelemetryStationParamList = null;
+private List<String> climateStationMeasTypeSameAsTelemetryStationParamUpperList = null;
 
 private List<ReferenceTablesCounty> countyList = null;
 
@@ -208,12 +208,12 @@ private void checkClimateAndTelemetryStationTypes () {
 	if ( (climateStationMeasTypeList != null) && (climateStationMeasTypeList.size() > 0)  &&
 		(telemetryParamsList != null) && (telemetryParamsList.size() > 0) ) {
 		// Have data to check for overlapping data.
-		this.climateStationMeasTypeSameAsTelemetryStationParamList = new ArrayList<>();
+		this.climateStationMeasTypeSameAsTelemetryStationParamUpperList = new ArrayList<>();
 		for ( String measType : this.climateStationMeasTypeList ) {
 			String measTypeUpper = measType.toUpperCase();
 			for ( ReferenceTablesTelemetryParams param : this.telemetryParamsList ) {
 				if ( measTypeUpper.equalsIgnoreCase(param.getParameter()) ) {
-					this.climateStationMeasTypeSameAsTelemetryStationParamList.add(measTypeUpper);
+					this.climateStationMeasTypeSameAsTelemetryStationParamUpperList.add(measTypeUpper);
 				}
 			}
 		}
@@ -911,7 +911,7 @@ public List<ClimateStationDataType> getClimateStationTimeSeriesCatalog ( String 
 	ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel filterPanel ) {
 	String routine = "ColoradoHydroBaseRestDataStore.getClimateStationTimeSeriesCatalog";
 	List<ClimateStationDataType> climateStationList = new ArrayList<>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest climate station time series list");
+	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest climate station time series list.");
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -1472,7 +1472,7 @@ public List<SurfaceWaterStationDataType> getSurfaceWaterStationTimeSeriesCatalog
 	ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel filterPanel ) {
 	String routine = "ColoradoHydroBaseRestDataStore.getSurfaceWaterStationTimeSeriesCatalog";
 	List<SurfaceWaterStationDataType> surfaceStationList = new ArrayList<>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest surface water station time series list");
+	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest surface water station time series list.");
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -1485,7 +1485,8 @@ public List<SurfaceWaterStationDataType> getSurfaceWaterStationTimeSeriesCatalog
 			if(triplet != null){
 				listOfTriplets.add(triplet);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			Message.printWarning(3, routine, e);
 		}
 	}
@@ -1790,7 +1791,7 @@ public List<TelemetryStationDataType> getTelemetryStationTimeSeriesCatalog ( Str
 	ColoradoHydroBaseRest_TelemetryStation_InputFilter_JPanel filterPanel ) {
 	String routine = "ColoradoHydroBaseRestDataStore.getTelemeteryStationTimeSeriesCatalog";
 	List<TelemetryStationDataType> telemetryList = new ArrayList<>();
-	Message.printStatus(1, "", "Getting ColoradoHydroBaseRest telemetry station time series list");
+	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest telemetry station time series list.");
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -2223,7 +2224,7 @@ public List<DiversionWaterClass> getWaterClassesTimeSeriesCatalog ( String dataT
 	String routine = getClass().getSimpleName() + ".getWaterClassesTimeSeriesCatalog";
 	// Create list for returned water classes.
 	List<DiversionWaterClass> waterclassList = new ArrayList<>();
-	Message.printStatus(1, routine, "Getting ColoradoHydroBaseRest structure time series list");
+	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest structure time series list.");
 	// Retrieve input filters.
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
@@ -2555,7 +2556,7 @@ public List<WaterLevelsWell> getWells(String dataTypeReq, String intervalReq, Li
 public List<WaterLevelsWell> getWellTimeSeriesCatalog ( String dataType, String interval, ColoradoHydroBaseRest_Well_InputFilter_JPanel filterPanel ) {
 	String routine = getClass().getSimpleName() + ".getWellTimeSeriesCatalog";
 	List<WaterLevelsWell> wellsList = new ArrayList<>();
-	Message.printStatus(1, routine, "Getting ColoradoHydroBaseRest structure time series list");
+	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest structure time series list.");
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
@@ -2634,9 +2635,9 @@ public boolean isClimateStationTimeSeriesDataType ( String dataType ) {
 		if ( dataTypeUpper.startsWith(measType.toUpperCase()) ) {
 			// If the 'measType' overlaps telemetry station parameter,
 			// matching upper case indicates a telemetry station parameter.
-			if ( this.climateStationMeasTypeSameAsTelemetryStationParamList != null ) {
-				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamList ) {
-					if ( dataType.startsWith(sameMeasTypeUpper) ) {
+			if ( this.climateStationMeasTypeSameAsTelemetryStationParamUpperList != null ) {
+				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamUpperList ) {
+					if ( dataType.equals(sameMeasTypeUpper) ) {
 						// Requested datatype is uppercase so assume it is telemetry station.
 						return false;
 					}
@@ -2705,30 +2706,46 @@ public boolean isSurfaceWaterStationTimeSeriesDataType ( String dataType ) {
  * @return true if data type is for a telemetry station, false otherwise
  */
 public boolean isTelemetryStationTimeSeriesDataType ( String dataType ) {
+	//String routine = getClass().getSimpleName() + ".isTelemetryStationTimeSeriesData";
+	//Message.printStatus(2, routine, "Checking whether \"" + dataType + "\" is telemetry station." );
 	if ( dataType == null ) {
 		return false;
 	}
+	// Remove the group from the front of the name.
 	dataType = getDataTypeWithoutGroup(dataType);
+	String dataTypeUpper = dataType.toUpperCase();
+	//Message.printStatus(2, routine, "Data type without group: \"" + dataType + "\"." );
+
 	if ( dataType.equals("*") ) {
 		// Allow wildcard because telemetry stations are the only location type to use the wildcard.
 		return true;
 	}
 	for ( int i = 0; i < this.telemetryParamsList.size(); i++ ) {
 		if ( dataType.equalsIgnoreCase(this.telemetryParamsList.get(i).getParameter()) ) {
-			// If the 'measType' overlaps telemetry station parameter,
+			//Message.printStatus(2, routine, "Data type ignoring case matches telemetry station parameters." );
+			// The data type matches a telemetry station ignoring case.
+			// If the requested data type overlaps a telemetry station parameter and climate station 'measType',
 			// an upper case match indicates a telemetry station parameter.
-			if ( this.climateStationMeasTypeSameAsTelemetryStationParamList != null ) {
-				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamList ) {
-					if ( dataType.startsWith(sameMeasTypeUpper) ) {
-						// Requested datatype is uppercase so assume it is telemetry station.
-						return true;
-					}
-					else {
-						// Upper case did not match so climate station data type such as 'Evap'.
-						return false;
+			if ( this.climateStationMeasTypeSameAsTelemetryStationParamUpperList != null ) {
+				boolean found = false; // If ignorecase match below.
+				for ( String sameMeasTypeUpper : this.climateStationMeasTypeSameAsTelemetryStationParamUpperList ) {
+					//Message.printStatus(2, routine, "Checking overlapping measType \"" + sameMeasTypeUpper + "\"" );
+					if ( dataTypeUpper.equals(sameMeasTypeUpper) ) {
+						found = true;
+						if ( dataType.equals(sameMeasTypeUpper) ) {
+							// Requested datatype is uppercase so assume it is telemetry station.
+							//Message.printStatus(2, routine, "Requested overlapping data type is telemetry station.");
+							return true;
+						}
 					}
 				}
+				// Upper case did not match so climate station data type such as 'Evap'.
+				if ( found ) {
+					//Message.printStatus(2, routine, "Requested overlapping data type is NOT telemetry station.");
+					return false;
+				}
 			}
+			// Does not overlap with climate station 'measType' and is therefore a telemetry station.
 			return true;
 		}
 	}
@@ -5027,7 +5044,7 @@ throws MalformedURLException, Exception {
 			wellMeasurementRequest += getApiKeyString();
 			JsonNode results = jacksonToolkit.getJsonNodeFromWebServices(wellMeasurementRequest);
 			//System.out.println(wellMeasurementRequest);
-			Message.printStatus(1, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
+			Message.printStatus(2, routine, "Retrieve well measurements from DWR REST API request url: " + wellMeasurementRequest);
 			
 			if ( (results == null) || (results.size() == 0) ) {
 				return ts;
