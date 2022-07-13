@@ -624,7 +624,12 @@ public class DiversionWaterClass {
 	}
 
 	public void setPorEnd(String porEnd) {
-		this.porEnd = DateTime.parse(porEnd);
+		if ( porEnd == null ) {
+			this.porEnd = null;
+		}
+		else {
+			this.porEnd = DateTime.parse(porEnd);
+		}
 	}
 	public void setPorLastModified(String porLastModified) {
 		this.porLastModified = TimeToolkit.getInstance().toDateTime(porLastModified, false);

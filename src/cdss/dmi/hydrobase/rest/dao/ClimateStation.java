@@ -205,7 +205,12 @@ public class ClimateStation {
 	}
 	
 	public void setEndDate(String endDate) {
-		this.endDate = DateTime.parse(endDate);
+		if ( endDate == null ) {
+			this.endDate = null;
+		}
+		else {
+			this.endDate = DateTime.parse(endDate);
+		}
 	}
 
 	public void setLatitude(Double latitude) {
@@ -221,7 +226,12 @@ public class ClimateStation {
 	}
 	
 	public void setModified(String modified) {
-		this.modified = DateTime.parse(modified);
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			this.modified = DateTime.parse(modified);
+		}
 	}
 	
 	public void setMoreInformation(String moreInformation) {
@@ -233,7 +243,12 @@ public class ClimateStation {
 	}
 
 	public void setStartDate(String startDate) {
-		this.startDate = DateTime.parse(startDate);
+		if ( startDate == null ) {
+			this.startDate = null;
+		}
+		else {
+			this.startDate = DateTime.parse(startDate);
+		}
 	}
 
 	public void setState(String state) {

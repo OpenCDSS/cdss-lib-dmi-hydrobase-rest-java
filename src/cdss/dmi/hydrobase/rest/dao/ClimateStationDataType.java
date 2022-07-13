@@ -247,15 +247,30 @@ public class ClimateStationDataType {
 	}
 	
 	public void setPorEnd(String porEnd) {
-		this.porEnd = DateTime.parse(porEnd);
+		if ( porEnd == null ) {
+			this.porEnd = null;
+		}
+		else {
+			this.porEnd = DateTime.parse(porEnd);
+		}
 	}
 
 	public void setPorLastModified(String porLastModified) {
-		this.porLastModified = DateTime.parse(porLastModified);
+		if ( porLastModified == null ) {
+			this.porLastModified = null;
+		}
+		else {
+			this.porLastModified = DateTime.parse(porLastModified);
+		}
 	}
 	
 	public void setPorStart(String porStart) {
-		this.porStart = DateTime.parse(porStart);
+		if ( porStart == null ) {
+			this.porStart = null;
+		}
+		else {
+			this.porStart = DateTime.parse(porStart);
+		}
 	}
 
 	public void setSiteId(String siteId) {

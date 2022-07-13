@@ -186,11 +186,21 @@ public class ClimateStationTSDay {
 	}
 	
 	public void setMeasDate(String measDate) {
-		this.measDate = DateTime.parse(measDate);
+		if ( measDate == null ) {
+			this.measDate = null;
+		}
+		else {
+			this.measDate = DateTime.parse(measDate);
+		}
 	}
 
 	public void setModified(String modified) {
-		this.modified = DateTime.parse(modified);
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			this.modified = DateTime.parse(modified);
+		}
 	}
 
 	public void setMeasType(String measType) {
