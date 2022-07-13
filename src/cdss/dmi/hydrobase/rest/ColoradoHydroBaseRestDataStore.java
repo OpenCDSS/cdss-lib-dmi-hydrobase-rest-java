@@ -2970,22 +2970,107 @@ private void readDivRecTypes(){
  * @throws MalformedURLException 
  */
 private void readGlobalData() throws MalformedURLException{
-	// TODO smalers 2022-03-17 tried lazy loading but UI is slow and gives bad user experience.
-	readClimateStationMeasTypes();
-	readCounties();
-	readCurrentInUseCodes();
-	readDiversionNotUsedCodes();
-	readDivRecObservationCodes();
-	readDivRecTypes();
-	readGroundwaterPublication();
-	readDesignatedBasins();
-	readManagementDistrict();
-	readPermitActionName();
-	// TODO smalers 2022-03-17 tried lazy loading but UI is slow and gives bad user experience.
-	readSurfaceWaterStationMeasTypes();
-	readTelemetryParams();
-	readWaterDistricts();
-	readWaterDivisions();
+	String routine = getClass().getSimpleName() + ".readGlobalData";
+	try {
+		// TODO smalers 2022-03-17 tried lazy loading but UI is slow and gives bad user experience.
+		readClimateStationMeasTypes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global ClimateStationMeasType (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readCounties();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global Counties (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readCurrentInUseCodes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global InUseCodes (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readDiversionNotUsedCodes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global NotUsedCodes (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readDivRecObservationCodes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global DivRecObservationCodes (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readDivRecTypes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global DivRecTypes (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readGroundwaterPublication();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global GroundwaterPublication (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readDesignatedBasins();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global DesignatedBasins (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readManagementDistrict();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global ManagementDistricts (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readPermitActionName();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global PermitActionName (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		// TODO smalers 2022-03-17 tried lazy loading but UI is slow and gives bad user experience.
+		readSurfaceWaterStationMeasTypes();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global SurfaceWaterStationMeasTypes (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readTelemetryParams();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global TelemetryParams (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readWaterDistricts();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global WaterDistricts (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
+	try {
+		readWaterDivisions();
+	}
+	catch ( Exception e ) {
+		Message.printWarning(3, routine, "Error reading global WaterDivisions (" + e + ")");
+		Message.printWarning(3, routine, e );
+	}
 }
 
 /**

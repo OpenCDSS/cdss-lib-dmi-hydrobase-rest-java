@@ -208,7 +208,12 @@ public class ClimateStationTSMonth {
 	}
 
 	public void setModified(String modified) {
-		this.modified = DateTime.parse(modified);
+		if ( modified == null ) {
+			this.modified = null;
+		}
+		else {
+			this.modified = DateTime.parse(modified);
+		}
 	}
 
 	public void setSiteId(String siteId) {
