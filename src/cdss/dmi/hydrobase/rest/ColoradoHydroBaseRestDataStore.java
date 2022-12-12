@@ -831,6 +831,12 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
 				case "ABBREV":
 						requestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
+				case "SITEID":
+						requestString.append("&siteId=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+						break;
+				case "STATIONNAME":
+						requestString.append("&stationName=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+						break;
 				case "STATIONTYPE":
 						requestString.append("&stationType=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 						break;
@@ -909,25 +915,28 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
  */
 public List<ClimateStationDataType> getClimateStationTimeSeriesCatalog ( String dataType, String interval,
 	ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel filterPanel ) {
-	String routine = "ColoradoHydroBaseRestDataStore.getClimateStationTimeSeriesCatalog";
+	String routine = getClass().getSimpleName() + ".getClimateStationTimeSeriesCatalog";
 	List<ClimateStationDataType> climateStationList = new ArrayList<>();
 	Message.printStatus(2, routine, "Getting ColoradoHydroBaseRest climate station time series list.");
+	// Process the filter panel to determine where clauses for the query.
 	InputFilter filter = null;
 	int nfg = filterPanel.getNumFilterGroups();
 	List<String[]> listOfTriplets = new ArrayList<String[]>();
-	for(int ifg = 0; ifg < nfg; ifg++){
+	for ( int ifg = 0; ifg < nfg; ifg++ ) {
 		filter = filterPanel.getInputFilter(ifg);
 		String op = filterPanel.getOperator(ifg);
 		String[] triplet;
 		try {
 			triplet = getSPFlexParametersTriplet(filter, op);
-			if(triplet != null){
+			if ( triplet != null ) {
 				listOfTriplets.add(triplet);
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			Message.printWarning(3, routine, e);
 		}
 	}
+	// Request the data.
 	climateStationList = getClimateStationDataTypes(dataType, interval, listOfTriplets);
 	return climateStationList;
 }
@@ -1367,9 +1376,9 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, L
 		// Determine what to append to request string for specifiers.
 		try{
 			switch (argumentKey.toUpperCase()){
-				//case "ABBREV":
-				//		requestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
-				//		break;
+				case "ABBREV":
+					requestString.append("&abbrev=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
+					break;
 				case "COUNTY":  
 					requestString.append("&county=" + URLEncoder.encode(getRequestStringHelperMatches(operator, value), "UTF-8") );
 					break;
