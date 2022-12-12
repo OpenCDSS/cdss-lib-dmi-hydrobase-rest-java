@@ -4,7 +4,7 @@
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2019 Colorado Department of Natural Resources
+Copyright (C) 2018-2022 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel
 extends InputFilter_JPanel
 implements MouseListener
 {
-    
+
 /**
 Datastore for this panel.
 */
@@ -57,8 +57,8 @@ Default filter panel properties are used (e.g., 3 filter groups).
 @exception Exception if there is an error.
 */
 public ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel ( ColoradoHydroBaseRestDataStore dataStore )
-throws Exception
-{	this ( dataStore, -1, -1 );
+throws Exception {
+	this ( dataStore, -1, -1 );
 }
 
 /**
@@ -72,8 +72,8 @@ This is used by TSTool.
 */
 public ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
-throws Exception
-{	this.datastore = datastore;
+throws Exception {
+	this.datastore = datastore;
 	
 	// Now define the input filters.
 
@@ -115,8 +115,8 @@ throws Exception
 		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
 
 	// Station abbreviation.
-	//input_filters.add ( new InputFilter ( "Station Abbreviation", "abbrev", "abbrev", "StationAbbreviation",
-	//	StringUtil.TYPE_STRING, null, null, true ) );
+	input_filters.add ( new InputFilter ( "Station Abbreviation", "abbrev", "abbrev", "StationAbbreviation",
+		StringUtil.TYPE_STRING, null, null, true ) );
 
 	// Station name.
 	input_filters.add ( new InputFilter ( "Station Name", "stationName", "stationName", "StationName",

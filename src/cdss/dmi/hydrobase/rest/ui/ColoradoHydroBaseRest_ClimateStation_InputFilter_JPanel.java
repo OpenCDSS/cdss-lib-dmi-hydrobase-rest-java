@@ -42,7 +42,7 @@ public class ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel
 extends InputFilter_JPanel
 implements MouseListener
 {
-    
+
 /**
 Datastore for this panel
 */
@@ -57,8 +57,8 @@ Default filter panel properties are used (e.g., 3 filter groups).
 @exception Exception if there is an error.
 */
 public ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel ( ColoradoHydroBaseRestDataStore dataStore )
-throws Exception
-{	this ( dataStore, -1, -1 );
+throws Exception {
+	this ( dataStore, -1, -1 );
 }
 
 /**
@@ -72,8 +72,8 @@ This is used by TSTool.
 */
 public ColoradoHydroBaseRest_ClimateStation_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
-throws Exception
-{	this.datastore = datastore;
+throws Exception {
+	this.datastore = datastore;
 	
 	// Define the input filters.
 
@@ -173,10 +173,10 @@ throws Exception
  */
 @Override
 public String checkInputFilters ( boolean displayWarning ) {
-	// Use the parent class method to check basic input types based on data types
+	// Use the parent class method to check basic input types based on data types:
 	// - will return empty string if no issues
 	String warning = super.checkInputFilters(displayWarning);
-	// Perform specific checks
+	// Perform specific checks.
 	String warning2 = "";
 	int coordCount = 0;
 	String Latitude = getInputValue("Latitude", false);
@@ -199,23 +199,25 @@ public String checkInputFilters ( boolean displayWarning ) {
 		warning2 += "\nSpecifying latitude and longitude requires specifying latitude, longitude, radius, and units.";
 	}
 	if ( !warning2.isEmpty() ) {
-		// Have non-empty specific warnings so append specific warnings
+		// Have non-empty specific warnings so append specific warnings.
 		warning += warning2;
 	}
-	// Return the general warnings or the appended results
+	// Return the general warnings or the appended results.
 	return warning;
 }
 
-public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore ()
-{
+public ColoradoHydroBaseRestDataStore getColoradoHydroBaseRestDataStore () {
     return this.datastore;
 }
 
-public void mouseClicked(MouseEvent event) {}
+public void mouseClicked(MouseEvent event) {
+}
 
-public void mouseExited(MouseEvent event) {}
+public void mouseExited(MouseEvent event) {
+}
 
-public void mouseEntered(MouseEvent event) {}
+public void mouseEntered(MouseEvent event) {
+}
 
 /**
 Responds to mouse pressed events.
@@ -229,6 +231,7 @@ public void mousePressed(MouseEvent event) {
 	*/
 }
 
-public void mouseReleased(MouseEvent event) {}
+public void mouseReleased(MouseEvent event) {
+}
 
 }
