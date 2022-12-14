@@ -174,18 +174,15 @@ private List<ReferenceTablesWaterDivision> waterDivisionList = null;
 
 /**
 Constructor for web service.
-Important, properties other than the default values passed as parameters may be set with a subsequent
-call to setProperties().  Consequently, initialization should occur from public called methods to ensure
-that information is available for initialization.
+Important, properties other than the default values passed as parameters may be set with a subsequent call to setProperties().
+Consequently, initialization should occur from public called methods to ensure that information is available for initialization.
 @param name - the name of the datastore
 @param description - a brief description of the datastore being defined
 @param serviceRootURI - the root URI used to access the API of the given datastore
-@param apiKey - apiKey generated from DWR to allow access with a higher rate of requests that can be made to 
-DWR REST API.
+@param apiKey - apiKey generated from DWR to allow access with a higher rate of requests that can be made to DWR REST API.
 */
 public ColoradoHydroBaseRestDataStore ( String name, String description, URI serviceRootURI, String apiKey )
-throws URISyntaxException, IOException
-{
+throws URISyntaxException, IOException {
     setName ( name );
     setDescription ( description );
     setServiceRootURI ( serviceRootURI );
@@ -225,8 +222,7 @@ Factory method to construct a data store connection from a properties file.
 @param filename name of file containing property strings
 */
 public static ColoradoHydroBaseRestDataStore createFromFile ( String filename )
-throws IOException, Exception
-{
+throws IOException, Exception {
     // Read the properties from the file.
     PropList props = new PropList ("");
     props.setPersistentName ( filename );
@@ -252,7 +248,7 @@ throws IOException, Exception
  * will return 2.
  */
 private void determineAPIVersion() {   
-	String routine = "ColoradoHydroBaseRestDataStore.determineAPIVersion";
+	String routine = getClass().getSimpleName() + ".determineAPIVersion";
 	String uriString = getServiceRootURI().toString();
 	int indexOf = uriString.lastIndexOf("/");
 	int version = Integer.parseInt(uriString.substring(indexOf + 2, uriString.length()));
@@ -260,8 +256,9 @@ private void determineAPIVersion() {
 	this.apiVersion = version;
 }
 
-// THIS CODE IS AN EXACT COPY OF THE SAME METHOD IN HydroBase_Util.
-// - just change the routine name for logging
+// THIS CODE WAS COPIED FROM THE SAME METHOD IN HydroBase_Util AND MODIFIED.
+// - change the routine name for logging
+// - support processing monthly time series so that web services match HydroBase
 /**
 Fill a daily diversion (DivTotal or DivClass) or reservoir (RelTotal, RelClass)
 time series by carrying forward data.  This method is typically only called by internal database
@@ -271,55 +268,98 @@ Prior to 2019-09-07 any value was used to fill.
 Subsequent to this date only zero can be used to fill values because filling non-zero values.
 The following rules are applied:
 <ol>
-<li> Operates on daily data.</li>
-<li> Filling considers data in blocks of irrigation years (Nov 1 to Oct 31).</li>
+<li> Operates on daily or monthly data.</li>
+<li> If filling monthly data, daily data are queried if necessary to determine
+     if a zero value occurred within the month.</li>
+<li> Filling considers data in blocks of irrigation years (Nov 1 to Oct 31 for daily,
+     Nov to Dec for monthly).</li>
 <li> If an entire irrigation year is missing, no filling occurs.</li>
 <li> Start of year:  If an observation occurs after Nov 1 (but no value is recorded on
      Nov 1), zero is used at the beginning of the irrigation year, until the
-     first observation in that irrigation year.</li>
+     first observation in that irrigation year.
+     Monthly data are treated similarly.</li>
 <li> Within year:  Missing values that follow an observed zero are filled with zero
      until the next observed value.</li>
 <li> End of year:  If an observation occurs before Oct 31 (but no value is recorded on
 	 Oct 31), the last observation in the irrigation year is carried to the
-	 end of the irrigation year - but only if ZERO.</li>
+	 end of the irrigation year - but only if ZERO.
+	 Monthly data are handled similarly.</li>
 <li> HydroBase should have full irrigation years of daily data for months in which
      there was an observation.  However, do not count on this and fill all
      months of daily data, as per the rules.</li>
 <li> Any filled values are flagged with 'c' by default, or user-supplied flag.</li>
 </ol>
 @param ts Time series to fill.
-@param fillDailyDivFlag a string used to flag filled data.
+@param fillDailyDivFlag a string used to flag filled data (default is no flag is set on filled values).
+@param tsidentString TSID string for the original time series that was read,
+used if a daily time series needs to be read to fill monthly time series.
+@param readStart the starting time that was used to read the time series being filled,
+used if daily data need to be read to fill monthly time series.
+@param readEnd the ending time that was used to read the time series being filled,
+used if daily data need to be read to fill monthly time series.
+@param props properties to control reading from the original time series read,
+used if daily data need to be read to fill monthly time series.
 @exception Exception if there is an error filling the data.
 */
-public void fillTSIrrigationYearCarryForward ( DayTS ts, String fillDailyDivFlag )
-throws Exception
-{	String routine = getClass().getSimpleName() + ".fillTSIrrigationYearCarryForward";
+public void fillTSIrrigationYearCarryForward ( TS ts, String fillDailyDivFlag,
+	String tsidentString, DateTime readStart, DateTime readEnd, PropList props )
+	throws Exception {
+	String routine = getClass().getSimpleName() + ".fillTSIrrigationYearCarryForward";
 	if ( ts == null ) {
 		return;
 	}
-	if ( !(ts instanceof DayTS) ) {
+
+	// DayTS is used when filing monthly data:
+	// - only use when missing values are encountered that don't have previous zero month
+	// - read by substituting Day for the interval in the monthly TSID
+	// - didDayQuery is set to true if a daily time series was queried for monthly filling,
+	//   and will be set to true even if the query failed
+	TS dayts = null;
+	boolean didDayQuery = false;
+	
+	// Only daily and monthly time series can be filled.
+	boolean doDay = false;
+	boolean doMonth = false;
+	int baseInterval = -1;
+	if ( ts instanceof DayTS ) {
+		// OK.
+		doDay = true;
+		baseInterval = TimeInterval.DAY;
+	}
+	else if ( ts instanceof MonthTS ) {
+		// OK.
+		doMonth = true;
+		baseInterval = TimeInterval.MONTH;
+	}
+	else {
+		// Unsupported interval so ignore filling.
 		return;
 	}
 
+	// The following works for daily or monthly precision.
 	DateTime FillStart_DateTime = new DateTime ( ts.getDate1() );
 	DateTime FillEnd_DateTime = new DateTime ( ts.getDate2() );
 
-	boolean FillDailyDivFlag_boolean = false; // Indicate whether to use flag.
+	boolean FillDailyDivFlag_boolean = false; // Indicate whether to set the flag for filled values.
+	// Note for the end of the genesis history.
+	String flagNote = ".";
 	if ( (fillDailyDivFlag != null) && (fillDailyDivFlag.length() > 0) ) {
 		FillDailyDivFlag_boolean = true;
+		flagNote = ", flagged with '" + fillDailyDivFlag + "'.";
 	}
 
 	// Loop through the period in blocks of irrigation years.
 
 	FillStart_DateTime.setMonth(11);
-	FillStart_DateTime.setDay(1);
+	if ( doDay ) {
+		FillStart_DateTime.setDay(1);
+	}
 	if ( FillStart_DateTime.greaterThan(ts.getDate1()) ) {
 		// Subtract a year to get the full irrigation year.
 		FillStart_DateTime.addYear ( -1 );
 	}
 
 	List<String> messages = new ArrayList<>();
-	DateTime date = new DateTime ( FillStart_DateTime );
 	DateTime yearstart_DateTime = null;	// Fill dates for one year.
 	DateTime yearend_DateTime = null;
 	int found_count = 0; // Count of non-missing values in year.
@@ -328,8 +368,17 @@ throws Exception
 	double fill_value = 0.0; // Value to be used to fill data, if carry-forward of zero or non-zero.
 	double fillZero = 0.0; // Exact zero value used for filling with zero.
 	TSData tsdata = new TSData(); // Needed to retrieve time series data with flags.
-	for ( ; date.lessThanOrEqualTo(FillEnd_DateTime); date.addDay(1) ) {
-		if ( (date.getMonth() == 11) && (date.getDay() == 1) ) {
+	
+	// Since the time series can be day or month precision, add an interval.
+
+	if ( Message.isDebugOn ) {
+		Message.printStatus(2, routine, "Filling from " + FillStart_DateTime + " to " + FillEnd_DateTime);
+	}
+	DateTime date = new DateTime ( FillStart_DateTime );
+	for ( ; date.lessThanOrEqualTo(FillEnd_DateTime); date.addInterval(baseInterval, 1) ) {
+		// Filling only occurs on full irrigation years so time series must be passed as full years.
+		if ( (doDay && (date.getMonth() == 11) && (date.getDay() == 1)) ||
+			(doMonth && (date.getMonth() == 11)) ) {
 			// Start of a new irrigation year.
 			// First go through the whole year to determine if any non-missing values exist.
 			// If not, then skip the entire year (leave the entire year missing).
@@ -337,7 +386,9 @@ throws Exception
 			yearend_DateTime = new DateTime ( date );
 			yearend_DateTime.addYear ( 1 );
 			yearend_DateTime.setMonth ( 10 );
-			yearend_DateTime.setDay ( 31 );
+			if ( doDay ) {
+				yearend_DateTime.setDay ( 31 );
+			}
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 2, routine,
 				    "Checking for data in " + yearstart_DateTime + " to " + yearend_DateTime );
@@ -346,7 +397,7 @@ throws Exception
 			if ( Message.isDebugOn ) {
 				Message.printDebug ( 2, routine, "Processing irrigation year starting at " + date );
 			}
-			for ( ; date.lessThanOrEqualTo(yearend_DateTime); date.addDay(1) ) {
+			for ( ; date.lessThanOrEqualTo(yearend_DateTime); date.addInterval(baseInterval, 1) ) {
 				value = ts.getDataValue ( date );
 				if ( !ts.isDataMissing(value) ) {
 					// Have an observation.
@@ -357,60 +408,174 @@ throws Exception
 				}
 			}
 			if ( Message.isDebugOn ) {
-				Message.printDebug ( 2, routine, "Found " + found_count + " days of observations." );
+				if ( doDay ) {
+					Message.printDebug ( 2, routine, "Found " + found_count + " days of observations." );
+				}
+				else {
+					Message.printDebug ( 2, routine, "Found " + found_count + " months of observations." );
+				}
 			}
 			if ( found_count == 0 ) {
-				// Just continue and process the next year.
-				// Reset the date to the end of the irrigation year so
-				// that an increment will cause a new irrigation year to be processed.
+				// Have no data values in the year:
+				// - the entire year will have missing values
+				// - reset the date to the end of the irrigation year so
+				//   that an increment will cause a new irrigation year to be processed.
 				date = new DateTime ( yearend_DateTime );
+				if ( Message.isDebugOn ) {
+					Message.printStatus ( 2, routine, "Entire year from " + yearstart_DateTime + " to + " + yearend_DateTime + " is missing - not filling." );
+				}
 				continue;
 			}
-			// Else, will repeat the year that was just checked to fill it in.
+			else {
+				if ( Message.isDebugOn ) {
+					Message.printStatus ( 2, routine, "Year from " + yearstart_DateTime + " to + " + yearend_DateTime +
+						" has " + found_count + " non-missing values so can fill." );
+				}
+			}
+
+			// Else, had at least one non-missing value in the year:
+			// - repeat the year that was just checked
+			// - run the fill carry forward logic
+
 			date = new DateTime(yearstart_DateTime);
-			fill_value = 0.0;
+			// Start of irrigation year has zero fill value by default.
+			fill_value = fillZero;
 			missing_count = 0;
-			for ( ; date.lessThanOrEqualTo(yearend_DateTime); date.addDay(1) ) {
+			for ( ; date.lessThanOrEqualTo(yearend_DateTime); date.addInterval(baseInterval, 1) ) {
 				value = ts.getDataValue ( date );
-				if ( ts.isDataMissing(value) && (fill_value > -.000001) && (fill_value < .000001) ) {
-					// Only fill if the carry-forward fill value is zero.
-					++missing_count;
-					if ( FillDailyDivFlag_boolean ) {
-						// Set the data flag, appending to the old value.
-						tsdata = ts.getDataPoint(date,tsdata);
-						// Used when non-zero carry forward was allowed.
-						//ts.setDataValue ( date, fill_value, (tsdata.getDataFlag().trim() + fillDailyDivFlag), 1 );
-						ts.setDataValue ( date, fillZero, (tsdata.getDataFlag().trim() + fillDailyDivFlag), 1 );
+				if ( ts.isDataMissing(value) ) {
+					if ( Message.isDebugOn ) {
+						Message.printStatus(2, routine, "Found missing value at " + date );
+					}
+					if ( doMonth && (fill_value >= .000001) ) {
+						// Monthly time series and fill value (from start of year or previous value) is not zero:
+						// - previous month was non-zero
+						// - a zero value may be embedded at the end of the previous month in the daily time series
+						//   so have to query the daily time series to
+						if ( !didDayQuery ) {
+							// Get the daily time series:
+							// - query will be done once
+							boolean readData = true;
+							// Replace Month with Day in the time series identifier and then read the time series.
+							TSIdent tsident = TSIdent.parseIdentifier(tsidentString);
+							tsident.setInterval("day");
+							// Make a copy of the start and end and set the days.
+							DateTime readStartDaily = null;
+							DateTime readEndDaily = null;
+							if ( readStart != null ) {
+								readStartDaily = new DateTime(readStart);
+								readStartDaily.setDay(1);
+							}
+							if ( readEnd != null ) {
+								readEndDaily = new DateTime(readEnd);
+								readEndDaily.setDay(TimeUtil.numDaysInMonth(readEnd.getMonth(), readEnd.getYear()));
+							}
+							// Set this to true before the read because if it is left as false many service calls may result.
+							didDayQuery = true;
+							if ( Message.isDebugOn ) {
+								Message.printStatus(2, routine, "Reading daily time series for period " + readStartDaily + " to " + readEndDaily );
+							}
+							dayts = readTimeSeries(tsident.toString(), readStartDaily, readEndDaily, readData, props);
+						}
+						if ( dayts != null ) {
+							// Have a daily time series to examine:
+							// - see if the previous month's last daily value was a zero
+							DateTime startDate = new DateTime(date);
+							startDate.setPrecision(DateTime.PRECISION_DAY);
+							startDate.setDay(1);
+							startDate.addMonth(-1);
+							DateTime endDate = new DateTime(startDate);
+							endDate.setDay(TimeUtil.numDaysInMonth(endDate.getMonth(), endDate.getYear()));
+							DateTime searchDate = new DateTime(endDate);
+							// Search backwards in the previous month:
+							// - only care about finding a zero
+							for ( ; searchDate.greaterThanOrEqualTo(startDate); searchDate.addDay(-1) ) {
+								double daytsValue = dayts.getDataValue(searchDate);
+								if ( ! dayts.isDataMissing(daytsValue) ) {
+									if ( (daytsValue > -.000001) && (daytsValue < .000001) ) {
+										// Have a zero value to use in subsequent filling.
+										if ( Message.isDebugOn ) {
+											Message.printStatus(2, routine, "Found daily zero value at " + searchDate );
+										}
+										fill_value = fillZero;
+									}
+									// Break in any case.
+									break;
+								}
+							}
+						}
+					}
+					if ( (fill_value > -.000001) && (fill_value < .000001) ) {
+						// Only fill if the carry-forward fill value is zero.
+						++missing_count;
+						if ( Message.isDebugOn ) {
+							Message.printStatus(2,routine,"Filling value at " + date + " with " + fill_value);
+						}
+						if ( FillDailyDivFlag_boolean ) {
+							// Set the data flag, appending to the old value.
+							tsdata = ts.getDataPoint(date,tsdata);
+							// Used when non-zero carry forward was allowed.
+							//ts.setDataValue ( date, fill_value, (tsdata.getDataFlag().trim() + fillDailyDivFlag), 1 );
+							ts.setDataValue ( date, fillZero, (tsdata.getDataFlag().trim() + fillDailyDivFlag), 1 );
+						}
+						else {
+					    	// No data flag.
+							// Used when non-zero carry forward was allowed.
+							//ts.setDataValue ( date, fill_value );
+							ts.setDataValue ( date, fillZero );
+						}
 					}
 					else {
-					    // No data flag.
-						// Used when non-zero carry forward was allowed.
-						//ts.setDataValue ( date, fill_value );
-						ts.setDataValue ( date, fillZero );
+						if ( Message.isDebugOn ) {
+							Message.printStatus(2,routine,"Not filling value at " + date + " because fill value " + fill_value + " is non-zero.");
+						}
 					}
 				}
 				// Check for filling with zero elsewhere in the code.
 				else {
+					// Value is not missing:
+					// - don't need to fill
+					// - set the fill value to the value (may or may not be zero)
+					// - will only be used to fill above if zero
 					fill_value = value;
 				}
 			}
-			// Save messages to add to the genesis history...
+			// Save messages to add to the genesis history.
 			if ( missing_count > 0 ) {
-				messages.add (
-				"Nov 1, " + yearstart_DateTime.getYear() + " to Oct 31, " + yearend_DateTime.getYear() +
-				" filled " + missing_count + " values by carrying forward observation, flagged with 'c'." );
+				if ( doDay ) {
+					messages.add (
+					"Nov 1, " + yearstart_DateTime.getYear() + " to Oct 31, " + yearend_DateTime.getYear() +
+					" filled " + missing_count + " values by carrying forward observation" + flagNote );
+				}
+				else {
+					messages.add (
+					"Nov, " + yearstart_DateTime.getYear() + " to Oct, " + yearend_DateTime.getYear() +
+					" filled " + missing_count + " values by carrying forward observation" + flagNote );
+				}
 			}
 			// Reset the date to the end of the irrigation year so
 			// that an increment will cause a new irrigation year to be processed.
 			date = new DateTime ( yearend_DateTime );
+		}
+		else {
+			if ( Message.isDebugOn ) {
+				Message.printStatus(2, routine, "Ignoring value at " + date + " since before first irrigation year.");
+			}
 		}
 	}
 
 	// Add to the genesis.
 
 	if ( messages.size() > 0 ) {
-		ts.addToGenesis("Filled " + ts.getDate1() + " to " +
-		ts.getDate2() + " using carry forward within irrigation year because HydroBase daily data omit empty months." );
+		if ( doDay ) {
+			ts.addToGenesis("Filled " + ts.getDate1() + " to " +
+			ts.getDate2() + " using carry forward within irrigation year because HydroBase daily data omit empty months." );
+		}
+		else {
+			// Should only be called for web services.
+			ts.addToGenesis("Filled " + ts.getDate1() + " to " +
+			ts.getDate2() + " using carry forward within irrigation year because HydroBase web service monthly data omit empty months." );
+		}
 		if ( Message.isDebugOn ) {
 			// TODO SAM 2006-04-27 Evaluate whether this should always be saved in the genesis.
 			// The problem is that the genesis can get very long.
@@ -419,8 +584,16 @@ throws Exception
 			}
 		}
 		if ( (fillDailyDivFlag != null) && !fillDailyDivFlag.equals("") ) {
-		    ts.addDataFlagMetadata(
-		        new TSDataFlagMetadata(fillDailyDivFlag, "Filled within irrigation year using DWR carry-forward approach because HydroBase daily data omits empty months."));
+			if ( doDay ) {
+				ts.addDataFlagMetadata(
+					new TSDataFlagMetadata(fillDailyDivFlag,
+						"Filled within irrigation year using DWR carry-forward approach because HydroBase daily data omit empty months."));
+			}
+			else {
+				ts.addDataFlagMetadata(
+					new TSDataFlagMetadata(fillDailyDivFlag,
+						"Filled within irrigation year using DWR carry-forward approach because HydroBase web service monthly data omit empty months."));
+			}
 		}
 	}
 }
@@ -3212,7 +3385,11 @@ The data type should be the 'measType' or similar returned from web services;
 however, in some cases custom handling is required because it is not easy or possible to map
 because a record contains multiple values.
 @param readStart the starting date/time to read, or null to read all data.
+Diversion record time series will adjust this to full irrigation year for processing if not null,
+and return the requested period.
 @param readEnd the ending date/time to read, or null to read all data.
+Diversion record time series will adjust this to full irrigation year for processing if not null,
+and return the requested period.
 @param readData if true, read the data; if false, construct the time series and populate properties but do not read the data
 @param props Additional properties to control reading, such as filling structure time series with diversion comments.
 Recognized properties include:
@@ -3220,9 +3397,9 @@ Recognized properties include:
 <li> FillgDivRecordsCarryForward - indicate whether to fill diversion records with fill carry forward</li>
 <li> FillgDivRecordsCarryForwardFlag - flag used for filled carry forward values (default is "c")</li>
 <li> FillUsingDivComments - indicate whether to fill diversion record time series with
-additional zero values using diversion comments (default is False).</li>
+     additional zero values using diversion comments (default is False).</li>
 <li> FillUsingDivCommentsFlag - flag for data values filled with diversion comments
-(default if null is "Auto" to use "not in use" flag).</li>
+     (default if null is "Auto" to use "not in use" flag).</li>
 </ul>
 @return the time series read from the HydroBase web services,
 or minimally-initialized time series if unable to read.
@@ -3751,7 +3928,7 @@ throws MalformedURLException, Exception {
 						// Value is set to zero diversion amount, flag can be used later to fill data with zeros:
 						// -TODO smalers 2019-08-28 HydroBase 'usp_CDSS_DiversionComment_Sel_By_Structure_num' stored procedure has 'acres_irrig'
 						ts.setDataValue(dt, 0.0, notUsed, -1);
-						Message.printStatus(2, routine, "Setting diversion comment for " + dt.getYear() + " flag " + notUsed );
+						Message.printStatus(2, routine, "Reading diversion comments - have comment for " + dt.getYear() + " flag " + notUsed );
 					}
 				}
 			}
@@ -3825,7 +4002,8 @@ throws MalformedURLException, Exception {
 			return ts;
 		}
 		
-		// Get first and last date.
+		// Get first and last dates from the data records to set as the original period.
+
 		// First date.
 		DateTime firstDate = waterClassForWdid.getPorStart();
 		if ( firstDate != null ) {
@@ -3873,42 +4051,56 @@ throws MalformedURLException, Exception {
 		//ts.addToGenesis("read data from web services " + structRequest + " and " + divRecRequest + "."); // might need to add waterclasses URL string
 		setTimeSeriesPropertiesForStructure(ts, struct, waterClassForWdid);
 		
-		// FIXME @jurentie 06/26/2018 Do not read all data if not within the bounds of the specified dates.
 		// 5. Read data.
-		if(!readData){
+		if ( !readData ) {
 			setCommentsForStructure(ts, struct);
 			return ts;
 		}
 		else {
 			// Read the data.
+			// - for daily and monthly data, extend to the full irrigation year to ensure that carry forward logic works
+			// - then reset after reading/filling to the requested period
+			
+			// Make a copy of the start and end.
+			DateTime readStartIrrig = null;
+			DateTime readEndIrrig = null;
+			if ( readStart != null ) {
+				readStartIrrig = new DateTime(readStart);
+			}
+			if ( readEnd != null ) {
+				readEndIrrig = new DateTime(readEnd);
+			}
+			roundToIrrigationYear ( intervalBase, readStartIrrig, readEndIrrig );
 			
 			// Get the data from web services.
 			String divRecRequest = null;
-			if(intervalBase == TimeInterval.DAY){
+			if ( intervalBase == TimeInterval.DAY ) {
 				// Create request URL for web services API.
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecday?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision.
-				if ( readStart != null ) {
-					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readStart.getMonth(), readStart.getDay(), readStart.getYear()), "UTF-8");
+				if ( readStartIrrig != null ) {
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d",
+						readStartIrrig.getMonth(), readStartIrrig.getDay(), readStartIrrig.getYear()), "UTF-8");
 				}
-				if ( readEnd != null ) {
-					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d", readEnd.getMonth(), readEnd.getDay(), readEnd.getYear()), "UTF-8");
+				if ( readEndIrrig != null ) {
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%02d/%04d",
+						readEndIrrig.getMonth(), readEndIrrig.getDay(), readEndIrrig.getYear()), "UTF-8");
 				}
-				Message.printStatus(2, routine, "Retrieve diversion by day data from DWR REST API request url: " + divRecRequest);
+				Message.printStatus(2, routine, "Retrieve daily diversion data from DWR REST API request url: " + divRecRequest);
 			}
-			if(intervalBase == TimeInterval.MONTH){
+			else if ( intervalBase == TimeInterval.MONTH ) {
 				// Create request URL for web services API.
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecmonth?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision.
-				if ( readStart != null ) {
-					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readStart.getMonth(), readStart.getYear()), "UTF-8");
+				if ( readStartIrrig != null ) {
+					divRecRequest += "&min-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readStartIrrig.getMonth(), readStartIrrig.getYear()), "UTF-8");
 				}
-				if ( readEnd != null ) {
-					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readEnd.getMonth(), readEnd.getYear()), "UTF-8");
+				if ( readEndIrrig != null ) {
+					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%02d/%04d", readEndIrrig.getMonth(), readEndIrrig.getYear()), "UTF-8");
 				}
-				Message.printStatus(2, routine, "Retrieve diversion by month data from DWR REST API request url: " + divRecRequest);
+				Message.printStatus(2, routine, "Retrieve monthly diversion data from DWR REST API request url: " + divRecRequest);
 			}
-			if(intervalBase == TimeInterval.YEAR){
+			else if ( intervalBase == TimeInterval.YEAR ) {
 				// Create request URL for web services API.
 				divRecRequest = getServiceRootURI() + "/structures/divrec/divrecyear?format=json&wdid=" + wdid + "&waterClassNum=" + waterClassNumForWdid;
 				// Add dates to limit query, to day precision.
@@ -3918,7 +4110,7 @@ throws MalformedURLException, Exception {
 				if ( readEnd != null ) {
 					divRecRequest += "&max-dataMeasDate=" + URLEncoder.encode(String.format("%04d", readEnd.getYear()), "UTF-8");
 				}
-				Message.printStatus(2, routine, "Retrieve diversion by day year from DWR REST API request url: " + divRecRequest);
+				Message.printStatus(2, routine, "Retrieve yearly diversion data from DWR REST API request url: " + divRecRequest);
 			}
 			if ( Message.isDebugOn ) { 
 				Message.printDebug(dl, routine, "DivRecRequest: " + divRecRequest);
@@ -3933,7 +4125,7 @@ throws MalformedURLException, Exception {
 			}
 
 			// Set the original start and end date to the parameter period.
-			if ( readStart == null ) {
+			if ( readStartIrrig == null ) {
 				// Set the time series start to the first data record.
 				if (intervalBase == TimeInterval.DAY ) {
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(0), DiversionByDay.class);
@@ -3949,9 +4141,9 @@ throws MalformedURLException, Exception {
 				}
 			}
 			else {
-				ts.setDate1(readStart);
+				ts.setDate1(readStartIrrig);
 			}
-			if ( readEnd == null ) {
+			if ( readEndIrrig == null ) {
 				// Set the time series start to the last data record
 				if (intervalBase == TimeInterval.DAY ) {
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionByDay.class);
@@ -3967,8 +4159,16 @@ throws MalformedURLException, Exception {
 				}
 			}
 			else {
-				ts.setDate2(readEnd);
+				ts.setDate2(readEndIrrig);
 			}
+			
+			// Round the to the irrigation year before transferring data:
+			// - may have only been able to determine this after reading data
+			readStartIrrig = new DateTime (ts.getDate1());
+			readEndIrrig = new DateTime (ts.getDate2());
+			roundToIrrigationYear ( intervalBase, readStartIrrig, readEndIrrig );
+			ts.setDate1(readStartIrrig);
+			ts.setDate2(readEndIrrig);
 			
 			// Allocate data space.
 			ts.allocateDataSpace();
@@ -3978,7 +4178,7 @@ throws MalformedURLException, Exception {
 			String obsCode;
 			Double value;
 			boolean valueIsMissing;
-			if(intervalBase == TimeInterval.DAY){
+			if ( intervalBase == TimeInterval.DAY ) {
 				for(int i = 0; i < results.size(); i++){
 					
 					DiversionByDay divRecCurrDay = (DiversionByDay)jacksonToolkit.treeToValue(results.get(i), DiversionByDay.class);
@@ -4028,7 +4228,7 @@ throws MalformedURLException, Exception {
 					}
 				}
 			}
-			if(intervalBase == TimeInterval.MONTH){
+			else if ( intervalBase == TimeInterval.MONTH ) {
 				for(int i = 0; i < results.size(); i++){
 					DiversionByMonth divRecCurrMonth = (DiversionByMonth)jacksonToolkit.treeToValue(results.get(i), DiversionByMonth.class);
 					
@@ -4077,7 +4277,7 @@ throws MalformedURLException, Exception {
 					}
 				}
 			}
-			if(intervalBase == TimeInterval.YEAR){
+			else if ( intervalBase == TimeInterval.YEAR ) {
 				for(int i = 0; i < results.size(); i++){
 					DiversionByYear divRecCurrYear = (DiversionByYear)jacksonToolkit.treeToValue(results.get(i), DiversionByYear.class);
 					
@@ -4126,26 +4326,35 @@ throws MalformedURLException, Exception {
 			}
 			
 			/**
-			 * If any data is set within the irrigation year then fill the rest of the data
-			 * forward or fill empty data with 0.0.
-			 * The default is false, which is changed by command parameters.
+			 * Handle fill carry forward as per HydroBase rules:
+			 * - if any data is set within the irrigation year then fill the rest of the data forward or fill empty data with 0.0
+			 * - the default is true, which is changed by command parameters
+			 * - as of 2022-12-12 include monthly data because web services don't return zeros and nulls result in time series
 			 */
-			if ( intervalBase == TimeInterval.DAY ) {
+			if ( (intervalBase == TimeInterval.DAY) || (intervalBase == TimeInterval.MONTH) ) {
 				String fillCarryForward = props.getValue("FillDivRecordsCarryForward");
 				if ( (fillCarryForward == null) || fillCarryForward.equals("") ) {
 					fillCarryForward = "true"; // Default is to fill, consistent with CDSS/HydroBase approach.
 				}
-				if(fillCarryForward.equalsIgnoreCase("true")){
-					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", filling daily diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
+				String intervalString = "daily";
+				if ( intervalBase == TimeInterval.MONTH ) {
+					intervalString = "monthly";
+				}
+				if ( fillCarryForward.equalsIgnoreCase("true") ) {
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", filling " + intervalString +
+						" diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
 					String fillCarryForwardFlag = props.getValue("FillDivRecordsCarryForwardFlag");
-					if((fillCarryForwardFlag == null) || fillCarryForwardFlag.isEmpty()){
+					if ( (fillCarryForwardFlag == null) || fillCarryForwardFlag.isEmpty()) {
 						fillCarryForwardFlag = "c"; // Default.
 					}
-					// The following will add the flag as another flag description.
-					fillTSIrrigationYearCarryForward((DayTS)ts, fillCarryForwardFlag);
+					// The following will add the flag as another flag description:
+					// - props is used to read daily time series when filling monthly time series, if necessary,
+					//   which will use fill carry forward and diversion comments on the daily
+					fillTSIrrigationYearCarryForward(ts, fillCarryForwardFlag, tsidentString, readStartIrrig, readEndIrrig, props );
 				}
 				else {
-					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling daily diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling " + intervalString +
+						" diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
 				}
 			}
 			
@@ -4163,16 +4372,19 @@ throws MalformedURLException, Exception {
 						", filling diversion records with diversion comments because FillUsingDivComments=" + fillDivComments );
 					String fillFlag = props.getValue("FillUsingDivCommentsFlag");
 					if ( (fillFlag == null) || fillFlag.isEmpty() ) {
+						// If not specified use "Auto".
 						fillFlag = "Auto";
 					}
-					// If not specified use "Auto".
 					// Fill flag description is automatically assigned to "notUsed" value.
 					String fillFlagDesc = "Auto";
-					fillTSUsingDiversionComments( ts, readStart, readEnd,
-						fillFlag, fillFlagDesc, extendPeriod );
+					// Pass the original read period:
+					// - if a specific period was requested, only fill that
+					// - if nulls (full period) is used, then the period will be extended
+					fillTSUsingDiversionComments( ts, readStart, readEnd, fillFlag, fillFlagDesc, extendPeriod );
 				}
 				else {
-					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling diversion records with diversion comments because FillUsingDivComments=" + fillDivComments );
+					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() +
+						", not filling diversion records with diversion comments because FillUsingDivComments=" + fillDivComments );
 				}
 			}
 			else {
@@ -4261,6 +4473,41 @@ throws MalformedURLException, Exception {
 					}
 				}
 			}
+			}
+			
+			// Set the time series period to the original request:
+			// - irrigation year was used for processing to ensure that carry forward filling works
+			// - only need to change the period if the requested period is not null and is different from the irrigation year
+			// - if the original period was null, allow full irrigation years to be returned,
+			//   but limit to the current date
+			
+			if ( Message.isDebugOn ) {
+				Message.printStatus(2, routine, "Checking period at end for readStart=" + readStart + " and readEnd=" + readEnd);
+				Message.printStatus(2, routine, "Checking period at end for readStartIrrig=" + readStartIrrig + " and readEndIrrig=" + readEndIrrig);
+			}
+			if ( (intervalBase == TimeInterval.DAY) || (intervalBase == TimeInterval.MONTH) ) {
+				if ( (readStart == null) && (readEnd == null) ) {
+					// All data were read:
+					// - keep full irrigation year for start
+					// - limit the end to the current date because otherwise would have a missing data into the future
+					DateTime readEndNow = new DateTime(DateTime.DATE_CURRENT);
+					if ( intervalBase == TimeInterval.DAY ) {
+						readEndNow.setPrecision(DateTime.PRECISION_DAY);
+					}
+					else {
+						readEndNow.setPrecision(DateTime.PRECISION_MONTH);
+					}
+					if ( readEndIrrig.greaterThan(readEndNow) ) {
+						ts.changePeriodOfRecord(readStartIrrig, readEndNow);
+					}
+					else {
+						// Keep the historical irrigation years.
+					}
+				}
+				else if ( !readStart.equals(readStartIrrig) || !readEnd.equals(readEndIrrig) ) {
+					// Need to change to the original output period.
+					ts.changePeriodOfRecord(readStart, readEnd);
+				}
 			}
 		}
 	}
@@ -4370,14 +4617,14 @@ throws MalformedURLException, Exception {
 			}
 
 			// Set start and end date.
-			if(readStart == null){
+			if ( readStart == null ) {
 				DiversionStageVolume divStageVol = (DiversionStageVolume)jacksonToolkit.treeToValue(results.get(0), DiversionStageVolume.class);
 				ts.setDate1(divStageVol.getDataMeasDate());
 			}
 			else {
 				ts.setDate1(readStart);
 			}
-			if ( readEnd == null) {
+			if ( readEnd == null ) {
 				DiversionStageVolume divStageVol = (DiversionStageVolume)jacksonToolkit.treeToValue(results.get(results.size() - 1), DiversionStageVolume.class);
 				ts.setDate2(divStageVol.getDataMeasDate());
 			}
@@ -5271,6 +5518,54 @@ private void readWaterDivisions(){
 	JacksonToolkit jacksonToolkit = JacksonToolkit.getInstance();
 	for(int i = 0; i < results.size(); i++){
 		this.waterDivisionList.add((ReferenceTablesWaterDivision)jacksonToolkit.treeToValue(results.get(i), ReferenceTablesWaterDivision.class));
+	}
+}
+
+/**
+ * Helper method to round a period to irrigation year, used when reading daily and monthly diversion record time series.
+ * @param readStartIrrig start of read, can be null, will be updated to the start of the bounding irrigation year
+ * @param readEndIrrig end of read, can be null, will be updated to the end of the bounding irrigation year
+ */
+private void roundToIrrigationYear ( int intervalBase, DateTime readStartIrrig, DateTime readEndIrrig ) {
+	if ( (intervalBase != TimeInterval.DAY) && (intervalBase != TimeInterval.MONTH) ) {
+		return;
+	}
+	// Do the work as day and then set the precision at the end.
+	if ( readStartIrrig != null ) {
+		readStartIrrig.setDay(1);
+		if ( readStartIrrig.getMonth() < 11 ) {
+			// Round down to the start of the irrigation year in the previous year.
+			readStartIrrig.setYear(readStartIrrig.getYear() - 1);
+			readStartIrrig.setMonth(11);
+		}
+		else if ( readStartIrrig.getMonth() > 11 ) {
+			// Just need to set the month in the current year.
+			readStartIrrig.setMonth(11);
+		}
+		if ( intervalBase == TimeInterval.DAY ) {
+			readStartIrrig.setPrecision(DateTime.PRECISION_DAY);
+		}
+		else if ( intervalBase == TimeInterval.MONTH ) {
+			readStartIrrig.setPrecision(DateTime.PRECISION_MONTH);
+		}
+	}
+	if ( readEndIrrig != null ) {
+		readEndIrrig.setDay(31);
+		if ( readEndIrrig.getMonth() > 10 ) {
+			// Round up to the nd of the irrigation year in the next year.
+			readEndIrrig.setYear(readEndIrrig.getYear() + 1);
+			readEndIrrig.setMonth(10);
+		}
+		else if ( readEndIrrig.getMonth() < 10 ) {
+			// Just need to set the month in the current year.
+			readEndIrrig.setMonth(10);
+		}
+		if ( intervalBase == TimeInterval.DAY ) {
+			readEndIrrig.setPrecision(DateTime.PRECISION_DAY);
+		}
+		else if ( intervalBase == TimeInterval.MONTH ) {
+			readEndIrrig.setPrecision(DateTime.PRECISION_MONTH);
+		}
 	}
 }
 
