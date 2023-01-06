@@ -46,6 +46,7 @@ import RTi.TS.TSIterator;
 import RTi.TS.TSUtil;
 import RTi.TS.YearTS;
 import RTi.Util.GUI.InputFilter;
+import RTi.Util.GUI.InputFilterCriterionType;
 import RTi.Util.IO.IOUtil;
 import RTi.Util.IO.PropList;
 import RTi.Util.Math.MathUtil;
@@ -1419,16 +1420,16 @@ throws Exception {
 	// Get the user input.
 	triplet[2] = filter.getInputInternal().trim();
 
-	if (op.equalsIgnoreCase(InputFilter.INPUT_BETWEEN)) {
+	if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_BETWEEN.toString())) {
 		// TODO - need to enable in InputFilter_JPanel.
 	}
-	else if (op.equalsIgnoreCase( InputFilter.INPUT_CONTAINS)) {
+	else if (op.equalsIgnoreCase( InputFilterCriterionType.INPUT_CONTAINS.toString())) {
 		triplet[1] = "CN";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_ENDS_WITH)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_ENDS_WITH.toString())) {
 		triplet[1] = "EW";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_EQUALS)){
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_EQUALS.toString())){
 		if (inputType == StringUtil.TYPE_STRING) {
 			triplet[1] = "MA";
 		}
@@ -1436,25 +1437,25 @@ throws Exception {
 			triplet[1] = "EQ";
 		}
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_GREATER_THAN)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_GREATER_THAN.toString())) {
 		triplet[1] = "GT";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_GREATER_THAN_OR_EQUAL_TO)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_GREATER_THAN_OR_EQUAL_TO.toString())) {
 	    	triplet[1] = "GE";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_LESS_THAN)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_LESS_THAN.toString())) {
 		triplet[1] = "LT";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_LESS_THAN_OR_EQUAL_TO)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_LESS_THAN_OR_EQUAL_TO.toString())) {
 		triplet[1] = "LE";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_MATCHES)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_MATCHES.toString())) {
 		triplet[1] = "MA";
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_ONE_OF)){
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_ONE_OF.toString())){
 		// TODO - need to enable in InputFilter_JPanel.
 	}
-	else if (op.equalsIgnoreCase(InputFilter.INPUT_STARTS_WITH)) {
+	else if (op.equalsIgnoreCase(InputFilterCriterionType.INPUT_STARTS_WITH.toString())) {
 		triplet[1] = "SW";
 	}
 	else {	
