@@ -4,7 +4,7 @@
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2022 Colorado Department of Natural Resources
+Copyright (C) 2018-2023 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public ColoradoHydroBaseRest_SurfaceWaterStation_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
 throws Exception {
 	this.datastore = datastore;
-	
+
 	// Now define the input filters.
 
 	List<InputFilter> input_filters = new ArrayList<>(8);
@@ -87,23 +87,27 @@ throws Exception {
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
 	List<String> countyList = new ArrayList<> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
-		countyList.add ( county.getCounty() ); // TODO smalers 2018-06-19 HydroBase has state + ", CO" );
+		countyList.add ( county.getCounty() ); // TODO smalers 2018-06-19 HydroBase has state + ", CO".
 	}
-	filter = new InputFilter ( "County", "county", "county",
+	filter = new InputFilter ( "County",
+		"county", "county", "county",
 		StringUtil.TYPE_STRING, countyList, countyList, false );
 	filter.setTokenInfo(",",0);
 	input_filters.add ( filter );
 
 	// Latitude.
-	input_filters.add ( new InputFilter ( "Latitude", "latitude", "latitude",
+	input_filters.add ( new InputFilter ( "Latitude",
+		"latitude", "latitude", "latitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Longitude.
-	input_filters.add ( new InputFilter ( "Longitude", "longitude", "longitude",
+	input_filters.add ( new InputFilter ( "Longitude",
+		"longitude", "longitude", "longitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Radius around latitude/longitude.
-	input_filters.add ( new InputFilter ( "LatLong Radius", "radius", "radius", "LatLongRadius",
+	input_filters.add ( new InputFilter ( "LatLong Radius",
+		"radius", "radius", "LatLongRadius",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Radius units, used with radius:
@@ -111,19 +115,23 @@ throws Exception {
 	List<String> radiusUnitsChoices = new ArrayList<>(2);
 	radiusUnitsChoices.add("feet");
 	radiusUnitsChoices.add("miles");
-	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units", "LatLongRadiusUnits",
+	input_filters.add ( new InputFilter ( "LatLong Radius Units",
+		"units", "units", "LatLongRadiusUnits",
 		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
 
 	// Station abbreviation.
-	input_filters.add ( new InputFilter ( "Station Abbreviation", "abbrev", "abbrev", "StationAbbreviation",
+	input_filters.add ( new InputFilter ( "Station Abbreviation",
+		"abbrev", "abbrev", "StationAbbreviation",
 		StringUtil.TYPE_STRING, null, null, true ) );
 
 	// Station name.
-	input_filters.add ( new InputFilter ( "Station Name", "stationName", "stationName", "StationName",
+	input_filters.add ( new InputFilter ( "Station Name",
+		"stationName", "stationName", "StationName",
 		StringUtil.TYPE_STRING, null, null, true ) );
 
 	// USIS identifier.
-	input_filters.add ( new InputFilter ( "USGS Site ID", "usgsSiteId", "usgsSiteId", "usgsSiteId",
+	input_filters.add ( new InputFilter ( "USGS Site ID",
+		"usgsSiteId", "usgsSiteId", "usgsSiteId",
 		StringUtil.TYPE_STRING, null, null, true ) );
 
 	// Water district.
@@ -134,7 +142,8 @@ throws Exception {
 		districtList.add ("" + wd.getWaterDistrict() + " - " + wd.getWaterDistrictName());
 		districtInternalList.add ("" + wd.getWaterDistrict() );
 	}
-	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict", "WaterDistrict",
+	filter = new InputFilter ( "Water District",
+		"waterDistrict", "waterDistrict", "WaterDistrict",
 		StringUtil.TYPE_STRING, districtList, districtInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
@@ -147,11 +156,12 @@ throws Exception {
 		divisionList.add ("" + div.getDivision() + " - " + div.getDivisionName());
 		divisionInternalList.add ("" + div.getDivision() );
 	}
-	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision", "WaterDivision",
+	filter = new InputFilter ( "Water Division",
+		"waterDivision", "waterDivision", "WaterDivision",
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
-	
+
 	if ( numFilterGroups < 0 ) {
 		// Set number of filter groups to 5 so that latitude, longitude, radius, units, and one other can be specified.
 		numFilterGroups = 5;
@@ -177,7 +187,7 @@ throws Exception {
  */
 @Override
 public String checkInputFilters ( boolean displayWarning ) {
-	// Use the parent class method to check basic input types based on data types
+	// Use the parent class method to check basic input types based on data types:
 	// - will return empty string if no issues
 	String warning = super.checkInputFilters(displayWarning);
 	// Perform specific checks.
@@ -228,9 +238,9 @@ Responds to mouse pressed events.
 @param event the event that happened.
 */
 public void mousePressed(MouseEvent event) {
-    /** Not enabled - used for PLSS query
+    /** Not enabled - used for PLSS query.
 	JFrame temp = new JFrame();
-	JGUIUtil.setIcon(temp, JGUIUtil.getIconImage());	
+	JGUIUtil.setIcon(temp, JGUIUtil.getIconImage());
 	HydroBase_GUI_Util.buildLocation(temp, (JTextField)event.getSource());
 	*/
 }
