@@ -57,8 +57,8 @@ Default filter panel properties are used (e.g., 3 filter groups).
 @exception Exception if there is an error.
 */
 public ColoradoHydroBaseRest_Well_InputFilter_JPanel ( ColoradoHydroBaseRestDataStore datastore )
-throws Exception
-{	this ( datastore, -1, -1 );
+throws Exception {
+	this ( datastore, -1, -1 );
 }
 
 /**
@@ -73,57 +73,65 @@ This is used by TSTool.
 */
 public ColoradoHydroBaseRest_Well_InputFilter_JPanel (
 		ColoradoHydroBaseRestDataStore datastore, int numFilterGroups, int numWhereChoicesToDisplay )
-throws Exception
-{	this.datastore = datastore;
+throws Exception {
+	this.datastore = datastore;
 	
-	// Now define the input filters
+	// Now define the input filters.
 
-	List<InputFilter> input_filters = new ArrayList<InputFilter>(8);
+	List<InputFilter> input_filters = new ArrayList<>(8);
 	input_filters.add ( new InputFilter ("", "",
-	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter
+	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter.
 
 	InputFilter filter;
     // County
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
 	List<String> countyList = new ArrayList<> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
-		countyList.add ( county.getCounty() ); // TODO smalers 2018-06-19 HydroBase has state + ", CO" );
+		countyList.add ( county.getCounty() ); // TODO smalers 2018-06-19 HydroBase has state + ", CO".
 	}
-	filter = new InputFilter ( "County", "county", "county",
+	filter = new InputFilter ( "County",
+		"county", "county", "county",
 		StringUtil.TYPE_STRING, countyList, countyList, false );
 	filter.setTokenInfo(",",0);
 	input_filters.add ( filter );
 	
-	// Designated basin
-    input_filters.add ( new InputFilter ( "Designated Basin", "designatedBasin", "designatedBasin", "DesignatedBasin",
+	// Designated basin.
+    input_filters.add ( new InputFilter ( "Designated Basin",
+    		"designatedBasin", "designatedBasin", "DesignatedBasin",
             StringUtil.TYPE_STRING, null, null, true ) );
 	
 	// Latitude
-	input_filters.add ( new InputFilter ( "Latitude", "latitude", "latitude",
+	input_filters.add ( new InputFilter ( "Latitude",
+		"latitude", "latitude", "latitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
 	// Longitude
-	input_filters.add ( new InputFilter ( "Longitude", "longitude", "longitude",
+	input_filters.add ( new InputFilter ( "Longitude",
+		"longitude", "longitude", "longitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 	
-	// Radius around latitude/longitude
-	input_filters.add ( new InputFilter ( "LatLong Radius", "radius", "radius", "LatLongRadius",
+	// Radius around latitude/longitude.
+	input_filters.add ( new InputFilter ( "LatLong Radius",
+		"radius", "radius", "LatLongRadius",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
-	// Radius units, used with radius
+	// Radius units, used with radius.
 	// TODO smalers 2018-06-20 should this be a reference table?
 	List<String> radiusUnitsChoices = new ArrayList<>(2);
 	radiusUnitsChoices.add("feet");
 	radiusUnitsChoices.add("miles");
-	input_filters.add ( new InputFilter ( "LatLong Radius Units", "units", "units", "LatLongRadiusUnits",
+	input_filters.add ( new InputFilter ( "LatLong Radius Units",
+		"units", "units", "LatLongRadiusUnits",
 		StringUtil.TYPE_STRING, radiusUnitsChoices, radiusUnitsChoices, false ) );
 	
 	// Management district
-    input_filters.add ( new InputFilter ( "Management District", "managementDistrict", "managementDistrict", "ManagementDistrict",
+    input_filters.add ( new InputFilter ( "Management District",
+    	"managementDistrict", "managementDistrict", "ManagementDistrict",
         StringUtil.TYPE_STRING, null, null, true ) );
     
 	// Publication name
-    input_filters.add ( new InputFilter ( "Publication Name", "publicationName", "publicationName", "PublicationName",
+    input_filters.add ( new InputFilter ( "Publication Name",
+    	"publicationName", "publicationName", "PublicationName",
         StringUtil.TYPE_STRING, null, null, true ) );
 
 	// Water district
@@ -134,7 +142,8 @@ throws Exception
 		districtList.add ("" + wd.getWaterDistrict() + " - " + wd.getWaterDistrictName());
 		districtInternalList.add ("" + wd.getWaterDistrict() );
 	}
-	filter = new InputFilter ( "Water District", "waterDistrict", "waterDistrict", "WaterDistrict",
+	filter = new InputFilter ( "Water District",
+		"waterDistrict", "waterDistrict", "WaterDistrict",
 		StringUtil.TYPE_STRING, districtList, districtInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
@@ -147,12 +156,14 @@ throws Exception
 		divisionList.add ("" + div.getDivision() + " - " + div.getDivisionName());
 		divisionInternalList.add ("" + div.getDivision() );
 	}
-	filter = new InputFilter ( "Water Division", "waterDivision", "waterDivision", "WaterDivision",
+	filter = new InputFilter ( "Water Division",
+		"waterDivision", "waterDivision", "WaterDivision",
 		StringUtil.TYPE_STRING, divisionList, divisionInternalList, false );
 	filter.setTokenInfo("-",0,StringUtil.TYPE_INTEGER);
 	input_filters.add ( filter );
 	
-    input_filters.add ( new InputFilter ( "Well ID", "wellId", "wellId", "WellID",
+    input_filters.add ( new InputFilter ( "Well ID",
+    	"wellId", "wellId", "WellID",
         StringUtil.TYPE_INTEGER, null, null, true ) );
 
 	if ( numFilterGroups < 0 ) {
@@ -210,19 +221,19 @@ public String checkInputFilters ( boolean displayWarning ) {
 	String District = getInputValue("WaterDistrict", false);
 	String County = getInputValue("County", false);
 	int necInputFilters = 0;
-	if( (WellId != null) && !WellId.isEmpty()){
+	if( (WellId != null) && !WellId.isEmpty()) {
 		++necInputFilters;
 	}
-	if( (Division != null) && !Division.isEmpty()){
+	if( (Division != null) && !Division.isEmpty()) {
 		++necInputFilters;
 	}
-	if( (District != null) && !District.isEmpty()){
+	if( (District != null) && !District.isEmpty()) {
 		++necInputFilters;
 	}
-	if( (County != null) && !County.isEmpty()){
+	if( (County != null) && !County.isEmpty()) {
 		++necInputFilters;
 	}
-	if( !(necInputFilters > 0)){
+	if( !(necInputFilters > 0)) {
 		warning2 += "\nWell ID, county, designated basin, management district, pulication name, location, water district, or water division is required.";
 	}
 	if ( !warning2.isEmpty() ) {
