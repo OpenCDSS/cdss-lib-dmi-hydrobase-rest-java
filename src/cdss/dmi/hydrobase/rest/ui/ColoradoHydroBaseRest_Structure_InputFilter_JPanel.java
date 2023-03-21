@@ -87,7 +87,7 @@ throws Exception {
 	    StringUtil.TYPE_STRING, null, null, true ) ); // Blank to disable filter.
 
 	InputFilter filter;
-    // County
+    // County.
 	List<ReferenceTablesCounty> countyDataList = datastore.getCounties();
 	List<String> countyList = new ArrayList<> ( countyDataList.size() );
 	for ( ReferenceTablesCounty county : countyDataList ) {
@@ -99,22 +99,22 @@ throws Exception {
 	filter.setTokenInfo(",",0);
 	input_filters.add ( filter );
 
-	// Latitude
+	// Latitude.
 	input_filters.add ( new InputFilter ( "Latitude",
 		"latitude", "latitude", "Latitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
-	// Longitude
+	// Longitude.
 	input_filters.add ( new InputFilter ( "Longitude",
 		"longitude", "longitude", "Longitude",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
-	// Radius around latitude/longitude
+	// Radius around latitude/longitude.
 	input_filters.add ( new InputFilter ( "LatLong Radius",
 		"radius", "radius", "LatLongRadius",
 		StringUtil.TYPE_DOUBLE, null, null, true ) );
 
-	// Radius units, used with radius
+	// Radius units, used with radius.
 	// TODO smalers 2018-06-20 should this be a reference table?
 	List<String> radiusUnitsChoices = new ArrayList<>(2);
 	radiusUnitsChoices.add("feet");
@@ -172,8 +172,7 @@ throws Exception {
  * These checks can be performed in the ReadColoradoHydroBaseRest command and the main TSTool UI,
  * both of which use this class.
  * @param displayWarning If true, display a warning dialog if there are errors in the input.
- * If false, do not display a warning, in which case
- * the calling code should generally display a warning and optionally
+ * If false, do not display a warning, in which case the calling code should generally display a warning and optionally
  * also perform other checks by overriding this method.
  * @return null if no issues or a string that indicates issues,
  * can use \n for line breaks and put at the front of the string.
@@ -183,7 +182,7 @@ public String checkInputFilters ( boolean displayWarning ) {
 	// Use the parent class method to check basic input types based on data types:
 	// - will return empty string if no issues
 	String warning = super.checkInputFilters(displayWarning);
-	// Perform specific checks
+	// Perform specific checks.
 	String warning2 = "";
 	int coordCount = 0;
 	String Latitude = getInputValue("Latitude", false);
