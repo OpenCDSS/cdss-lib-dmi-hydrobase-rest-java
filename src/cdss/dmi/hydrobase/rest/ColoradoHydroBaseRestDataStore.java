@@ -4,19 +4,19 @@
 
 CDSS HydroBase REST Web Services Java Library
 CDSS HydroBase REST Web Services Java Library is a part of Colorado's Decision Support Systems (CDSS)
-Copyright (C) 2018-2022 Colorado Department of Natural Resources
+Copyright (C) 2018-2025 Colorado Department of Natural Resources
 
 CDSS HydroBase REST Web Services Java Library is free software:  you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    CDSS HydroBase REST Web Services Java Library is distributed in the hope that it will be useful,
+CDSS HydroBase REST Web Services Java Library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License
     along with CDSS HydroBase REST Web Services Java Library.  If not, see <https://www.gnu.org/licenses/>.
 
 NoticeEnd */
@@ -107,7 +107,6 @@ import cdss.dmi.hydrobase.rest.dto.JacksonToolkit;
 /**
 Data store for State of Colorado Division of Water Resources HydroBase REST web services.
 This class provides a general interface to the web service, consistent with TSTool conventions.
-@author sam
 */
 public class ColoradoHydroBaseRestDataStore extends AbstractWebServiceDataStore
 {
@@ -1023,7 +1022,7 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
 								requestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1031,7 +1030,7 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
 								requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1046,7 +1045,7 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
 								requestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1054,7 +1053,7 @@ public String getClimateStationDataTypesRequestString(String dataType, List<Stri
 								requestString.append("&max-division" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								requestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1175,10 +1174,10 @@ public String getDataTypeGroup ( String dataType ) {
 public String getDataTypeWithoutGroup ( String dataType ) {
 	// Parse the group.
    	int pos = dataType.indexOf(" -");
-   	String group = "";
+   	//String group = "";
    	if ( pos > 0 ) {
    		// Have a group.
-   		group = dataType.substring(0,pos).trim();
+   		//group = dataType.substring(0,pos).trim();
        	dataType = dataType.substring(pos+2).trim();
    	}
    	else {
@@ -1581,7 +1580,7 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, L
 							requestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 							break;
 						case "LT":
-							newVal = new Integer(value) - 1;
+							newVal = Integer.valueOf(value) - 1;
 							value = Integer.toString(newVal);
 							requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 							break;
@@ -1589,7 +1588,7 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, L
 							requestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 							break;
 						case "GT":
-							newVal = new Integer(value) + 1;
+							newVal = Integer.valueOf(value) + 1;
 							value = Integer.toString(newVal);
 							requestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 							break;
@@ -1604,7 +1603,7 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, L
 							requestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
 							break;
 						case "LT":
-							newVal = new Integer(value) - 1;
+							newVal = Integer.valueOf(value) - 1;
 							value = Integer.toString(newVal);
 							requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
 							break;
@@ -1612,7 +1611,7 @@ public String getSurfaceWaterStationDataTypesRequestString(String dataTypeReq, L
 							requestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
 							break;
 						case "GT":
-							newVal = new Integer(value) + 1;
+							newVal = Integer.valueOf(value) + 1;
 							value = Integer.toString(newVal);
 							requestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
 							break;
@@ -1907,7 +1906,7 @@ public String getTelemetryStationDataTypesRequestString(String dataType, List<St
 								tpRequestString.append("&waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								tpRequestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1915,7 +1914,7 @@ public String getTelemetryStationDataTypesRequestString(String dataType, List<St
 								tpRequestString.append("&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								tpRequestString.append("&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1930,7 +1929,7 @@ public String getTelemetryStationDataTypesRequestString(String dataType, List<St
 								tpRequestString.append("&division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								tpRequestString.append("&max-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -1938,7 +1937,7 @@ public String getTelemetryStationDataTypesRequestString(String dataType, List<St
 								tpRequestString.append("&max-division" + URLEncoder.encode(value, "UTF-8") );
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								tpRequestString.append("&min-division=" + URLEncoder.encode(value, "UTF-8") );
 								break;
@@ -2341,7 +2340,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 								wcRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								wcRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2349,7 +2348,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 								wcRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								wcRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2364,7 +2363,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 								wcRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								wcRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2372,7 +2371,7 @@ public String getWaterClassesRequestString(String dataType, String interval, Lis
 								wcRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								wcRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2613,7 +2612,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 								wellRequestString += "&waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								wellRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2621,7 +2620,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 								wellRequestString += "&max-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								wellRequestString += "&min-waterDistrict=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2636,7 +2635,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 								wellRequestString += "&division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "LT":
-								newVal = new Integer(value) - 1;
+								newVal = Integer.valueOf(value) - 1;
 								value = Integer.toString(newVal);
 								wellRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2644,7 +2643,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 								wellRequestString += "&max-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
 							case "GT":
-								newVal = new Integer(value) + 1;
+								newVal = Integer.valueOf(value) + 1;
 								value = Integer.toString(newVal);
 								wellRequestString += "&min-division=" + URLEncoder.encode(value, "UTF-8");
 								break;
@@ -2659,7 +2658,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 							wellRequestString += "&wellId=" + URLEncoder.encode(value, "UTF-8");
 							break;
 						case "LT":
-							newVal = new Integer(value) - 1;
+							newVal = Integer.valueOf(value) - 1;
 							value = Integer.toString(newVal);
 							wellRequestString += "&max-wellId=" + URLEncoder.encode(value, "UTF-8");
 							break;
@@ -2667,7 +2666,7 @@ public String getWellRequestString(List<String[]> listOfTriplets){
 							wellRequestString += "&max-wellId=" + URLEncoder.encode(value, "UTF-8");
 							break;
 						case "GT":
-							newVal = new Integer(value) + 1;
+							newVal = Integer.valueOf(value) + 1;
 							value = Integer.toString(newVal);
 							wellRequestString += "&min-wellId=" + URLEncoder.encode(value, "UTF-8");
 							break;
