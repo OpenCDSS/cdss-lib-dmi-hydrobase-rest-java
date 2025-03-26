@@ -310,7 +310,7 @@ public Object getValueAt(int row, int col)
 		    // The units are not in HydroBase.meas_type but are set by TSTool...
 			return mt.getData_units();
 		case COL_START:
-		    //return new Integer(mt.getStart_year() );
+		    //return Integer.valueOf(mt.getStart_year() );
 			i = mt.getStart_year();
 			if ( DMIUtil.isMissing(i) ) {
 				return "";
@@ -319,7 +319,7 @@ public Object getValueAt(int row, int col)
 			    return "" + i;
 			}
 		case COL_END:
-		    //return new Integer ( mt.getEnd_year() );
+		    //return Integer.valueOf ( mt.getEnd_year() );
 			i = mt.getEnd_year();
 			if ( DMIUtil.isMissing(i) ) {
 				return "";
@@ -336,7 +336,7 @@ public Object getValueAt(int row, int col)
 			    return "" + i;
 			}
 		case COL_DIV:
-		    //return new Integer ( mt.getDiv() );
+		    //return Integer.valueOf ( mt.getDiv() );
 			i = mt.getDiv();
 			if ( DMIUtil.isMissing(i) ) {
 				return "";
@@ -345,7 +345,7 @@ public Object getValueAt(int row, int col)
 			    return "" + i;
 			}
 		case COL_DIST:
-		    //return new Integer ( mt.getWD() );
+		    //return Integer.valueOf ( mt.getWD() );
 			i = mt.getWD();
 			if ( DMIUtil.isMissing(i) ) {
 				return "";
