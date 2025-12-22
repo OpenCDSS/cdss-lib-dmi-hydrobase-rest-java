@@ -256,7 +256,7 @@ private void determineAPIVersion() {
 	this.apiVersion = version;
 }
 
-// THIS CODE WAS COPIED FROM THE SAME METHOD IN HydroBase_Util AND MODIFIED.
+// THIS CODE WAS COPIED FROM THE SAME METHOD IN the HydroBase DMI package HydroBase_Util class AND MODIFIED.
 // - change the routine name for logging
 // - support processing monthly time series so that web services match HydroBase
 /**
@@ -301,8 +301,12 @@ used if daily data need to be read to fill monthly time series.
 used if daily data need to be read to fill monthly time series.
 @exception Exception if there is an error filling the data.
 */
-public void fillTSIrrigationYearCarryForward ( TS ts, String fillDailyDivFlag,
-	String tsidentString, DateTime readStart, DateTime readEnd, PropList props )
+public void fillTSIrrigationYearCarryForward (
+	TS ts,
+	String fillDailyDivFlag,
+	String tsidentString,
+	DateTime readStart, DateTime readEnd,
+	PropList props )
 	throws Exception {
 	String routine = getClass().getSimpleName() + ".fillTSIrrigationYearCarryForward";
 	if ( ts == null ) {
@@ -4334,7 +4338,8 @@ throws MalformedURLException, Exception {
 			if ( (intervalBase == TimeInterval.DAY) || (intervalBase == TimeInterval.MONTH) ) {
 				String fillCarryForward = props.getValue("FillDivRecordsCarryForward");
 				if ( (fillCarryForward == null) || fillCarryForward.equals("") ) {
-					fillCarryForward = "true"; // Default is to fill, consistent with CDSS/HydroBase approach.
+					// Default is to fill, consistent with CDSS/HydroBase approach.
+					fillCarryForward = "true";
 				}
 				String intervalString = "daily";
 				if ( intervalBase == TimeInterval.MONTH ) {
@@ -4345,12 +4350,24 @@ throws MalformedURLException, Exception {
 						" diversion records with carry forward because FillDivRecordsCarryForward=" + fillCarryForward );
 					String fillCarryForwardFlag = props.getValue("FillDivRecordsCarryForwardFlag");
 					if ( (fillCarryForwardFlag == null) || fillCarryForwardFlag.isEmpty()) {
-						fillCarryForwardFlag = "c"; // Default.
+						// Default flag to use for fill carry forward values.
+						fillCarryForwardFlag = "c";
 					}
 					// The following will add the flag as another flag description:
 					// - props is used to read daily time series when filling monthly time series, if necessary,
 					//   which will use fill carry forward and diversion comments on the daily
-					fillTSIrrigationYearCarryForward(ts, fillCarryForwardFlag, tsidentString, readStartIrrig, readEndIrrig, props );
+					fillTSIrrigationYearCarryForward (
+						ts,
+						fillCarryForwardFlag,
+						// Original time series identifier:
+						// - used when reading daily time series to fill monthly
+						// - use what was originally passed in to 'readTimeSeries'
+						tsidentString,
+						readStartIrrig,
+						readEndIrrig,
+						// Properties that are used if reading a daily time series:
+						// - use what was originally passed in to 'readTimeSeries'
+						props );
 				}
 				else {
 					Message.printStatus(2, routine, "TSID=" + ts.getIdentifierString() + ", not filling " + intervalString +
@@ -4393,77 +4410,78 @@ throws MalformedURLException, Exception {
 				// - TODO smalers 2019-08-26 code is disabled so delete when the above checks out
 			
 			
-			// Fill years with diversion comments. Currently defaults to not fill.
-
-			TSIterator iterator = null;
-			if(intervalBase == TimeInterval.DAY ||
-				intervalBase == TimeInterval.MONTH || 
-				intervalBase == TimeInterval.YEAR ) {
-				String FillUsingDivComments = null;
-				if((FillUsingDivComments == null) || FillUsingDivComments.equals("")){
-					FillUsingDivComments = "true"; // Default is to fill in order to provide more information.
-				}
-				if(FillUsingDivComments.equalsIgnoreCase("true")){
-					boolean hasComments = waterclassHasComments(wdid);
-					if(hasComments){
-						Message.printStatus(2, routine, "Structure has diversion comments - process to add more zeros.");
-						List<DiversionComments> divComments = getDivComments(wdid, null, -1);
-						if(divComments != null){
-							TSData it;
-							for(int i = 0; i < divComments.size(); i++){
-								DiversionComments divComment = divComments.get(i);
-								int irrYear = divComment.getIrrYear();
-								if(irrYear >= ts.getDate1().getYear() && irrYear <= ts.getDate2().getYear()){
-									DateTime start;
-									DateTime end;
-									if(intervalBase == TimeInterval.DAY){
-										start = new DateTime(DateTime.PRECISION_DAY);
-										start.setYear(irrYear);
-										start.setMonth(11);
-										start.setDay(1);
-										end = new DateTime(DateTime.PRECISION_DAY);
-										end.setYear(irrYear + 1);
-										end.setMonth(10);
-										end.setDay(31);
-										iterator = ts.iterator(start,end);
-										// Get the existing data and if missing set as zero.
-										while(iterator.hasNext()){
-											it = iterator.next();
-											value = it.getDataValue();
-											if ( !isTimeSeriesValueMissing(value, true) ) {
-												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+				// Fill years with diversion comments. Currently defaults to not fill.
+	
+				TSIterator iterator = null;
+				if(intervalBase == TimeInterval.DAY ||
+					intervalBase == TimeInterval.MONTH || 
+					intervalBase == TimeInterval.YEAR ) {
+					String FillUsingDivComments = null;
+					if((FillUsingDivComments == null) || FillUsingDivComments.equals("")){
+						FillUsingDivComments = "true"; // Default is to fill in order to provide more information.
+					}
+					if(FillUsingDivComments.equalsIgnoreCase("true")){
+						boolean hasComments = waterclassHasComments(wdid);
+						if(hasComments){
+							Message.printStatus(2, routine, "Structure has diversion comments - process to add more zeros.");
+							List<DiversionComments> divComments = getDivComments(wdid, null, -1);
+							if(divComments != null){
+								TSData it;
+								for(int i = 0; i < divComments.size(); i++){
+									DiversionComments divComment = divComments.get(i);
+									int irrYear = divComment.getIrrYear();
+									if(irrYear >= ts.getDate1().getYear() && irrYear <= ts.getDate2().getYear()){
+										DateTime start;
+										DateTime end;
+										if(intervalBase == TimeInterval.DAY){
+											start = new DateTime(DateTime.PRECISION_DAY);
+											start.setYear(irrYear);
+											start.setMonth(11);
+											start.setDay(1);
+											end = new DateTime(DateTime.PRECISION_DAY);
+											end.setYear(irrYear + 1);
+											end.setMonth(10);
+											end.setDay(31);
+											iterator = ts.iterator(start,end);
+											// Get the existing data and if missing set as zero.
+											while(iterator.hasNext()){
+												it = iterator.next();
+												value = it.getDataValue();
+												if ( !isTimeSeriesValueMissing(value, true) ) {
+													ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+												}
 											}
 										}
-									}
-									if(intervalBase == TimeInterval.MONTH){
-										start = new DateTime(DateTime.PRECISION_MONTH);
-										start.setYear(irrYear);
-										start.setMonth(11);
-										end = new DateTime(DateTime.PRECISION_MONTH);
-										end.setYear(irrYear);
-										end.setMonth(10);
-										iterator = ts.iterator(start,end);
-										// Get the existing data and if missing set as zero.
-										while(iterator.hasNext()){
-											it = iterator.next();
-											value = it.getDataValue();
-											if ( !isTimeSeriesValueMissing(value, true) ) {
-												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+										if(intervalBase == TimeInterval.MONTH){
+											start = new DateTime(DateTime.PRECISION_MONTH);
+											start.setYear(irrYear);
+											start.setMonth(11);
+											end = new DateTime(DateTime.PRECISION_MONTH);
+											end.setYear(irrYear);
+											end.setMonth(10);
+											iterator = ts.iterator(start,end);
+											// Get the existing data and if missing set as zero.
+											while(iterator.hasNext()){
+												it = iterator.next();
+												value = it.getDataValue();
+												if ( !isTimeSeriesValueMissing(value, true) ) {
+													ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+												}
 											}
 										}
-									}
-									if(intervalBase == TimeInterval.YEAR){
-										start = new DateTime(DateTime.PRECISION_YEAR);
-										start.setYear(irrYear);
-										end = new DateTime(DateTime.PRECISION_YEAR);
-										end.setYear(irrYear);
-										iterator = ts.iterator(start,end);
-										// Get the existing data and if missing set as zero.
-										while(iterator.hasNext()){
-											it = iterator.next();
-											value = it.getDataValue();
-											if ( !isTimeSeriesValueMissing(value, true) ) {
-												ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+										if(intervalBase == TimeInterval.YEAR){
+											start = new DateTime(DateTime.PRECISION_YEAR);
+											start.setYear(irrYear);
+											end = new DateTime(DateTime.PRECISION_YEAR);
+											end.setYear(irrYear);
+											iterator = ts.iterator(start,end);
+											// Get the existing data and if missing set as zero.
+											while(iterator.hasNext()){
+												it = iterator.next();
+												value = it.getDataValue();
+												if ( !isTimeSeriesValueMissing(value, true) ) {
+													ts.setDataValue(it.getDate(), 0, it.getDataFlag(), -1);
+												}
 											}
 										}
 									}
@@ -4472,7 +4490,6 @@ throws MalformedURLException, Exception {
 						}
 					}
 				}
-			}
 			}
 			
 			// Set the time series period to the original request:
