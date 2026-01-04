@@ -3033,13 +3033,14 @@ private void readClimateStationMeasTypes() {
 				// Bad HydroBase data?  Streamflow should not be in climate data.  Ignore.
 				continue;
 			}
-			if ( measType.equals(dataType.getMeasType()) ) {
+			else if ( measType.equals(dataType.getMeasType()) ) {
 				found = true;
 				break;
 			}
 		}
 		if ( !found ) {
-			this.climateStationMeasTypeList.add(dataType.getMeasType());
+			// Trim the meastypes because web services in 2025-12 have traiing spaces for some values.
+			this.climateStationMeasTypeList.add(dataType.getMeasType().trim() );
 		}
 		// Check the dataSource.
 		for ( String dataSource : this.climateStationDataSourceList ) {
